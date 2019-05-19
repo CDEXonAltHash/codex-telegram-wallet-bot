@@ -366,15 +366,15 @@ bot.on("callback_query", async  (msg) => {
         await bot.sendMessage(msg.message.chat.id,
             "<b>Introduction: </b> \n" +
             "    Codex wallet bot will help you can execute some basic actions in wallet.\n\n<b>Getting started:</b>\n" +
-            "    • If you have an address  -> Please use /restore & lt;private key & gt command to restore your address on wallet\n"+ 
+            "    • If you have an address  -> Please use /restore &lt;private key &gt command to restore your address on wallet\n"+ 
             "    • If you want to change your address -> Please use /change &lt;private key&gt command to change your address\n" +
             "    • If you haven't address, Codex wallet automatically generates a address for you, to which you can send CDEX or other tokens.\n" +
-            "        1. Create new adddress by pressing 🍏<i>Help</i> button then seclect <i>Create new address</i>.\n" +
+            "        1. Create new adddress by pressing 🍏<i>Help</i> button then seclect 🔐<i>Create new address</i>.\n" +
             "        2. Check the balance of your account by pressing the 💰<i>Get balance</i> button.\n" +
             "        3. Get your address to give for someone who want to send token for you by pressing the 🔑<i> Public address</i> button\n"+
             "        4. To withdraw your funds, press the 🗝<i>Get private key</i> button to see your private key.\n" +
             "        <b>Note:</b> The private key can be used to login to AltHash wallet (https://althash.org/) or HTML coin wallet and to send tokens" +
-            " or CDEX to any account you wish.\n\n<b>How to send to an address:</b>\nDirectly sending to an address can be done" +
+            " or CDEX to any account you wish. <b>Don't show it for anyone</b>\n\n<b>How to send to an address:</b>\nDirectly sending to an address can be done" +
             " with the /send command, for example:\n    1. Sending CDEX:\n    /send <i>&lt;address&gt</i> <i>&lt;amount&gt</i>\n" +
             "            /send Hd1yhCGhmaGwgcSPHHpFNwgYAuuyZwAHyY 10\n    2. Sending a token\n" +
             "    /send <i>&lt;address&gt</i> <i>&lt;amount&gt</i> <i>&lt;token&gt</i>\n" +
