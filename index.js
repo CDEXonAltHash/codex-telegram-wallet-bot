@@ -117,7 +117,7 @@ bot.onText(/\/restore (.+)/, async (msg, match) => {
 
 bot.onText(/\/stats/,  async (msg) => {
     const supply =  hrc20.getTokenBySymbol('CDEX');
-    await bot.sendMessage(msg.chat.id, 'Total Supply of CDEX:', supply.total_supply);
+    await bot.sendMessage(msg.from.id, 'Total Supply of CDEX: ' + `${supply.total_supply}`);
 });
 
 /**
@@ -138,7 +138,7 @@ const botSendToken = async (msgId, ownerTelegramId, toAddress, amount, token) =>
  */
 bot.onText(/\/send (.+)/, async (msg, match) => {
     const params = match[1].split(' ');
-    await botSendToken(msg.chat.id, msg.from.id, params[0], params[1], params[2]);
+    await botSendToken(msg.from.id, msg.from.id, params[0], params[1], params[2]);
 });
 
 /**
@@ -165,8 +165,6 @@ bot.onText(/\/tip (.+)/, async (msg, match) => {
 /**
  * Trading function
  */
-
-
 let commandTrade = '';
 bot.onText(/\/trade (.+)/,  async (msg, match) => {
     if (isValidOffer(msg.reply_to_message.date)) {
@@ -212,10 +210,10 @@ bot.on('message', async (msg) => {
     if (msg.text.indexOf(keyboard_helpers[0]) === 0) {
         const address = getAddress(msg.from.id);
         if (address !== '') {
-           await bot.sendMessage(msg.chat.id, "Your public address: " + `${address}`);
+           await bot.sendMessage(msg.from.id, "Your public address: " + `${address}`);
         }
         else {
-            await bot.sendMessage(msg.chat.id, 
+            await bot.sendMessage(msg.from.id, 
                 "If you have no account, please click *Help* button to create a new account", { parse_mode: "Markdown" });
         }
     }
@@ -252,10 +250,10 @@ bot.on('message', async(msg) => {
     if (msg.text.indexOf(keyboard_helpers[2]) === 0) {
         const privKey = getPrivKey(msg.from.id);
         if (privKey !== '') {
-            await bot.sendMessage(msg.chat.id, "Your private key: " + `${privKey}`);
+            await bot.sendMessage(msg.from.id, "Your private key: " + `${privKey}`);
         }
         else{
-            await bot.sendMessage(msg.chat.id, 
+            await bot.sendMessage(msg.from.id, 
                                          "If you have no account, please click *Help* button to create a new account", {parse_mode: "Markdown"});
         }
     }
@@ -379,7 +377,7 @@ bot.on("callback_query", async  (msg) => {
             "            /send Hd1yhCGhmaGwgcSPHHpFNwgYAuuyZwAHyY 10\n    2. Sending a token\n" +
             "    /send <i>&lt;address&gt</i> <i>&lt;amount&gt</i> <i>&lt;token&gt</i>\n" +
             "            /send Hd1yhCGhmaGwgcSPHHpFNwgYAuuyZwAHyY 10 CDEX\n" +
-            "    • If you want to tip some token for who you reply to. Please use command: /tip &lt;amount&gt &lt;token&gt" +
+            "    • If you want to tip some token for who you reply to. Please use command: /tip &lt;amount&gt &lt;token&gt",
             { parse_mode: "HTML" });    
     }
     else if (choice === "6") {
