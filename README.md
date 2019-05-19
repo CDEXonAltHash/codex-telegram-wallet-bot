@@ -1,4 +1,4 @@
-## Codex wallet bot on telegram 
+# Codex wallet bot on telegram 
 
 This project to help you can use telegram bot as a wallet. We based on [althash web platform](https://github.com/HTMLCOIN/althash-web-platform) to build our wallet. 
 
