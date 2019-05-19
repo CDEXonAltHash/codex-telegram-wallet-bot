@@ -6,7 +6,7 @@ const { CODEX_CREDENTIAL } = require('../config/config');
 
 const userStoragePath = './codexWallet';
 
-const CodexWallet = new Map();
+var CodexWallet = new Map(string, any);
 
 const saveAccountToWallet = (account) => {
     const encryptedAccount = keyFile.encode(JSON.stringify(account), CODEX_CREDENTIAL);

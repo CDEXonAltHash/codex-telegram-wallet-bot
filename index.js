@@ -81,7 +81,7 @@ bot.onText(/\/start/, async(msg) => {
  * Change new address on wallet from WIF
  */
 bot.onText(/\/change (.+)/, async (msg, match) => {
-    const result = await changeFromWIF(msg.from.id, match[1]);
+    const result =  changeFromWIF(msg.from.id, match[1]);
     if (result === true) {
         await bot.sendMessage(msg.chat.id, 'The change adddress is sucessful');
     }
@@ -94,7 +94,7 @@ bot.onText(/\/change (.+)/, async (msg, match) => {
  * Restore an address on wallet from WIF
  */
 bot.onText(/\/restore (.+)/, async (msg, match) => {
-    const result = await restoreFromWIF(msg.from.id, match[1]);
+    const result = restoreFromWIF(msg.from.id, match[1]);
     if (result === true) {
         await bot.sendMessage(msg.chat.id, "Welcome to Codex Wallet, use the keyboard to navigate the menu ", {
             "reply_markup": {
@@ -153,7 +153,7 @@ bot.onText(/\/tip (.+)/, async (msg, match) => {
     if(address === '') {
         const account = generateAccount();
         address = account.address;
-        await saveAccount(msg.reply_to_message.from.id, account.wallet);
+        saveAccount(msg.reply_to_message.from.id, account.wallet);
     }
     /**
      * After that send some tokens

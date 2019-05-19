@@ -14,7 +14,7 @@ const generateAccount = () => {
 };
 
 const saveAccount = async (telegramId, wallet) => {
-    await CodexWallet.set(`${telegramId}`, wallet);
+    CodexWallet.set(`${telegramId}`, wallet);
     saveAccountToWallet({
         telegramId: `${ telegramId }`,
         privKey: wallet.getPrivKey()
@@ -37,7 +37,7 @@ const getPrivKey = (telegramId) => {
     return (wallet !== '') ? wallet.getPrivKey() : '';
 };
 
-const restoreFromWIF = async (telegramId, privKey) => {
+const restoreFromWIF =  (telegramId, privKey) => {
     const address = getAddress(telegramId);
     if(address !== '')
     {
@@ -45,7 +45,7 @@ const restoreFromWIF = async (telegramId, privKey) => {
     }
     try {
         const wallet = webWallet.restoreFromWif(privKey);
-        await saveAccount(telegramId, wallet);
+        saveAccount(telegramId, wallet);
     }
     catch (e) {
         return false;
@@ -53,14 +53,14 @@ const restoreFromWIF = async (telegramId, privKey) => {
     return true;
 };
 
-const changeFromWIF = async (telegramId, privKey) => {
+const changeFromWIF = (telegramId, privKey) => {
     const existAccount = CodexWallet.get(`${telegramId}`);
     if(existAccount === undefined){
         return false;
     }
     try {
         const wallet = webWallet.restoreFromWif(privKey);
-        await CodexWallet.set(`${telegramId}`, wallet);
+        CodexWallet.set(`${telegramId}`, wallet);
     }
     catch (e) {
         return false;
