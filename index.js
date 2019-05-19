@@ -40,7 +40,6 @@ const keyboard_helpers = ["🔑Public address", "💰Get balance", "🗝Get priv
 /**
  * Load all backup data when server re-start
  */
-
 loadAccountFromFile();
 
 /**

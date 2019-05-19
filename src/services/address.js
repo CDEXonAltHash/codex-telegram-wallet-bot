@@ -13,7 +13,7 @@ const generateAccount = () => {
     };
 };
 
-const saveAccount = async (telegramId, wallet) => {
+const saveAccount =  (telegramId, wallet) => {
     CodexWallet.set(`${telegramId}`, wallet);
     saveAccountToWallet({
         telegramId: `${ telegramId }`,

@@ -6,8 +6,8 @@ const { CODEX_CREDENTIAL } = require('../config/config');
 
 const userStoragePath = './codexWallet';
 
-var CodexWallet = new Map();
-
+const CodexWallet = new Map();
+const accountArray = fs.readFileSync(`${userStoragePath}`).toString().split('\n');
 const saveAccountToWallet = (account) => {
     const encryptedAccount = keyFile.encode(JSON.stringify(account), CODEX_CREDENTIAL);
     fs.appendFileSync(userStoragePath, encryptedAccount + '\n');
@@ -15,15 +15,17 @@ const saveAccountToWallet = (account) => {
 
 const loadAccountFromFile =  () => {
     try{
-        lineReader.eachLine(userStoragePath, function (line) {
-            const decryptedAccount = keyFile.decode(line, CODEX_CREDENTIAL);
-            const account = JSON.parse(decryptedAccount);
-            const wallet = webWallet.restoreFromWif(`${account.privKey}`);
-            wallet.setInfo().then(() => {});
-            wallet.setHrc20().then(() => { });
-            CodexWallet.set(`${account.telegramId}`, wallet);
-        });
-    }
+        for (const line of accountArray) {
+            if(line !='')
+            {
+                const decryptedAccount = keyFile.decode(line, CODEX_CREDENTIAL);
+                const account = JSON.parse(decryptedAccount);
+                const wallet = webWallet.restoreFromWif(`${account.privKey}`);
+                wallet.setInfo().then(() => { });
+                wallet.setHrc20().then(() => { });
+                CodexWallet.set(`${account.telegramId}`, wallet);
+            }
+        }    }
     catch(e) {   
     }
 
