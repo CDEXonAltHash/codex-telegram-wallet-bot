@@ -82,10 +82,10 @@ bot.onText(/\/start/, async(msg) => {
 bot.onText(/\/change (.+)/, async (msg, match) => {
     const result =  changeFromWIF(msg.from.id, match[1]);
     if (result === true) {
-        await bot.sendMessage(msg.chat.id, 'The change adddress is sucessful');
+        await bot.sendMessage(msg.from.id, 'The change adddress is sucessful');
     }
     else {
-        await bot.sendMessage(msg.chat.id, 'The private key is invalid or you not have addess on wale');
+        await bot.sendMessage(msg.from.id, 'The private key is invalid or you not have addess on wale');
     }
 });
 

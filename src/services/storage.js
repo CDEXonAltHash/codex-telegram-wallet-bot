@@ -1,7 +1,6 @@
 const keyFile = require('../libs/keyfile');
 const webWallet = require('../libs/web-wallet');
 const fs = require('fs');
-const lineReader = require('line-reader');
 const { CODEX_CREDENTIAL } = require('../config/config');
 
 const userStoragePath = './codexWallet';
