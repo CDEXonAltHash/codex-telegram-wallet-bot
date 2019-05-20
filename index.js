@@ -305,7 +305,7 @@ bot.on('message', async (msg) => {
 bot.on('message', async (msg) => {
     if (msg.text.indexOf(keyboard_helpers[4]) === 0) {
         const vipWallet = getCustomWallet(msg.from.id);
-        if(!vipWallet){
+        if(!vipWallet.isVip){
             return await bot.sendMessage(msg.from.id, "Sorry, the function only for VIP member");
         }
         if (isValidAirDrop(msg.date, vipWallet.getAirDropTime())) {
