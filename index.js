@@ -95,7 +95,7 @@ bot.onText(/\/change (.+)/, async (msg, match) => {
 bot.onText(/\/restore (.+)/, async (msg, match) => {
     const result = restoreFromWIF(msg.from.id, match[1]);
     if (result === true) {
-        await bot.sendMessage(msg.chat.id, "Welcome to Codex Wallet, use the keyboard to navigate the menu ", {
+        await bot.sendMessage(msg.from.id, "Welcome to Codex Wallet, use the keyboard to navigate the menu ", {
             "reply_markup": {
                 "keyboard": [
                     [keyboard_helpers[0], keyboard_helpers[1]],
@@ -125,10 +125,10 @@ bot.onText(/\/stats/,  async (msg) => {
 const botSendToken = async (msgId, ownerTelegramId, toAddress, amount, token) => {
     const result = await sendToken(ownerTelegramId, amount, toAddress, token);
     if (result.error === '') {
-       await bot.sendMessage(msgId, 'Send tokens are successful with transaction Id: ' + `${result.trxId}`);
+        await bot.sendMessage(msgId, '✅Send tokens are successful with transaction Id: ' + `${result.trxId}`);
     }
     else {
-        await bot.sendMessage(msgId, 'Has an error when send token: ' + `${result.error}`);
+        await bot.sendMessage(msgId, '❌Cannot execute the transaction: Please check again *(token symbol, received address, HTML coin, etc)*',{parse_mode:"Markdown"});
     }
 }
 
@@ -137,7 +137,7 @@ const botSendToken = async (msgId, ownerTelegramId, toAddress, amount, token) =>
  */
 bot.onText(/\/send (.+)/, async (msg, match) => {
     const params = match[1].split(' ');
-    await botSendToken(msg.from.id, msg.from.id, params[0], params[1], params[2]);
+    await botSendToken(msg.chat.id, msg.from.id, params[0], params[1], params[2]);
 });
 
 /**
@@ -162,6 +162,28 @@ bot.onText(/\/tip (.+)/, async (msg, match) => {
 });
 
 /**
+ * Command for get balance
+ */
+bot.onText(/\/balance/, async (msg, match) => {
+    const info = await getBalance(msg.from.id);
+    if (info === '') {
+        await bot.sendMessage(msg.chat.id, "[" + msg.from.username + "](tg://user?id=" + msg.from.id + ")" + "-> Please go to HRC2O Codex Wallet create address on AltHash blockchain first", { parse_mode: "Markdown" });
+    }
+    else {
+        const balance = info.balance;
+        const unconfirmedBalance = info.unconfirmedBalance;
+        let token;
+        let getAllHrc20 = '';
+        const hrc20 = info.hrc20;
+        for (token of hrc20) {
+            getAllHrc20 += `${token.contract.name}` + ': ' + `${token.amount / Math.pow(10, token.contract.decimals)}` + ' ' + `${token.contract.symbol}` + '\n';
+        }
+        getAllHrc20 += "HTML: " + `${balance}` + "\nHTML unconfirmed: " + `${unconfirmedBalance}`
+        await bot.sendMessage(msg.chat.id, "[" + msg.from.username + "](tg://user?id=" + msg.from.id + "), your current balance is: \n" +  getAllHrc20, {parse_mode: "Markdown"});
+    }
+});
+
+/**
  * Trading function
  */
 let commandTrade = '';
@@ -171,10 +193,10 @@ bot.onText(/\/trade (.+)/,  async (msg, match) => {
         const traderAccount = getCustomWallet(msg.from.id);
 
         if (adsAccount === '') {
-            await bot.sendMessage(msg.chat.id, "⚠️ " + "[" + msg.reply_to_message.from.username + "](tg://user?id=" + msg.reply_to_message.from.id + ")" + "-> Please go to codex_bot create address on AltHash blockchain first", {parse_mode: "Markdown"});
+            await bot.sendMessage(msg.chat.id, "⚠️ " + "[" + msg.reply_to_message.from.username + "](tg://user?id=" + msg.reply_to_message.from.id + ")" + "-> Please go to HRC2O Codex Wallet create address on AltHash blockchain first", {parse_mode: "Markdown"});
         }
         else if (traderAccount === '') {
-            await bot.sendMessage(msg.chat.id, "⚠️ " + "[" + msg.from.username + "](tg://user?id=" + msg.from.id + ")" + "-> Please go to codex_bot create address on AltHash blockchain first", {parse_mode: "Markdown"});
+            await bot.sendMessage(msg.chat.id, "⚠️ " + "[" + msg.from.username + "](tg://user?id=" + msg.from.id + ")" + "-> Please go to HRC2O Codex Wallet create address on AltHash blockchain first", {parse_mode: "Markdown"});
         }
         else {
             const tradingArray = parseCommandTrading(msg.reply_to_message.text);
