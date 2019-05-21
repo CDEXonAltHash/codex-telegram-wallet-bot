@@ -1,5 +1,5 @@
 const hrc20 = require('../libs/hrc20');
-const {getCustomWallet} = require('./address');
+const { getCustomWallet, getVip } = require('./address');
 
 const tokenInfo = {
     symbol: 'HTML',
@@ -41,10 +41,18 @@ const getBalance = async (telegramId) => {
     return (wallet !== '') ? wallet.info : '';
 };
 
+const checkVip = (telegramId) => {
+    const vip = getVip(telegramId);
+    if(vip !==''){
+        return true;
+    }
+    return false;
+}
+
 const checkCDEX = (telegramId) => {
     const wallet = getCustomWallet(telegramId);
     const hrc20Coin = wallet.info.hrc20;
-    const tokenAmount = 500000;
+    const tokenAmount = 50000;
     for (token of hrc20Coin) {
         if (token.contract.symbol === 'CDEX' && tokenAmount <= (token.amount / Math.pow(10, token.contract.decimals))) {
             return true;
@@ -57,5 +65,6 @@ const checkCDEX = (telegramId) => {
 module.exports =  {
     sendToken,
     getBalance,
-    checkCDEX
+    checkCDEX,
+    checkVip
 }

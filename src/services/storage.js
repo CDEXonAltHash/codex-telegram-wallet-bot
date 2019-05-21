@@ -4,9 +4,13 @@ const fs = require('fs');
 const { CODEX_CREDENTIAL } = require('../config/config');
 
 const userStoragePath = './codexWallet';
-
+const vipStoragePath = './codexVip';
 const CodexWallet = new Map();
+const CodexVIP = new Map();
+
 const accountArray = fs.readFileSync(`${userStoragePath}`).toString().split('\n');
+const vipArray = fs.readFileSync(`${vipStoragePath}`).toString().split('\n');
+
 const saveAccountToWallet = (account) => {
     const encryptedAccount = keyFile.encode(JSON.stringify(account), CODEX_CREDENTIAL);
     fs.appendFileSync(userStoragePath, encryptedAccount + '\n');
@@ -30,8 +34,26 @@ const loadAccountFromFile =  () => {
 
 };
 
+const saveVip = (vip) => {
+    fs.appendFileSync(vipStoragePath, JSON.stringify(vip) + '\n');
+}
+const loadVip = () => {
+    try {
+        for (const line of vipArray) {
+            if (line != '') {
+                const vip = JSON.parse(line);
+                CodexVIP.set(`${vip.telegramId}`, vip.airDropTime);
+            }
+        }
+    }
+    catch (e) {
+    }
+}
 module.exports = {
     CodexWallet,
+    CodexVIP,
     saveAccountToWallet,
     loadAccountFromFile,
+    saveVip,
+    loadVip,
 }

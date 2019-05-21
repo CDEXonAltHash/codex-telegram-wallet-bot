@@ -8,13 +8,16 @@ const {
     getPrivKey,
     restoreFromWIF,
     changeFromWIF,
-    getCustomWallet
+    getCustomWallet,
+    saveVipMember,
+    getVip
 } = require('./src/services/address'); 
 const { 
     sendToken,
     getBalance,
     tradingToken,
-    checkCDEX
+    checkCDEX,
+    checkVip
 } = require('./src/services/tokens');
 
 const {
@@ -30,7 +33,7 @@ const {
 } = require('./src/config/config');
 
 const hrc20 = require('./src/libs/hrc20');
-const { loadAccountFromFile } = require('./src/services/storage');
+const { loadAccountFromFile, loadVip } = require('./src/services/storage');
 
 const token = TELEGRAM_TOKEN; 
 const bot = new TelegramBot(token, { polling: true });
@@ -41,7 +44,7 @@ const keyboard_helpers = ["🔑Public address", "💰Get balance", "🗝Get priv
  * Load address of bot to airdrop function
  */
 loadAccountFromFile();
-
+loadVip();
 /**
  * Start bot
  */
@@ -305,11 +308,11 @@ bot.on('message', async (msg) => {
 bot.on('message', async (msg) => {
     if (msg.text.indexOf(keyboard_helpers[4]) === 0) {
         const vipWallet = getCustomWallet(msg.from.id);
-        if(!vipWallet.isVip){
+        // const vip = getVip(msg.from.id);
+        if (!vipWallet.isVIP){
             return await bot.sendMessage(msg.from.id, "Sorry, the function only for VIP member");
         }
         if (isValidAirDrop(msg.date, vipWallet.getAirDropTime())) {
-            vipWallet.setAirDropTime();
             const result = await sendToken(AIRDROP_ID, 10, vipWallet.getAddress(), "CDEX");
             if (result.error === '') {
                 await bot.sendMessage(msg.from.id, '🎉🎉🎉Recieve Airdrop Once Daily');
@@ -365,6 +368,10 @@ bot.on("callback_query", async  (msg) => {
         });
     }
     else if (choice === "4") {
+        const vipWallet = getCustomWallet(msg.from.id);
+        if (vipWallet.isVIP) {
+            return await bot.sendMessage(msg.from.id, '⚠️You are a VIP member');
+        }
         const codex = checkCDEX(msg.from.id);
         if(codex) {
             const opts = {
@@ -375,7 +382,7 @@ bot.on("callback_query", async  (msg) => {
                 parse_mode: "Markdown"
             };
 
-            await bot.sendMessage(msg.from.id, "That it costs 50k CDEX for VIP. Do you want to become a CDEX member?", opts);
+            await bot.sendMessage(msg.from.id, "It costs 50k CDEX for VIP. Do you want to become a CDEX member?", opts);
         }
         else {
             await bot.sendMessage(msg.from.id, '⚠️You must have CDEX token greater than 50k');
@@ -465,10 +472,11 @@ bot.on("callback_query", async  (msg) => {
 
     else if(choice === "8") {
         const vipWallet = getCustomWallet(msg.from.id);
-        const result = await sendToken(msg.from.id, 500000, AIRDROP_ADDRESS, "CDEX");
+        const result = await sendToken(msg.from.id, 50000, AIRDROP_ADDRESS, "CDEX");
         if (result.error === '') {
             await bot.sendMessage(msg.message.chat.id, '🎉🎉🎉Congratulations! You become a VIP member!');
             vipWallet.setVIPMember();
+            saveVipMember(msg.from.id);
         }
         else {
             await bot.sendMessage(msg.message.chat.id, 'Oops⁉️Something error');
