@@ -1,7 +1,6 @@
 const TRX_FEE = 1;
 const TIME_EXPIRED_OFFER = 43200; //12 hours
 const TIME_AIRDROP = 86400;
-const test= 'etst';
 /**
  * @param input will be a string has format: 
  * "#autosell number1 token1 for number2 token2 #autosell number3 token1 for number4 token3 "
