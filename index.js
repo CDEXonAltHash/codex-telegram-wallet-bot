@@ -137,7 +137,7 @@ const botSendToken = async (msgId, ownerTelegramId, toAddress, amount, token) =>
  */
 bot.onText(/\/send (.+)/, async (msg, match) => {
     const params = match[1].split(' ');
-    await botSendToken(msg.chat.id, msg.from.id, params[0], params[1], params[2]);
+    await botSendToken(msg.from.id, msg.from.id, params[0], params[1], params[2]);
 });
 
 /**
@@ -164,7 +164,7 @@ bot.onText(/\/tip (.+)/, async (msg, match) => {
 /**
  * Command for get balance
  */
-bot.onText(/\/balance/, async (msg, match) => {
+bot.onText(/\/balance/, async (msg) => {
     const info = await getBalance(msg.from.id);
     if (info === '') {
         await bot.sendMessage(msg.chat.id, "[" + msg.from.username + "](tg://user?id=" + msg.from.id + ")" + "-> Please go to HRC2O Codex Wallet create address on AltHash blockchain first", { parse_mode: "Markdown" });
