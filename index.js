@@ -106,7 +106,7 @@ bot.onText(/\/restore (.+)/, async (msg, match) => {
         });
     }
     else {
-        await bot.sendMessage(msg.chat.id, 'The private key is invalid or your address exist');
+        await bot.sendMessage(msg.from.id, 'The private key is invalid or your address exist');
     }
 });
 
