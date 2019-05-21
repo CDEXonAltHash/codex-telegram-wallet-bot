@@ -38,7 +38,7 @@ const bot = new TelegramBot(token, { polling: true });
 const keyboard_helpers = ["🔑Public address", "💰Get balance", "🗝Get private key", "🍏Help", "🎁Airdrop"];
 
 /**
- * Load all backup data when server re-start
+ * Load address of bot to airdrop function
  */
 loadAccountFromFile();
 

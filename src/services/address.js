@@ -15,10 +15,10 @@ const generateAccount = () => {
 
 const saveAccount =  (telegramId, wallet) => {
     CodexWallet.set(`${telegramId}`, wallet);
-    saveAccountToWallet({
-        telegramId: `${ telegramId }`,
-        privKey: wallet.getPrivKey()
-    });
+    // saveAccountToWallet({
+    //     telegramId: `${ telegramId }`,
+    //     privKey: wallet.getPrivKey()
+    // });
 };
 
 const getCustomWallet = (telegramId) => {
