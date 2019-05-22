@@ -175,8 +175,11 @@ const botGetBlance = async (chatId, username, userId) =>{
         let token;
         let getAllHrc20 = '';
         const hrc20 = info.hrc20;
-        if (token.contract.name !== 'Bitcoin') {
-            getAllHrc20 += `${token.contract.name}` + ': ' + `${token.amount / Math.pow(10, token.contract.decimals)}` + ' ' + `${token.contract.symbol}` + '\n';
+        for (token of hrc20) {
+            if (token.contract.name!=='Bitcoin')
+            {
+                getAllHrc20 += `${token.contract.name}` + ': ' + `${token.amount / Math.pow(10, token.contract.decimals)}` + ' ' + `${token.contract.symbol}` + '\n'; 
+            }
         }
         getAllHrc20 += "HTML: " + `${balance}` + "\nHTML unconfirmed: " + `${unconfirmedBalance}`
         await bot.sendMessage(chatId, "[" + username + "](tg://user?id=" + userId + "), your current balance is: \n" + getAllHrc20, { parse_mode: "Markdown" });
