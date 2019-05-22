@@ -42,7 +42,7 @@ const loadVip = () => {
         for (const line of vipArray) {
             if (line != '') {
                 const vip = JSON.parse(line);
-                CodexVIP.set(`${vip.telegramId}`, vip.airDropTime);
+                CodexVIP.set(`${vip.publicAddress}`, vip.airDropTime);
             }
         }
     }

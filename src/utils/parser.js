@@ -1,4 +1,4 @@
-const TRX_FEE = 1;
+const TRX_FEE = 1.01;
 const TIME_EXPIRED_OFFER = 43200; //12 hours
 const TIME_AIRDROP = 86400;
 /**

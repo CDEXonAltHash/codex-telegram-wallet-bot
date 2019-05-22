@@ -45,6 +45,7 @@ const keyboard_helpers = ["🔑Public address", "💰Get balance", "🗝Get priv
  */
 loadAccountFromFile();
 loadVip();
+
 /**
  * Start bot
  */
@@ -88,7 +89,7 @@ bot.onText(/\/change (.+)/, async (msg, match) => {
         await bot.sendMessage(msg.from.id, 'The change adddress is sucessful');
     }
     else {
-        await bot.sendMessage(msg.from.id, 'The private key is invalid or you not have addess on wale');
+        await bot.sendMessage(msg.from.id, 'The private key is invalid or your do not have account on wallet');
     }
 });
 
@@ -109,7 +110,7 @@ bot.onText(/\/restore (.+)/, async (msg, match) => {
         });
     }
     else {
-        await bot.sendMessage(msg.from.id, 'The private key is invalid or your address exist');
+        await bot.sendMessage(msg.from.id, 'The private key is invalid or your address already exists');
     }
 });
 
@@ -164,32 +165,31 @@ bot.onText(/\/tip (.+)/, async (msg, match) => {
 
 });
 
-const botGetBlance = async (chatId, username, userId) =>{
-    const info = await getBalance(userId);
-    if (info === '') {
-        await bot.sendMessage(chatId, "[" + username + "](tg://user?id=" + userId + ")" + "-> Please go to HRC2O Codex Wallet create address on AltHash blockchain first", { parse_mode: "Markdown" });
-    }
-    else {
-        const balance = info.balance;
-        const unconfirmedBalance = info.unconfirmedBalance;
-        let token;
-        let getAllHrc20 = '';
-        const hrc20 = info.hrc20;
-        for (token of hrc20) {
-            if (token.contract.name!=='Bitcoin')
-            {
-                getAllHrc20 += `${token.contract.name}` + ': ' + `${token.amount / Math.pow(10, token.contract.decimals)}` + ' ' + `${token.contract.symbol}` + '\n'; 
-            }
+const botGetBlance =  (info) =>{
+    const balance = info.balance;
+    const unconfirmedBalance = info.unconfirmedBalance;
+    let token;
+    let getAllHrc20 = '';
+    const hrc20 = info.hrc20;
+    for (token of hrc20) {
+        if (token.contract.name !== 'Bitcoin') {
+            getAllHrc20 += `${token.contract.name}` + ': ' + `${token.amount / Math.pow(10, token.contract.decimals)}` + ' ' + `${token.contract.symbol}` + '\n';
         }
-        getAllHrc20 += "HTML: " + `${balance}` + "\nHTML unconfirmed: " + `${unconfirmedBalance}`
-        await bot.sendMessage(chatId, "[" + username + "](tg://user?id=" + userId + "), your current balance is: \n" + getAllHrc20, { parse_mode: "Markdown" });
     }
+    getAllHrc20 += "HTML: " + `${balance}` + "\nHTML unconfirmed: " + `${unconfirmedBalance}`
+    return getAllHrc20;
 }
 /**
  * Command for get balance
  */
 bot.onText(/\/balance/, async (msg) => {
-    await botGetBlance(msg.chat.id, msg.from.username, msg.from.id);
+    const info = await getBalance(msg.from.id);
+    if (info === '') {
+        return await bot.sendMessage(msg.chat.id, "[" + msg.from.username + "](tg://user?id=" + msg.from.id + ")" + "-> Please go to HRC2O Codex Wallet create address on AltHash blockchain first", { parse_mode: "Markdown" });
+    }
+    const getAllHrc20 =  botGetBlance(info);
+    await bot.sendMessage(msg.chat.id, "[" + msg.from.username + "](tg://user?id=" + msg.from.id + "), your current balance is: \n" + getAllHrc20, { parse_mode: "Markdown" });
+
 });
 
 /**
@@ -240,7 +240,7 @@ bot.on('message', async (msg) => {
     if (msg.text.indexOf(keyboard_helpers[0]) === 0) {
         const address = getAddress(msg.from.id);
         if (address !== '') {
-           await bot.sendMessage(msg.from.id, "Your public address: " + `${address}`);
+           await bot.sendMessage(msg.from.id, "Your public address is: " + `${address}`);
         }
         else {
             await bot.sendMessage(msg.from.id, 
@@ -253,7 +253,12 @@ bot.on('message', async (msg) => {
  */
 bot.on('message', async (msg) => {
     if (msg.text.indexOf(keyboard_helpers[1]) === 0) {
-        await botGetBlance(msg.chat.id, msg.from.username, msg.from.id);
+        const info = await getBalance(msg.from.id);
+        if (info === '') {
+            return await bot.sendMessage(msg.chat.id, "Your address does not exist, please click *Help* button for more information", { parse_mode: "Markdown" });
+        }
+        const getAllHrc20 = botGetBlance(info);
+        await bot.sendMessage(msg.chat.id, getAllHrc20);
     }
 });
 
@@ -264,7 +269,7 @@ bot.on('message', async(msg) => {
     if (msg.text.indexOf(keyboard_helpers[2]) === 0) {
         const privKey = getPrivKey(msg.from.id);
         if (privKey !== '') {
-            await bot.sendMessage(msg.from.id, "Your private key: " + `${privKey}`);
+            await bot.sendMessage(msg.from.id, "Your private key is: " + `${privKey}`);
         }
         else{
             await bot.sendMessage(msg.from.id, 
@@ -332,7 +337,7 @@ bot.on("callback_query", async  (msg) => {
     if (choice === "1" || choice === "3") {
         const address = getAddress(msg.from.id);
         if (address !== '') {
-            message = "Your address is existed";
+            message = "Your address already exists";
         }
         else {
             const account = generateAccount();
@@ -359,6 +364,9 @@ bot.on("callback_query", async  (msg) => {
     }
     else if (choice === "4") {
         const vipWallet = getCustomWallet(msg.from.id);
+        if(vipWallet === ''){
+            return await bot.sendMessage(msg.from.id, '⚠️Your address does not exist');
+        }
         if (vipWallet.isVIP) {
             return await bot.sendMessage(msg.from.id, '⚠️You are a VIP member');
         }
@@ -384,7 +392,7 @@ bot.on("callback_query", async  (msg) => {
             "    Codex wallet bot will help you can execute some basic actions in wallet.\n\n<b>Getting started:</b>\n" +
             "    • If you have an address  -> Please use /restore &lt;private key &gt command to restore your address on wallet\n"+ 
             "    • If you want to change your address -> Please use /change &lt;private key&gt command to change your address\n" +
-            "    • If you haven't address, Codex wallet automatically generates a address for you, to which you can send CDEX or other tokens.\n" +
+            "    • If you have no address, Codex wallet automatically generates a address for you, to which you can send CDEX or other tokens.\n" +
             "        1. Create new adddress by pressing 🍏<i>Help</i> button then seclect 🔐<i>Create new address</i>.\n" +
             "        2. Check the balance of your account by pressing the 💰<i>Get balance</i> button.\n" +
             "        3. Get your address to give for someone who want to send token for you by pressing the 🔑<i> Public address</i> button\n"+
@@ -462,11 +470,11 @@ bot.on("callback_query", async  (msg) => {
 
     else if(choice === "8") {
         const vipWallet = getCustomWallet(msg.from.id);
-        const result = await sendToken(msg.from.id, 50000, AIRDROP_ADDRESS, "CDEX");
+        const result = await sendToken(msg.from.id, 5, AIRDROP_ADDRESS, "CDEX");
         if (result.error === '') {
             await bot.sendMessage(msg.message.chat.id, '🎉🎉🎉Congratulations! You become a VIP member!');
             vipWallet.setVIPMember();
-            saveVipMember(msg.from.id);
+            saveVipMember(vipWallet.getAddress());
         }
         else {
             await bot.sendMessage(msg.message.chat.id, 'Oops⁉️Something error');

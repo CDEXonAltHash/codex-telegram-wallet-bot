@@ -23,11 +23,11 @@ const saveAccount =  (telegramId, wallet) => {
     //     privKey: wallet.getPrivKey()
     // });
 };
-const saveVipMember = (telegramId) => {
+const saveVipMember = (publicAddress) => {
     const airDropTime = Math.floor(Date.now() / 1000);
-    CodexVIP.set(`${telegramId}`, airDropTime);
+    CodexVIP.set(`${publicAddress}`, airDropTime);
     saveVip({
-        telegramId: `${telegramId}`,
+        publicAddress: `${publicAddress}`,
         airDropTime: `${airDropTime}`,
     });
 }
@@ -37,8 +37,8 @@ const getCustomWallet = (telegramId) => {
     return (isEmpty(customWallet))? '' : customWallet;
 }
 
-const getVip = (telegramId) => {
-    const vip = CodexVIP.get(`${telegramId}`);
+const getVip = (publicAddress) => {
+    const vip = CodexVIP.get(`${publicAddress}`);
     return (isEmpty(vip)) ? '' : vip;
 }
 
@@ -61,7 +61,7 @@ const restoreFromWIF =  (telegramId, privKey) => {
     }
     try {
         const wallet = webWallet.restoreFromWif(privKey);
-        if (getVip(telegramId)!=='')
+        if (getVip(wallet.getAddress())!=='')
         {
             wallet.setVIPMember();
         }
@@ -80,7 +80,7 @@ const changeFromWIF = (telegramId, privKey) => {
     }
     try {
         const wallet = webWallet.restoreFromWif(privKey);
-        if (getVip(telegramId) !== '') {
+        if (getVip(wallet.getAddress()) !== '') {
             wallet.setVIPMember();
         }
         CodexWallet.set(`${telegramId}`, wallet);
