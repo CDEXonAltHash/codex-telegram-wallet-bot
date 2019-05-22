@@ -164,13 +164,10 @@ bot.onText(/\/tip (.+)/, async (msg, match) => {
 
 });
 
-/**
- * Command for get balance
- */
-bot.onText(/\/balance/, async (msg) => {
-    const info = await getBalance(msg.from.id);
+const botGetBlance = async (chatId, username, userId) =>{
+    const info = await getBalance(userId);
     if (info === '') {
-        await bot.sendMessage(msg.chat.id, "[" + msg.from.username + "](tg://user?id=" + msg.from.id + ")" + "-> Please go to HRC2O Codex Wallet create address on AltHash blockchain first", { parse_mode: "Markdown" });
+        await bot.sendMessage(chatId, "[" + username + "](tg://user?id=" + userId + ")" + "-> Please go to HRC2O Codex Wallet create address on AltHash blockchain first", { parse_mode: "Markdown" });
     }
     else {
         const balance = info.balance;
@@ -178,12 +175,34 @@ bot.onText(/\/balance/, async (msg) => {
         let token;
         let getAllHrc20 = '';
         const hrc20 = info.hrc20;
-        for (token of hrc20) {
+        if (token.contract.name !== 'Bitcoin') {
             getAllHrc20 += `${token.contract.name}` + ': ' + `${token.amount / Math.pow(10, token.contract.decimals)}` + ' ' + `${token.contract.symbol}` + '\n';
         }
         getAllHrc20 += "HTML: " + `${balance}` + "\nHTML unconfirmed: " + `${unconfirmedBalance}`
-        await bot.sendMessage(msg.chat.id, "[" + msg.from.username + "](tg://user?id=" + msg.from.id + "), your current balance is: \n" +  getAllHrc20, {parse_mode: "Markdown"});
+        await bot.sendMessage(chatId, "[" + username + "](tg://user?id=" + userId + "), your current balance is: \n" + getAllHrc20, { parse_mode: "Markdown" });
     }
+}
+/**
+ * Command for get balance
+ */
+bot.onText(/\/balance/, async (msg) => {
+    await botGetBlance(msg.chat.id, msg.from.username, msg.from.id);
+    // const info = await getBalance(msg.from.id);
+    // if (info === '') {
+    //     await bot.sendMessage(msg.chat.id, "[" + msg.from.username + "](tg://user?id=" + msg.from.id + ")" + "-> Please go to HRC2O Codex Wallet create address on AltHash blockchain first", { parse_mode: "Markdown" });
+    // }
+    // else {
+    //     const balance = info.balance;
+    //     const unconfirmedBalance = info.unconfirmedBalance;
+    //     let token;
+    //     let getAllHrc20 = '';
+    //     const hrc20 = info.hrc20;
+    //     for (token of hrc20) {
+    //         getAllHrc20 += `${token.contract.name}` + ': ' + `${token.amount / Math.pow(10, token.contract.decimals)}` + ' ' + `${token.contract.symbol}` + '\n';
+    //     }
+    //     getAllHrc20 += "HTML: " + `${balance}` + "\nHTML unconfirmed: " + `${unconfirmedBalance}`
+    //     await bot.sendMessage(msg.chat.id, "[" + msg.from.username + "](tg://user?id=" + msg.from.id + "), your current balance is: \n" +  getAllHrc20, {parse_mode: "Markdown"});
+    // }
 });
 
 /**
@@ -247,23 +266,28 @@ bot.on('message', async (msg) => {
  */
 bot.on('message', async (msg) => {
     if (msg.text.indexOf(keyboard_helpers[1]) === 0) {
-        const info = await getBalance(msg.from.id);
-        if(info === '')
-        {
-            await bot.sendMessage(msg.chat.id, "If you have no account, please click *Help* button to create a new account", {parse_mode: "Markdown"});
-        }
-        else{
-            const balance = info.balance;
-            const unconfirmedBalance = info.unconfirmedBalance;
-            let token;
-            let getAllHrc20= '';
-            const hrc20 = info.hrc20;
-            for (token of hrc20) {
-                getAllHrc20 +=`${token.contract.name}` + ': ' + `${token.amount / Math.pow(10, token.contract.decimals)}` + ' ' + `${token.contract.symbol}` +'\n';
-            }
-            getAllHrc20 += "HTML: " + `${balance}` + "\nHTML unconfirmed: " + `${unconfirmedBalance}`
-            await bot.sendMessage(msg.chat.id, getAllHrc20);
-        }
+        await botGetBlance(msg.chat.id, msg.from.username, msg.from.id);
+
+        // const info = await getBalance(msg.from.id);
+        // if(info === '')
+        // {
+        //     await bot.sendMessage(msg.chat.id, "If you have no account, please click *Help* button to create a new account", {parse_mode: "Markdown"});
+        // }
+        // else{
+        //     const balance = info.balance;
+        //     const unconfirmedBalance = info.unconfirmedBalance;
+        //     let token;
+        //     let getAllHrc20= '';
+        //     const hrc20 = info.hrc20;
+        //     for (token of hrc20) {
+        //         if (token.contract.name!=='Bitcoin')
+        //         {
+        //             getAllHrc20 += `${token.contract.name}` + ': ' + `${token.amount / Math.pow(10, token.contract.decimals)}` + ' ' + `${token.contract.symbol}` + '\n'; 
+        //         }
+        //     }
+        //     getAllHrc20 += "HTML: " + `${balance}` + "\nHTML unconfirmed: " + `${unconfirmedBalance}`
+        //     await bot.sendMessage(msg.chat.id, getAllHrc20);
+        // }
     }
 });
 
