@@ -82,6 +82,7 @@ class Wallet {
 
   setVIPMember() {
     this.isVIP = true;
+    this.setAirDropTime();
   }
 
   setAirDropTime () {

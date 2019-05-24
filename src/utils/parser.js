@@ -1,6 +1,6 @@
 const TRX_FEE = 1.01;
 const TIME_EXPIRED_OFFER = 43200; //12 hours
-const TIME_AIRDROP = 86400;
+const TIME_AIRDROP = 86400000;
 /**
  * @param input will be a string has format: 
  * "#autosell number1 token1 for number2 token2 #autosell number3 token1 for number4 token3 "
@@ -76,11 +76,27 @@ const isValidAirDrop = (timeAirDrop, lastTimeAirdop) => {
     }
     return false;
 }
+const convertTime = (duration) => {
+    let milliseconds = Math.floor((duration % 1000) / 100)
+    let seconds = Math.floor((duration / 1000) % 60)
+    let minutes = Math.floor((duration / (1000 * 60)) % 60)
+    let hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
+    // // let days = Math.floor(t / (1000 * 60 * 60 * 24));
+    // let hours = Math.floor((duration % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    // let minutes = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60));
+    // let seconds = Math.floor((duration % (1000 * 60)) / 1000);
+    hours = (hours < 10) ? "0" + hours : hours;
+    minutes = (minutes < 10) ? "0" + minutes : minutes;
+    seconds = (seconds < 10) ? "0" + seconds : seconds;
 
+    return hours + ":" + minutes + ":" + seconds;
+}
 module.exports = {
+    TIME_AIRDROP,
     parseCommandTrading,
     validToken,
     isValidOffer,
     getVal,
-    isValidAirDrop
+    isValidAirDrop,
+    convertTime
 }

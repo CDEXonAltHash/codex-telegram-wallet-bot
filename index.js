@@ -23,7 +23,9 @@ const {
 const {
     parseCommandTrading,
     isValidOffer,
-    isValidAirDrop
+    isValidAirDrop,
+    convertTime,
+    TIME_AIRDROP
 } = require('./src/utils/parser');
 
 const {
@@ -43,8 +45,8 @@ const keyboard_helpers = ["🔑Public address", "💰Get balance", "🗝Get priv
 /**
  * Load address of bot to airdrop function
  */
-loadAccountFromFile();
 loadVip();
+loadAccountFromFile();
 
 /**
  * Start bot
@@ -126,13 +128,13 @@ bot.onText(/\/stats/,  async (msg) => {
 /**
  * Bot send token
  */
-const botSendToken = async (msgId, ownerTelegramId, toAddress, amount, token) => {
+const botSendToken = async (msgId, msgContent,  ownerTelegramId, toAddress, amount, token) => {
     const result = await sendToken(ownerTelegramId, amount, toAddress, token);
     if (result.error === '') {
-        await bot.sendMessage(msgId, '✅Send tokens are successful with transaction Id: ' + `${result.trxId}`);
+        await bot.sendMessage(msgId, '✅ '+ `${msgContent}`+ ' successful with transaction Id: ' + `${result.trxId}`);
     }
     else {
-        await bot.sendMessage(msgId, '❌Cannot execute the transaction: Please check again *(token symbol, received address, HTML coin, etc)*',{parse_mode:"Markdown"});
+        await bot.sendMessage(msgId, '❌' + `${msgContent}` +' failed: Please check again *(token symbol, received address, HTML coin, etc)*',{parse_mode:"Markdown"});
     }
 }
 
@@ -141,7 +143,7 @@ const botSendToken = async (msgId, ownerTelegramId, toAddress, amount, token) =>
  */
 bot.onText(/\/send (.+)/, async (msg, match) => {
     const params = match[1].split(' ');
-    await botSendToken(msg.from.id, msg.from.id, params[0], params[1], params[2]);
+    await botSendToken(msg.from.id,'Send token is ', msg.from.id, params[0], params[1], params[2]);
 });
 
 /**
@@ -161,7 +163,7 @@ bot.onText(/\/tip (.+)/, async (msg, match) => {
     /**
      * After that send some tokens
      */
-    await botSendToken(msg.from.id, msg.from.id, address, params[0], params[1]);
+    await botSendToken(msg.chat.id,'Tip token is ', msg.from.id, address, params[0], params[1]);
 
 });
 
@@ -172,7 +174,7 @@ const botGetBlance =  (info) =>{
     let getAllHrc20 = '';
     const hrc20 = info.hrc20;
     for (token of hrc20) {
-        if (token.contract.name !== 'Bitcoin') {
+        if (token.contract.name !== 'Bitcoin' && token.contract.name !== 'Ethereum' ) {
             getAllHrc20 += `${token.contract.name}` + ': ' + `${token.amount / Math.pow(10, token.contract.decimals)}` + ' ' + `${token.contract.symbol}` + '\n';
         }
     }
@@ -303,14 +305,13 @@ bot.on('message', async (msg) => {
 bot.on('message', async (msg) => {
     if (msg.text.indexOf(keyboard_helpers[4]) === 0) {
         const vipWallet = getCustomWallet(msg.from.id);
-        // const vip = getVip(msg.from.id);
-        if (!vipWallet.isVIP){
+        if (!vipWallet.isVIP) {
             return await bot.sendMessage(msg.from.id, "Sorry, the function only for VIP member");
         }
         if (isValidAirDrop(msg.date, vipWallet.getAirDropTime())) {
             const result = await sendToken(AIRDROP_ID, 10, vipWallet.getAddress(), "CDEX");
             if (result.error === '') {
-                await bot.sendMessage(msg.from.id, '🎉🎉🎉Recieve Airdrop Once Daily');
+                await bot.sendMessage(msg.from.id, '🎉🎉🎉Recieve <b> 10 CDEX </b> Airdrop Once Daily', {parse_mode: "HTML"});
                 vipWallet.setAirDropTime();
             }
             else {
@@ -318,7 +319,9 @@ bot.on('message', async (msg) => {
             }
         }
         else {
-            await bot.sendMessage(msg.from.id, "⚠️Airdrop only once time per day");
+            const miliseconds = TIME_AIRDROP - (new Date(msg.date).getTime() - new Date(vipWallet.getAirDropTime()).getTime()) * 1000;
+            const timeLeft = convertTime(miliseconds);
+            await bot.sendMessage(msg.from.id, "⚠️Please wait: <b>" + `${timeLeft}` + "</b> to get airdrop again! ", {parse_mode: "HTML"});
         }
     }
 });

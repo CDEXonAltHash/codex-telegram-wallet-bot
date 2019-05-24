@@ -2,7 +2,6 @@ const keyFile = require('../libs/keyfile');
 const webWallet = require('../libs/web-wallet');
 const fs = require('fs');
 const { CODEX_CREDENTIAL } = require('../config/config');
-
 const userStoragePath = './codexWallet';
 const vipStoragePath = './codexVip';
 const CodexWallet = new Map();
@@ -28,8 +27,10 @@ const loadAccountFromFile =  () => {
                 wallet.setHrc20().then(() => { });
                 CodexWallet.set(`${account.telegramId}`, wallet);
             }
-        }    }
+        }
+    }
     catch(e) {   
+        console.log(e);
     }
 
 };
