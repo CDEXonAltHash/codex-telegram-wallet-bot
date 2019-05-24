@@ -159,7 +159,7 @@ bot.onText(/\/tip (.+)/, async (msg, match) => {
         // const account = generateAccount();
         // address = account.address;
         // saveAccount(msg.reply_to_message.from.id, account.wallet);
-        return await bot.sendMessage(msg.chat.id, "❌Tip token cannot be completed recipient has not set up wallet", { parse_mode: "Markdown" });
+        return await bot.sendMessage(msg.chat.id, "❌Tip cannot be completed recipient has not set up wallet", { parse_mode: "Markdown" });
 
     }
     /**
