@@ -156,9 +156,11 @@ bot.onText(/\/tip (.+)/, async (msg, match) => {
      */
     let address = getAddress(msg.reply_to_message.from.id);
     if(address === '') {
-        const account = generateAccount();
-        address = account.address;
-        saveAccount(msg.reply_to_message.from.id, account.wallet);
+        // const account = generateAccount();
+        // address = account.address;
+        // saveAccount(msg.reply_to_message.from.id, account.wallet);
+        return await bot.sendMessage(msg.chat.id, "❌Tip token is failed because: " + "[" + msg.reply_to_message.from.username + "](tg://user?id=" + msg.reply_to_message.from.id + ")" + "-> Please go to HRC2O Codex Wallet create address on AltHash blockchain first", { parse_mode: "Markdown" });
+
     }
     /**
      * After that send some tokens
