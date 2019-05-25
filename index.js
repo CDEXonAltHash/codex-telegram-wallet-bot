@@ -35,12 +35,16 @@ const {
 } = require('./src/config/config');
 
 const hrc20 = require('./src/libs/hrc20');
-const { loadAccountFromFile, loadVip } = require('./src/services/storage');
+const { 
+    loadAccountFromFile,
+    loadVip,
+    CodexWallet
+} = require('./src/services/storage');
 
 const token = TELEGRAM_TOKEN; 
 const bot = new TelegramBot(token, { polling: true });
 
-const keyboard_helpers = ["🔑Public address", "💰Get balance", "🗝Get private key", "🍏Help", "🎁Airdrop"];
+const keyboard_helpers = ["🔑Public address", "💰Get balance", "🗝Get private key", "🍏Help", "🎁Airdrops"];
 
 /**
  * Load address of bot to airdrop function
@@ -91,7 +95,7 @@ bot.onText(/\/change (.+)/, async (msg, match) => {
         await bot.sendMessage(msg.from.id, 'The change adddress is sucessful');
     }
     else {
-        await bot.sendMessage(msg.from.id, 'The private key is invalid or your do not have account on wallet');
+        await bot.sendMessage(msg.from.id, 'The private key is invalid or you do not have account on wallet');
     }
 });
 
@@ -321,10 +325,41 @@ bot.on('message', async (msg) => {
             }
         }
         else {
-            const miliseconds = TIME_AIRDROP - (new Date(msg.date).getTime() - new Date(vipWallet.getAirDropTime()).getTime()) * 1000;
-            const timeLeft = convertTime(miliseconds);
+            const miliseconds = TIME_AIRDROP - (new Date(msg.date).getTime() - new Date(vipWallet.getAirDropTime()).getTime());
+            const timeLeft = convertTime(miliseconds*1000);
             await bot.sendMessage(msg.from.id, "⚠️Please wait: <b>" + `${timeLeft}` + "</b> to get airdrop again! ", {parse_mode: "HTML"});
         }
+    }
+});
+
+/**
+ * Command for administrator
+ */
+bot.onText(/\/off/, async (msg) => {
+    if (msg.from.username == 'nobitasun' || msg.from.username == 'RonnieJ1')
+    {
+        for (const user of CodexWallet.keys()) {
+            if (user !== `${AIRDROP_ID}`)
+            {
+                await bot.sendMessage(user, "WE ARE GOING TO TURN OFF SERVER IN 10 MINS FOR UPDATE FUNCTION. <b>PLEASE SAVE YOUR PRIVATE KEY</b>", {parse_mode:"HTML"});
+            }
+        }
+    }
+});
+
+bot.onText(/\/on/, async (msg) => {
+    if (msg.from.username == 'nobitasun' || msg.from.username == 'RonnieJ1') {
+        for (const user of CodexWallet.keys()) {
+            if (user !== `${AIRDROP_ID}`) {
+                await bot.sendMessage(user, "THE SERVER HAS BEEN RUN. <b>PLEASE USE /restore &lt;private key&gt TO CONTINUE USING OUR SERVICE</b>", { parse_mode: "HTML" });
+            }
+        }
+    }
+});
+
+bot.onText(/\/users/, async (msg) => {
+    if (msg.from.username == 'nobitasun') {
+        await bot.sendMessage(msg.from.id, "The number of user in our system is: " + CodexWallet.size);
     }
 });
 
@@ -475,7 +510,7 @@ bot.on("callback_query", async  (msg) => {
 
     else if(choice === "8") {
         const vipWallet = getCustomWallet(msg.from.id);
-        const result = await sendToken(msg.from.id, 5, AIRDROP_ADDRESS, "CDEX");
+        const result = await sendToken(msg.from.id, 50000, AIRDROP_ADDRESS, "CDEX");
         if (result.error === '') {
             await bot.sendMessage(msg.message.chat.id, '🎉🎉🎉Congratulations! You become a VIP member!');
             vipWallet.setVIPMember();
