@@ -335,24 +335,20 @@ bot.on('message', async (msg) => {
 /**
  * Command for administrator
  */
+const LIST_GROUP = ['@photizocommunity', '@LacnaTokenHRC20', '@HRC20_Token_Room', '@officialhtmlcoin', '@htmlbunkerofficial','@Biffy_Token']
 bot.onText(/\/off/, async (msg) => {
     if (msg.from.username == 'nobitasun' || msg.from.username == 'RonnieJ1')
     {
-        for (const user of CodexWallet.keys()) {
-            if (user !== `${AIRDROP_ID}`)
-            {
-                await bot.sendMessage(user, "WE ARE GOING TO TURN OFF SERVER IN 10 MINS FOR UPDATE FUNCTION. <b>PLEASE SAVE YOUR PRIVATE KEY</b>", {parse_mode:"HTML"});
-            }
+        for (const user of LIST_GROUP) {
+            await bot.sendMessage(user, "WE ARE GOING TO TURN OFF SERVER IN 10 MINS FOR UPDATE FUNCTION. <b>PLEASE SAVE YOUR PRIVATE KEY</b>", { parse_mode: "HTML" });
         }
     }
 });
 
 bot.onText(/\/on/, async (msg) => {
     if (msg.from.username == 'nobitasun' || msg.from.username == 'RonnieJ1') {
-        for (const user of CodexWallet.keys()) {
-            if (user !== `${AIRDROP_ID}`) {
-                await bot.sendMessage(user, "THE SERVER HAS BEEN RUN. <b>PLEASE USE /restore &lt;private key&gt TO CONTINUE USING OUR SERVICE</b>", { parse_mode: "HTML" });
-            }
+        for (const user of LIST_GROUP) {
+            await bot.sendMessage(user, "THE SERVER HAS BEEN RUN. <b>PLEASE GO TO YOUR WALLET AND USE /restore &lt;private key&gt TO CONTINUE USING OUR SERVICE</b>", { parse_mode: "HTML" });
         }
     }
 });
