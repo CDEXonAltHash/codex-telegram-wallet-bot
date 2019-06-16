@@ -68,8 +68,8 @@ class Wallet {
 
   async setInfo() {
     const info = await server.currentNode().getInfo(this.info.address)
-    this.info.balance = info.balance + unit
-    this.info.unconfirmedBalance = info.unconfirmedBalance + unit
+    this.info.balance = info.balance
+    this.info.unconfirmedBalance = info.unconfirmedBalance
   }
 
   async setHrc20() {

@@ -1,3 +1,4 @@
+'use strict';
 const TRX_FEE = 1.01;
 const TIME_EXPIRED_OFFER = 43200; //12 hours
 const TIME_AIRDROP = 86400;
@@ -77,14 +78,9 @@ const isValidAirDrop = (timeAirDrop, lastTimeAirdop) => {
     return false;
 }
 const convertTime = (duration) => {
-    let milliseconds = Math.floor((duration % 1000) / 100)
     let seconds = Math.floor((duration / 1000) % 60)
     let minutes = Math.floor((duration / (1000 * 60)) % 60)
     let hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
-    // // let days = Math.floor(t / (1000 * 60 * 60 * 24));
-    // let hours = Math.floor((duration % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    // let minutes = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60));
-    // let seconds = Math.floor((duration % (1000 * 60)) / 1000);
     hours = (hours < 10) ? "0" + hours : hours;
     minutes = (minutes < 10) ? "0" + minutes : minutes;
     seconds = (seconds < 10) ? "0" + seconds : seconds;

@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 require('babel-polyfill');
 const TelegramBot = require('node-telegram-bot-api');
 const {
@@ -11,14 +11,14 @@ const {
     getCustomWallet,
     saveVipMember,
     getVip
-} = require('./src/services/address'); 
+} = require('./src/services/AddressService'); 
+
 const { 
     sendToken,
     getBalance,
     tradingToken,
     checkCDEX,
-    checkVip
-} = require('./src/services/tokens');
+} = require('./src/services/TokenService');
 
 const {
     parseCommandTrading,
@@ -26,25 +26,36 @@ const {
     isValidAirDrop,
     convertTime,
     TIME_AIRDROP
-} = require('./src/utils/parser');
+} = require('./src/utils/StringParser');
 
 const {
     TELEGRAM_TOKEN,
     AIRDROP_ID,
     AIRDROP_ADDRESS
-} = require('./src/config/config');
+} = require('./src/config/Config');
 
 const hrc20 = require('./src/libs/hrc20');
+
 const { 
     loadAccountFromFile,
     loadVip,
     CodexWallet
-} = require('./src/services/storage');
+} = require('./src/services/StorageService');
+
+const {
+    svgTemplate,
+    buildSvgFile,
+    convertSvg2Png,
+} = require('./src/utils/SvgImageFile');
+
+const {
+    viewTransaction,
+} = require('./src/services/ViewTransaction');
 
 const token = TELEGRAM_TOKEN; 
 const bot = new TelegramBot(token, { polling: true });
-
-const keyboard_helpers = ["🔑Public address", "💰Get balance", "🗝Get private key", "🍏Help", "🎁Airdrops"];
+const AMOUNT_AIRDROP = 75;
+const keyboard_helpers = ["📬Public address", "💰Get balance", "🔑Get private key", "🔍Help", "🎁Airdrops", "👀View transaction"];
 
 /**
  * Load address of bot to airdrop function
@@ -57,35 +68,36 @@ loadAccountFromFile();
  */
 
 bot.onText(/\/start/, async(msg) => {
-    /**
-     * Check exist adress or not
-     */
-    const address = getAddress(msg.from.id);
-    if(address !== '') {
-        await bot.sendMessage(msg.from.id, "Hey friend, use the keyboard to navigate the menu", {
+    const welcomeMessage =
+    'Welcome to HRC20 Codex Bot, use command below to access wallet\n'+
+    '1.	Access to wallet(have an address) -> /restore <private key>\n'+
+    '2.	No wallet -> /mywallet (We made one for you)';
+    await bot.sendMessage(msg.chat.id, welcomeMessage);
+});
+
+/**
+ * Made new address
+ */
+bot.onText(/\/mywallet/, async (msg) => {
+    const account = generateAccount();
+    if (account.privKey !== undefined)
+    {
+        await bot.sendMessage(msg.from.id, 'Create new wallet is successful\n' +
+        '<b>Your public address is:</b> ' + `${account.address}` +
+        '\n<b>Your private key is :</b> ' + `${account.privKey}` +
+        '\n<i>(Please save private key to a safe place)</i>',
+        {
             "reply_markup": {
                 "keyboard": [
                     [keyboard_helpers[0], keyboard_helpers[1]],
                     [keyboard_helpers[2], keyboard_helpers[3]],
-                    [keyboard_helpers[4]]
+                    [keyboard_helpers[4], keyboard_helpers[5]],
                 ]
-            }
+            },
+            parse_mode:"HTML"
         });
     }
-    else {
-        const opts = {
-            reply_markup: {
-                inline_keyboard: [
-                    [{ text: "Yes", callback_data: "1" }],
-                    [{ text: "No", callback_data: "2" }],
-                ],
-            }
-        };
-        await bot.sendMessage(msg.from.id, "Do you want to create a new address on AltHash blockchain?", opts);
-    }
-
 });
-
 /**
  * Change new address on wallet from WIF
  */
@@ -104,19 +116,21 @@ bot.onText(/\/change (.+)/, async (msg, match) => {
  */
 bot.onText(/\/restore (.+)/, async (msg, match) => {
     const result = restoreFromWIF(msg.from.id, match[1]);
+    const transaction = await viewTransaction(msg.from.id);
+
     if (result === true) {
-        await bot.sendMessage(msg.from.id, "Welcome to Codex Wallet, use the keyboard to navigate the menu ", {
+        await bot.sendMessage(msg.from.id, "Restore address is successful", {
             "reply_markup": {
                 "keyboard": [
                     [keyboard_helpers[0], keyboard_helpers[1]],
                     [keyboard_helpers[2], keyboard_helpers[3]],
-                    [keyboard_helpers[4]]
+                    [keyboard_helpers[4], keyboard_helpers[5]],
                 ]
             }
         });
     }
     else {
-        await bot.sendMessage(msg.from.id, 'The private key is invalid or your address already exists');
+        await bot.sendMessage(msg.from.id, '❌The private key is invalid or your address already existed');
     }
 });
 
@@ -134,11 +148,12 @@ bot.onText(/\/stats/,  async (msg) => {
  */
 const botSendToken = async (msgId, msgContent,  ownerTelegramId, toAddress, amount, token) => {
     const result = await sendToken(ownerTelegramId, amount, toAddress, token);
+    const url = "https://explorer.htmlcoin.com/tx/" + `${result.trxId}`;
     if (result.error === '') {
-        await bot.sendMessage(msgId, '✅ '+ `${msgContent}`+ ' successful with transaction Id: ' + `${result.trxId}`);
+        await bot.sendMessage(msgId, '✅ ' + `${msgContent}` + ' successful\n' + '<a href=\"' + `${url}` + '">Please check transaction here</a>', { parse_mode: "HTML" });
     }
     else {
-        await bot.sendMessage(msgId, '❌' + `${msgContent}` +' failed: Please check again *(token symbol, received address, HTML coin, etc)*',{parse_mode:"Markdown"});
+        await bot.sendMessage(msgId, '❌' + `${result.error}`,{parse_mode:"Markdown"});
     }
 }
 
@@ -147,7 +162,7 @@ const botSendToken = async (msgId, msgContent,  ownerTelegramId, toAddress, amou
  */
 bot.onText(/\/send (.+)/, async (msg, match) => {
     const params = match[1].split(' ');
-    await botSendToken(msg.from.id,'Send token is ', msg.from.id, params[0], params[1], params[2]);
+    await botSendToken(msg.from.id,'Send tokens is ', msg.from.id, params[0], params[1], params[2]);
 });
 
 /**
@@ -160,32 +175,40 @@ bot.onText(/\/tip (.+)/, async (msg, match) => {
      */
     let address = getAddress(msg.reply_to_message.from.id);
     if(address === '') {
-        // const account = generateAccount();
-        // address = account.address;
-        // saveAccount(msg.reply_to_message.from.id, account.wallet);
         return await bot.sendMessage(msg.chat.id, "❌Tip cannot be completed recipient has not set up wallet", { parse_mode: "Markdown" });
-
     }
     /**
      * After that send some tokens
      */
-    await botSendToken(msg.chat.id,'Tip token is ', msg.from.id, address, params[0], params[1]);
+    await botSendToken(msg.chat.id,'Tip tokens is ', msg.from.id, address, params[0], params[1]);
 
 });
 
 const botGetBlance =  (info) =>{
     const balance = info.balance;
     const unconfirmedBalance = info.unconfirmedBalance;
-    let token;
-    let getAllHrc20 = '';
+    let yCoordinate = 506;
     const hrc20 = info.hrc20;
-    for (token of hrc20) {
-        if (token.contract.name !== 'Bitcoin' && token.contract.name !== 'Ethereum' ) {
-            getAllHrc20 += `${token.contract.name}` + ': ' + `${token.amount / Math.pow(10, token.contract.decimals)}` + ' ' + `${token.contract.symbol}` + '\n';
-        }
+    let svgFile = svgTemplate(800, 120 + hrc20.length*40);
+
+    for(const token of hrc20) {
+        const tokenValue = (token.amount / Math.pow(10, token.contract.decimals)).toString().split('.');
+        if(tokenValue[1] === undefined) tokenValue[1] = 0;
+        if (tokenValue[0] === undefined) tokenValue[0] = 0;
+        svgFile += buildSvgFile(yCoordinate, token.contract.name, tokenValue[0], '.' + tokenValue[1] , token.contract.symbol );
+        yCoordinate += 40;
     }
-    getAllHrc20 += "HTML: " + `${balance}` + "\nHTML unconfirmed: " + `${unconfirmedBalance}`
-    return getAllHrc20;
+    const htmlbalance = balance.toString().split('.');
+    if (htmlbalance[1] === undefined) htmlbalance[1] = 0;
+    if (htmlbalance[0] === undefined) htmlbalance[0] = 0;
+    const htmlbalanceunconfrim = unconfirmedBalance.toString().split('.');
+    if (htmlbalanceunconfrim[1] === undefined) htmlbalanceunconfrim[1] = 0;
+    if (htmlbalanceunconfrim[0] === undefined) htmlbalanceunconfrim[0] = 0;
+    svgFile += buildSvgFile(yCoordinate, 'HTML', htmlbalance[0], '.' + htmlbalance[1], 'HTML');
+    yCoordinate += 40;
+    svgFile += buildSvgFile(yCoordinate, 'HTML unconfirmed', htmlbalanceunconfrim[0], '.' +htmlbalanceunconfrim[1], 'HTML');
+    svgFile += '</g></svg>';
+    return svgFile;
 }
 /**
  * Command for get balance
@@ -193,11 +216,13 @@ const botGetBlance =  (info) =>{
 bot.onText(/\/balance/, async (msg) => {
     const info = await getBalance(msg.from.id);
     if (info === '') {
-        return await bot.sendMessage(msg.chat.id, "[" + msg.from.username + "](tg://user?id=" + msg.from.id + ")" + "-> Please go to HRC2O Codex Wallet create address on AltHash blockchain first", { parse_mode: "Markdown" });
+        return await bot.sendMessage(msg.from.id, "[" + msg.from.username + "](tg://user?id=" + msg.from.id + ")" + "-> Please go to @CodexWalletBot for more information", { parse_mode: "Markdown" });
     }
-    const getAllHrc20 =  botGetBlance(info);
-    await bot.sendMessage(msg.chat.id, "[" + msg.from.username + "](tg://user?id=" + msg.from.id + "), your current balance is: \n" + getAllHrc20, { parse_mode: "Markdown" });
+    const svgFile =  botGetBlance(info);
+    const imgBalance =  await convertSvg2Png(svgFile);
 
+    await bot.sendMessage(msg.from.id, "[" + msg.from.username + "](tg://user?id=" + msg.from.id + "), your current balance is:", { parse_mode: "Markdown" });
+    await bot.sendPhoto(msg.from.id, imgBalance);
 });
 
 /**
@@ -210,10 +235,10 @@ bot.onText(/\/trade (.+)/,  async (msg, match) => {
         const traderAccount = getCustomWallet(msg.from.id);
 
         if (adsAccount === '') {
-            await bot.sendMessage(msg.chat.id, "⚠️ " + "[" + msg.reply_to_message.from.username + "](tg://user?id=" + msg.reply_to_message.from.id + ")" + "-> Please go to HRC2O Codex Wallet create address on AltHash blockchain first", {parse_mode: "Markdown"});
+            await bot.sendMessage(msg.chat.id, "⚠️ " + "[" + msg.reply_to_message.from.username + "](tg://user?id=" + msg.reply_to_message.from.id + ")" + "-> Please go to @CodexWalletBot create/restore address on AltHash blockchain first", {parse_mode: "Markdown"});
         }
         else if (traderAccount === '') {
-            await bot.sendMessage(msg.chat.id, "⚠️ " + "[" + msg.from.username + "](tg://user?id=" + msg.from.id + ")" + "-> Please go to HRC2O Codex Wallet create address on AltHash blockchain first", {parse_mode: "Markdown"});
+            await bot.sendMessage(msg.chat.id, "⚠️ " + "[" + msg.from.username + "](tg://user?id=" + msg.from.id + ")" + "-> Please go to @CodexWalletBot create/restore address on AltHash blockchain first", {parse_mode: "Markdown"});
         }
         else {
             const tradingArray = parseCommandTrading(msg.reply_to_message.text);
@@ -252,7 +277,7 @@ bot.on('message', async (msg) => {
         }
         else {
             await bot.sendMessage(msg.from.id, 
-                "If you have no account, please click *Help* button to create a new account", { parse_mode: "Markdown" });
+                "Your address does not exist, please click *Help* button for more information", { parse_mode: "Markdown" });
         }
     }
 });
@@ -265,8 +290,11 @@ bot.on('message', async (msg) => {
         if (info === '') {
             return await bot.sendMessage(msg.chat.id, "Your address does not exist, please click *Help* button for more information", { parse_mode: "Markdown" });
         }
-        const getAllHrc20 = botGetBlance(info);
-        await bot.sendMessage(msg.chat.id, getAllHrc20);
+        const svgFile = botGetBlance(info);
+        const imgBalance = await convertSvg2Png(svgFile);
+        await bot.sendMessage(msg.from.id, "[" + msg.from.username + "](tg://user?id=" + msg.from.id + "), your current balance is:", { parse_mode: "Markdown" });
+
+        await bot.sendPhoto(msg.from.id, imgBalance);
     }
 });
 
@@ -281,7 +309,7 @@ bot.on('message', async(msg) => {
         }
         else{
             await bot.sendMessage(msg.from.id, 
-                                         "If you have no account, please click *Help* button to create a new account", {parse_mode: "Markdown"});
+                                         "Your address does not exist, please click *Help* for more information", {parse_mode: "Markdown"});
         }
     }
 });
@@ -294,19 +322,17 @@ bot.on('message', async (msg) => {
         const opts = {
             reply_markup: {
                 inline_keyboard: [
-                    [{ text: "❔Get started", callback_data: "5" }, { text: "🔐Create new address", callback_data: "3" }],
-                    [{ text: "🏵VIP member 🏵", callback_data: "4" }, { text: "⏪Back", callback_data: "10" }],
+                    [{ text: "❔How to use this wallet", callback_data: "5" }, { text: "🏵Become a VIP member 🏵", callback_data: "4" }],
                 ]
             },
             parse_mode: "Markdown"
         };
-        
-        await bot.sendMessage(msg.from.id, "Please chose action", opts);
+        await bot.sendMessage(msg.from.id, "What do you want to help?", opts);
     }
 });
 
 /**
- * Airdrop
+ * Airdrops
  */
 bot.on('message', async (msg) => {
     if (msg.text.indexOf(keyboard_helpers[4]) === 0) {
@@ -315,9 +341,9 @@ bot.on('message', async (msg) => {
             return await bot.sendMessage(msg.from.id, "Sorry, the function only for VIP member");
         }
         if (isValidAirDrop(msg.date, vipWallet.getAirDropTime())) {
-            const result = await sendToken(AIRDROP_ID, 10, vipWallet.getAddress(), "CDEX");
+            const result = await sendToken(AIRDROP_ID, AMOUNT_AIRDROP, vipWallet.getAddress(), "CDEX");
             if (result.error === '') {
-                await bot.sendMessage(msg.from.id, '🎉🎉🎉Recieve <b> 10 CDEX </b> Airdrop Once Daily', {parse_mode: "HTML"});
+                await bot.sendMessage(msg.from.id, '🎉🎉🎉You just recieved <b>'+ `${AMOUNT_AIRDROP}`+' CDEX </b>', {parse_mode: "HTML"});
                 vipWallet.setAirDropTime();
             }
             else {
@@ -335,7 +361,7 @@ bot.on('message', async (msg) => {
 /**
  * Command for administrator
  */
-const LIST_GROUP = ['@photizocommunity', '@LacnaTokenHRC20', '@HRC20_Token_Room', '@officialhtmlcoin', '@htmlbunkerofficial','@Biffy_Token']
+const LIST_GROUP = ['@photizocommunity', '@LacnaTokenHRC20', '@HRC20_Token_Room', '@officialhtmlcoin', '@htmlbunkerofficial', '@Biffy_Token', '@CodexHTML', '@AutoSalesWearOfficialGroup','@ROYgroup']
 bot.onText(/\/off/, async (msg) => {
     if (msg.from.username == 'nobitasun' || msg.from.username == 'RonnieJ1')
     {
@@ -354,7 +380,7 @@ bot.onText(/\/on/, async (msg) => {
 });
 
 bot.onText(/\/users/, async (msg) => {
-    if (msg.from.username == 'nobitasun') {
+    if (msg.from.username == 'nobitasun' || msg.from.username == 'RonnieJ1') {
         await bot.sendMessage(msg.from.id, "The number of user in our system is: " + CodexWallet.size);
     }
 });
@@ -369,36 +395,7 @@ bot.on("callback_query", async  (msg) => {
         return await bot.answerCallbackQuery(msg.id,'This message does not apply to you');
     }
     await bot.deleteMessage(msg.message.chat.id, msg.message.message_id);
-    let message = '';
-    if (choice === "1" || choice === "3") {
-        const address = getAddress(msg.from.id);
-        if (address !== '') {
-            message = "Your address already exists";
-        }
-        else {
-            const account = generateAccount();
-            await saveAccount(msg.from.id, account.wallet);
-            message = "Welcome to Codex Wallet, use the keyboard to navigate the menu";
-        }
-        await bot.sendMessage(msg.message.chat.id, message, {
-            "reply_markup": {
-                "keyboard": [
-                    [keyboard_helpers[0], keyboard_helpers[1]],
-                    [keyboard_helpers[2], keyboard_helpers[3]],
-                    [keyboard_helpers[4]]
-                ]
-            }
-        });
-    }
-    else if(choice === "2") {
-        await bot.sendMessage(msg.from.id, "Please click to *Help* button when you want to more information", {
-            "reply_markup": {
-                "keyboard": [[keyboard_helpers[3]]]
-            },
-            "parse_mode": "Markdown"
-        });
-    }
-    else if (choice === "4") {
+    if (choice === "4") {
         const vipWallet = getCustomWallet(msg.from.id);
         if(vipWallet === ''){
             return await bot.sendMessage(msg.from.id, '⚠️Your address does not exist');
@@ -411,12 +408,12 @@ bot.on("callback_query", async  (msg) => {
             const opts = {
                 reply_markup: {
                     inline_keyboard: [
-                        [{ text: "Yes", callback_data: "8" }, { text: "No", callback_data: "9" }]]
+                        [{ text: "YES", callback_data: "8" }, { text: "NO", callback_data: "9" }]]
                 },
                 parse_mode: "Markdown"
             };
 
-            await bot.sendMessage(msg.from.id, "It costs 50k CDEX for VIP. Do you want to become a CDEX member?", opts);
+            await bot.sendMessage(msg.from.id, "It costs 50k CDEX for VIP. Do you want to continue?", opts);
         }
         else {
             await bot.sendMessage(msg.from.id, '⚠️You must have CDEX token greater than 50k');
@@ -424,22 +421,14 @@ bot.on("callback_query", async  (msg) => {
     }
     else if (choice === "5") {
         await bot.sendMessage(msg.message.chat.id,
-            "<b>Introduction: </b> \n" +
-            "    Codex wallet bot will help you can execute some basic actions in wallet.\n\n<b>Getting started:</b>\n" +
-            "    • If you have an address  -> Please use /restore &lt;private key &gt command to restore your address on wallet\n"+ 
-            "    • If you want to change your address -> Please use /change &lt;private key&gt command to change your address\n" +
-            "    • If you have no address, Codex wallet automatically generates a address for you, to which you can send CDEX or other tokens.\n" +
-            "        1. Create new adddress by pressing 🍏<i>Help</i> button then seclect 🔐<i>Create new address</i>.\n" +
-            "        2. Check the balance of your account by pressing the 💰<i>Get balance</i> button.\n" +
-            "        3. Get your address to give for someone who want to send token for you by pressing the 🔑<i> Public address</i> button\n"+
-            "        4. To withdraw your funds, press the 🗝<i>Get private key</i> button to see your private key.\n" +
-            "        <b>Note:</b> The private key can be used to login to AltHash wallet (https://althash.org/) or HTML coin wallet and to send tokens" +
-            " or CDEX to any account you wish. <b>Don't show it for anyone</b>\n\n<b>How to send to an address:</b>\nDirectly sending to an address can be done" +
-            " with the /send command, for example:\n    1. Sending CDEX:\n    /send <i>&lt;address&gt</i> <i>&lt;amount&gt</i>\n" +
-            "            /send Hd1yhCGhmaGwgcSPHHpFNwgYAuuyZwAHyY 10\n    2. Sending a token\n" +
-            "    /send <i>&lt;address&gt</i> <i>&lt;amount&gt</i> <i>&lt;token&gt</i>\n" +
-            "            /send Hd1yhCGhmaGwgcSPHHpFNwgYAuuyZwAHyY 10 CDEX\n" +
-            "    • If you want to tip some token for who you reply to. Please use command: /tip &lt;amount&gt &lt;token&gt",
+            "Welcome to your virtual wallet, secure management and transfer of your funds in application has never been easier. Send the commands below directly to the bot to manage your wallet(s).\n" + 
+            "1.	Access wallet (have an address) -> /restore &lt;private key&gt\n"+
+            "2.	Change wallet -> /change &lt;private key&gt\n"+
+            "3.	No wallet -> /mywallet (We made one for you)\n"+
+            "4.	Get public address (for someone send tokens to you) -> press <b>Get public address</b> button\n"+
+            "5.	Get private key (for send tokens to someone or access into Althash or HTMLcoin wallet) -> press <b>Get private key</b> button\n"+
+            "6.	Send tokens to someone ->  /send &lt;recipient’s public address&gt &lt;amount&gt&lt;token&gt\n"+
+            "7.	Tip tokens for person who you reply message -> /tip &lt;amount&gt&lt;token&gt",
             { parse_mode: "HTML" });    
     }
     else if (choice === "6") {
@@ -508,7 +497,7 @@ bot.on("callback_query", async  (msg) => {
         const vipWallet = getCustomWallet(msg.from.id);
         const result = await sendToken(msg.from.id, 50000, AIRDROP_ADDRESS, "CDEX");
         if (result.error === '') {
-            await bot.sendMessage(msg.message.chat.id, '🎉🎉🎉Congratulations! You become a VIP member!');
+            await bot.sendMessage(msg.message.chat.id, '🎉🎉🎉Congratulations! You become a VIP member.\n Each day you will be receive airdrops token by click <b>Airdops</b> button', {parse_mode:"HTML"});
             vipWallet.setVIPMember();
             saveVipMember(vipWallet.getAddress());
         }

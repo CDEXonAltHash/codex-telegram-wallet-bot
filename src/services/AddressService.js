@@ -1,3 +1,4 @@
+'use strict';
 const webWallet = require('../libs/web-wallet');
 const {isEmpty} = require('lodash');
 const {
@@ -5,7 +6,7 @@ const {
     CodexVIP,
     saveAccountToWallet,
     saveVip
-} = require('./storage');
+} = require('./StorageService');
 
 const generateAccount = () => {
     const wallet = webWallet.restoreFromMnemonic(webWallet.generateMnemonic(), Date.now());
@@ -18,11 +19,8 @@ const generateAccount = () => {
 
 const saveAccount =  (telegramId, wallet) => {
     CodexWallet.set(`${telegramId}`, wallet);
-    // saveAccountToWallet({
-    //     telegramId: `${ telegramId }`,
-    //     privKey: wallet.getPrivKey()
-    // });
 };
+
 const saveVipMember = (publicAddress) => {
     const airDropTime = Math.floor(Date.now() / 1000);
     CodexVIP.set(`${publicAddress}`, airDropTime);
@@ -30,17 +28,17 @@ const saveVipMember = (publicAddress) => {
         publicAddress: `${publicAddress}`,
         airDropTime: `${airDropTime}`,
     });
-}
+};
 
 const getCustomWallet = (telegramId) => {
     const customWallet = CodexWallet.get(`${telegramId}`);
     return (isEmpty(customWallet))? '' : customWallet;
-}
+};
 
 const getVip = (publicAddress) => {
     const vip = CodexVIP.get(`${publicAddress}`);
     return (isEmpty(vip)) ? '' : vip;
-}
+};
 
 const getAddress = (telegramId) => {
     const wallet = getCustomWallet(telegramId);
@@ -101,4 +99,4 @@ module.exports = {
     changeFromWIF,
     getVip,
     saveVipMember
-}
+};

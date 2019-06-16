@@ -1,7 +1,8 @@
+'use strict';
 const keyFile = require('../libs/keyfile');
 const webWallet = require('../libs/web-wallet');
 const fs = require('fs');
-const { CODEX_CREDENTIAL } = require('../config/config');
+const { CODEX_CREDENTIAL } = require('../config/Config');
 const userStoragePath = './codexWallet';
 const vipStoragePath = './codexVip';
 const CodexWallet = new Map();
@@ -37,7 +38,8 @@ const loadAccountFromFile =  () => {
 
 const saveVip = (vip) => {
     fs.appendFileSync(vipStoragePath, JSON.stringify(vip) + '\n');
-}
+};
+
 const loadVip = () => {
     try {
         for (const line of vipArray) {
@@ -49,7 +51,8 @@ const loadVip = () => {
     }
     catch (e) {
     }
-}
+};
+
 module.exports = {
     CodexWallet,
     CodexVIP,
@@ -57,4 +60,4 @@ module.exports = {
     loadAccountFromFile,
     saveVip,
     loadVip,
-}
+};
