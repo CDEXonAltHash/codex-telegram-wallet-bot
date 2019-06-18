@@ -9,8 +9,8 @@ const TIME_AIRDROP = 86400;
 const parseCommandTrading = (input) => {
     const command_trading = [];
     const array_command = input.split('#');
-    for(item of array_command) {
-        if(item) {
+    for (item of array_command) {
+        if (item) {
             const trading = item.split(' ');
             command_trading.push({
                 type: trading[0],
@@ -24,7 +24,7 @@ const parseCommandTrading = (input) => {
     return command_trading;
 }
 const getVal = (val) => {
-    try{
+    try {
         multiplier = val.substr(-1).toLowerCase();
         if (multiplier == "k")
             return parseFloat(val) * 1000;
@@ -38,7 +38,7 @@ const getVal = (val) => {
     }
 }
 const validToken = (htmlCoin, hrc20Coin, tokenSymbol, tokenAmount) => {
-    if (tokenSymbol === 'HTML'){
+    if (tokenSymbol === 'HTML') {
         if (tokenAmount + TRX_FEE <= htmlCoin.split(' ')[0]) {
             return 200;
         }
@@ -47,10 +47,9 @@ const validToken = (htmlCoin, hrc20Coin, tokenSymbol, tokenAmount) => {
         }
     }
     else {
-        for(token of hrc20Coin) {
+        for (token of hrc20Coin) {
             if (token.contract.symbol === tokenSymbol && tokenAmount <= (token.amount / Math.pow(10, token.contract.decimals))) {
-                if (htmlCoin.split(' ')[0] >= TRX_FEE)
-                {
+                if (htmlCoin.split(' ')[0] >= TRX_FEE) {
                     return 200;
                 }
                 else {
@@ -65,7 +64,7 @@ const validToken = (htmlCoin, hrc20Coin, tokenSymbol, tokenAmount) => {
 
 const isValidOffer = (timeOffer) => {
     const current = Math.floor(Date.now() / 1000);
-    if (current - timeOffer >= TIME_EXPIRED_OFFER ) {
+    if (current - timeOffer >= TIME_EXPIRED_OFFER) {
         return false;
     }
     return true;
