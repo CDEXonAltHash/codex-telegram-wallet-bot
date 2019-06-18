@@ -140,7 +140,7 @@ bot.onText(/\/restore (.+)/, async (msg, match) => {
 
 bot.onText(/\/stats/,  async (msg) => {
     const supply =  hrc20.getTokenBySymbol('CDEX');
-    await bot.sendMessage(msg.from.id, 'Total Supply of CDEX: ' + `${supply.total_supply}`);
+    await bot.sendMessage(msg.chat.id, 'Total Supply of CDEX:', supply.total_supply);
 });
 
 /**
@@ -228,6 +228,8 @@ bot.onText(/\/balance/, async (msg) => {
 /**
  * Trading function
  */
+
+
 let commandTrade = '';
 bot.onText(/\/trade (.+)/,  async (msg, match) => {
     if (isValidOffer(msg.reply_to_message.date)) {
