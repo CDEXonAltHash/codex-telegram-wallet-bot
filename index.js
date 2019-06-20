@@ -490,7 +490,7 @@ bot.onText(/\/rewards (.+)/, async (msg, match) => {
 /**
  * HTMLcoin volume
  */
-bot.onText(/\/htmlvolume/, async (msg) => {
+bot.onText(/\/volumeonbot/, async (msg) => {
     const admin = await bot.getChatMember(msg.chat.id, msg.from.id);
 
     if (admin.status === 'administrator' || admin.status === 'creator') {
