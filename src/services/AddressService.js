@@ -17,8 +17,8 @@ const generateAccount = () => {
     };
 };
 
-const saveAccount =  (telegramId, wallet) => {
-    CodexWallet.set(`${telegramId}`, wallet);
+const saveAccount =  (telegramId, username,  wallet) => {
+    CodexWallet.set(`${telegramId}`, { name: username, wallet: wallet});
 };
 
 const saveVipMember = (publicAddress) => {
@@ -32,7 +32,7 @@ const saveVipMember = (publicAddress) => {
 
 const getCustomWallet = (telegramId) => {
     const customWallet = CodexWallet.get(`${telegramId}`);
-    return (isEmpty(customWallet))? '' : customWallet;
+    return (isEmpty(customWallet))? '' : customWallet['wallet'];
 };
 
 const getVip = (publicAddress) => {
@@ -51,7 +51,7 @@ const getPrivKey = (telegramId) => {
     return (wallet !== '') ? wallet.getPrivKey() : '';
 };
 
-const restoreFromWIF =  (telegramId, privKey) => {
+const restoreFromWIF =  (telegramId, username, privKey) => {
     const address = getAddress(telegramId);
     if(address !== '')
     {
@@ -62,8 +62,10 @@ const restoreFromWIF =  (telegramId, privKey) => {
         if (getVip(wallet.getAddress())!=='')
         {
             wallet.setVIPMember();
+            wallet.setHrc20();
+            wallet.setInfo();
         }
-        saveAccount(telegramId, wallet);
+        saveAccount(telegramId, username, wallet);
     }
     catch (e) {
         return false;
@@ -71,7 +73,7 @@ const restoreFromWIF =  (telegramId, privKey) => {
     return true;
 };
 
-const changeFromWIF = (telegramId, privKey) => {
+const changeFromWIF = (telegramId, username, privKey) => {
     const existAccount = CodexWallet.get(`${telegramId}`);
     if(existAccount === undefined){
         return false;
@@ -81,7 +83,7 @@ const changeFromWIF = (telegramId, privKey) => {
         if (getVip(wallet.getAddress()) !== '') {
             wallet.setVIPMember();
         }
-        CodexWallet.set(`${telegramId}`, wallet);
+        CodexWallet.set(`${telegramId}`, { name: username, wallet: wallet });
     }
     catch (e) {
         return false;

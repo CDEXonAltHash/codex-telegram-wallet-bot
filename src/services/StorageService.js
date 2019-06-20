@@ -16,7 +16,7 @@ const saveAccountToWallet = (account) => {
     fs.appendFileSync(userStoragePath, encryptedAccount + '\n');
 };
 
-const loadAccountFromFile =  () => {
+const loadBotAccountFromFile =  () => {
     try{
         for (const line of accountArray) {
             if(line !='')
@@ -26,7 +26,7 @@ const loadAccountFromFile =  () => {
                 const wallet = webWallet.restoreFromWif(`${account.privKey}`);
                 wallet.setInfo().then(() => { });
                 wallet.setHrc20().then(() => { });
-                CodexWallet.set(`${account.telegramId}`, wallet);
+                CodexWallet.set(`${account.telegramId}`,{name: 'CodexWalletBot', wallet: wallet});
             }
         }
     }
@@ -57,7 +57,7 @@ module.exports = {
     CodexWallet,
     CodexVIP,
     saveAccountToWallet,
-    loadAccountFromFile,
+    loadBotAccountFromFile,
     saveVip,
     loadVip,
 };

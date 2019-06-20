@@ -28,6 +28,8 @@
     "bip39": "2.5.0",
     "bitcoinjs-lib": "^5.0.3",
     "chai": "^4.2.0",
+    "chart.js": "^2.8.0",
+    "chartjs-node-canvas": "^2.4.0",
     "ethjs-abi": "^0.2.1",
     "htmlcoinjs-lib": "^0.1.9",
     "imagely": "^1.0.2",

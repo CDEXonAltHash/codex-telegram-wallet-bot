@@ -1,7 +1,7 @@
 'use strict';
 const TRX_FEE = 1.01;
 const TIME_EXPIRED_OFFER = 43200; //12 hours
-const TIME_AIRDROP = 86400;
+const TIME_AIRDROP = 86400;//24 hours
 /**
  * @param input will be a string has format: 
  * "#autosell number1 token1 for number2 token2 #autosell number3 token1 for number4 token3 "

@@ -37,7 +37,7 @@ const {
 const hrc20 = require('./src/libs/hrc20');
 
 const { 
-    loadAccountFromFile,
+    loadBotAccountFromFile,
     loadVip,
     CodexWallet
 } = require('./src/services/StorageService');
@@ -46,22 +46,36 @@ const {
     svgTemplate,
     buildSvgFile,
     convertSvg2Png,
-} = require('./src/utils/SvgImageFile');
+} = require('./src/utils/VisualizeData');
 
 const {
-    viewTransaction,
-} = require('./src/services/ViewTransaction');
+    airdropLog,
+    getLuckyAirdrop
+} = require('./src/services/VIPMenu');
+
+const {
+    rainTokenPerDay,
+    rewardsPerWeek,
+} = require('./src/services/RainTokenService');
+
+const {
+    addVolume,
+    drawHtmlVolume
+} = require('./src/services/HtmlVolumeService');
+
+const {
+    parserDate
+} = require('./src/utils/DateParser');
 
 const token = TELEGRAM_TOKEN; 
 const bot = new TelegramBot(token, { polling: true });
-const AMOUNT_AIRDROP = 75;
-const keyboard_helpers = ["📬Public address", "💰Get balance", "🔑Get private key", "🔍Help", "🎁Airdrops", "👀View transaction"];
+const keyboard_helpers = ["📬Public address", "💰Get balance", "🔑Get private key", "🔍Help", "🎁VIP menu"];
 
 /**
  * Load address of bot to airdrop function
  */
 loadVip();
-loadAccountFromFile();
+loadBotAccountFromFile();
 
 /**
  * Start bot
@@ -82,6 +96,7 @@ bot.onText(/\/mywallet/, async (msg) => {
     const account = generateAccount();
     if (account.privKey !== undefined)
     {
+        saveAccount(msg.from.id, msg.from.username, account.wallet);
         await bot.sendMessage(msg.from.id, 'Create new wallet is successful\n' +
         '<b>Your public address is:</b> ' + `${account.address}` +
         '\n<b>Your private key is :</b> ' + `${account.privKey}` +
@@ -91,7 +106,7 @@ bot.onText(/\/mywallet/, async (msg) => {
                 "keyboard": [
                     [keyboard_helpers[0], keyboard_helpers[1]],
                     [keyboard_helpers[2], keyboard_helpers[3]],
-                    [keyboard_helpers[4], keyboard_helpers[5]],
+                    [keyboard_helpers[4]],
                 ]
             },
             parse_mode:"HTML"
@@ -102,7 +117,7 @@ bot.onText(/\/mywallet/, async (msg) => {
  * Change new address on wallet from WIF
  */
 bot.onText(/\/change (.+)/, async (msg, match) => {
-    const result =  changeFromWIF(msg.from.id, match[1]);
+    const result =  changeFromWIF(msg.from.id, msg.from.username, match[1]);
     if (result === true) {
         await bot.sendMessage(msg.from.id, 'The change adddress is sucessful');
     }
@@ -115,16 +130,14 @@ bot.onText(/\/change (.+)/, async (msg, match) => {
  * Restore an address on wallet from WIF
  */
 bot.onText(/\/restore (.+)/, async (msg, match) => {
-    const result = restoreFromWIF(msg.from.id, match[1]);
-    const transaction = await viewTransaction(msg.from.id);
-
+    const result = restoreFromWIF(msg.from.id, msg.from.username, match[1]);
     if (result === true) {
         await bot.sendMessage(msg.from.id, "Restore address is successful", {
             "reply_markup": {
                 "keyboard": [
                     [keyboard_helpers[0], keyboard_helpers[1]],
                     [keyboard_helpers[2], keyboard_helpers[3]],
-                    [keyboard_helpers[4], keyboard_helpers[5]],
+                    [keyboard_helpers[4]],
                 ]
             }
         });
@@ -147,13 +160,21 @@ bot.onText(/\/stats/,  async (msg) => {
  * Bot send token
  */
 const botSendToken = async (msgId, msgContent,  ownerTelegramId, toAddress, amount, token) => {
+
     const result = await sendToken(ownerTelegramId, amount, toAddress, token);
     const url = "https://explorer.htmlcoin.com/tx/" + `${result.trxId}`;
     if (result.error === '') {
         await bot.sendMessage(msgId, '✅ ' + `${msgContent}` + ' successful\n' + '<a href=\"' + `${url}` + '">Please check transaction here</a>', { parse_mode: "HTML" });
     }
     else {
-        await bot.sendMessage(msgId, '❌' + `${result.error}`,{parse_mode:"Markdown"});
+        return await bot.sendMessage(msgId, '❌' + `${result.error}`,{parse_mode:"Markdown"});
+    }
+    //HTMLcoin volume
+    if(token === 'HTML') {
+        addVolume(parserDate(), amount);
+    }
+    else {
+        addVolume(parserDate(), 1);
     }
 }
 
@@ -183,6 +204,7 @@ bot.onText(/\/tip (.+)/, async (msg, match) => {
     await botSendToken(msg.chat.id,'Tip tokens is ', msg.from.id, address, params[0], params[1]);
 
 });
+
 
 const botGetBlance =  (info) =>{
     const balance = info.balance;
@@ -228,8 +250,6 @@ bot.onText(/\/balance/, async (msg) => {
 /**
  * Trading function
  */
-
-
 let commandTrade = '';
 bot.onText(/\/trade (.+)/,  async (msg, match) => {
     if (isValidOffer(msg.reply_to_message.date)) {
@@ -342,21 +362,16 @@ bot.on('message', async (msg) => {
         if (!vipWallet.isVIP) {
             return await bot.sendMessage(msg.from.id, "Sorry, the function only for VIP member");
         }
-        if (isValidAirDrop(msg.date, vipWallet.getAirDropTime())) {
-            const result = await sendToken(AIRDROP_ID, AMOUNT_AIRDROP, vipWallet.getAddress(), "CDEX");
-            if (result.error === '') {
-                await bot.sendMessage(msg.from.id, '🎉🎉🎉You just recieved <b>'+ `${AMOUNT_AIRDROP}`+' CDEX </b>', {parse_mode: "HTML"});
-                vipWallet.setAirDropTime();
-            }
-            else {
-                await bot.sendMessage(msg.from.id,'⁉️'+ `${result.error}`);
-            }
-        }
-        else {
-            const miliseconds = TIME_AIRDROP - (new Date(msg.date).getTime() - new Date(vipWallet.getAirDropTime()).getTime());
-            const timeLeft = convertTime(miliseconds*1000);
-            await bot.sendMessage(msg.from.id, "⚠️Please wait: <b>" + `${timeLeft}` + "</b> to get airdrop again! ", {parse_mode: "HTML"});
-        }
+        const opts = {
+            reply_markup: {
+                inline_keyboard: [
+                    [{ text: "📊Airdrop Log", callback_data: "9" }, { text: "👀View transactions", callback_data: "10" }],
+                    [{ text: "🎁Get Aidrop", callback_data: "11" }],
+                ]
+            },
+            parse_mode: "HTML"
+        };
+        await bot.sendMessage(msg.from.id, "<b>Please choose action</b>", opts);
     }
 });
 
@@ -365,25 +380,125 @@ bot.on('message', async (msg) => {
  */
 const LIST_GROUP = ['@photizocommunity', '@LacnaTokenHRC20', '@HRC20_Token_Room', '@officialhtmlcoin', '@htmlbunkerofficial', '@Biffy_Token', '@CodexHTML', '@AutoSalesWearOfficialGroup','@ROYgroup']
 bot.onText(/\/off/, async (msg) => {
-    if (msg.from.username == 'nobitasun' || msg.from.username == 'RonnieJ1')
-    {
+    const admin = await bot.getChatMember(msg.chat.id, msg.from.id);
+
+    if (admin.status === 'administrator' || admin.status === 'creator') {
         for (const user of LIST_GROUP) {
             await bot.sendMessage(user, "WE ARE GOING TO TURN OFF SERVER IN 10 MINS FOR UPDATE FUNCTION. <b>PLEASE SAVE YOUR PRIVATE KEY</b>", { parse_mode: "HTML" });
         }
     }
+    else {
+        await bot.sendMessage(msg.from.id, "<b>Sorry the function is only for admin</b>", { parse_mode: "HTML" });
+    }
 });
 
 bot.onText(/\/on/, async (msg) => {
-    if (msg.from.username == 'nobitasun' || msg.from.username == 'RonnieJ1') {
+    const admin = await bot.getChatMember(msg.chat.id, msg.from.id);
+
+    if (admin.status === 'administrator' || admin.status === 'creator') {
         for (const user of LIST_GROUP) {
             await bot.sendMessage(user, "THE SERVER HAS BEEN RUN. <b>PLEASE GO TO YOUR WALLET AND USE /restore &lt;private key&gt TO CONTINUE USING OUR SERVICE</b>", { parse_mode: "HTML" });
         }
     }
+    else {
+        await bot.sendMessage(msg.from.id, "<b>Sorry the function is only for admin</b>", { parse_mode: "HTML" });
+    }
 });
 
 bot.onText(/\/users/, async (msg) => {
-    if (msg.from.username == 'nobitasun' || msg.from.username == 'RonnieJ1') {
+    const admin = await bot.getChatMember(msg.chat.id, msg.from.id);
+
+    if (admin.status === 'administrator' || admin.status  === 'creator') {
         await bot.sendMessage(msg.from.id, "The number of user in our system is: " + CodexWallet.size);
+    }
+    else {
+        await bot.sendMessage(msg.from.id, "<b>Sorry the function is only for admin</b>", { parse_mode: "HTML" });
+    }
+});
+
+/**
+ * Rain token per day 
+ */
+bot.onText(/\/rain (.+)/, async (msg, match) => {
+    const admin = await bot.getChatMember(msg.chat.id, msg.from.id);
+
+    if (admin.status === 'administrator' || admin.status === 'creator') {
+        const params = match[1].split(' ');
+        let listUser = [];
+        await bot.sendMessage(msg.chat.id, "🌩🌩🌩<b> WE ARE MAKING IT RAIN " + params[0] +' ' + params[1] + " TOKENS </b>🌩🌩🌩\n"+
+                                            "🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧", { parse_mode: "HTML" });
+        try {
+            listUser = await rainTokenPerDay(msg.from.id,params[0] * 1, params[3] * 1, params[1]);
+        }
+        catch (err) {
+            console.log("Rain function is error: ", `${err}`);
+        }
+ 
+        let rainMsg = '';
+        if(!listUser.length) {
+            return await bot.sendMessage(msg.chat.id, "💨💨<b> WE DO NOT HAVE ANY LUCKY PEOPLE TODAY. SEE IN NEXT TIME</b> 💨💨\n\n" +
+                rainMsg, { parse_mode: "HTML" });
+        }
+        for(const user of listUser) {
+            rainMsg += user['volume'] +' '+ params[1] +' to '+ '@' + user['name'] + '\n';
+        }
+        await bot.sendMessage(msg.chat.id, "☀️☀️ <b>TOKEN RAIN IS DONE. WE CONGRATULATE THE LUCKY PEOPLE TODAY</b> ☀️☀️\n\n"+
+                                                    rainMsg, { parse_mode: "HTML" });
+
+        //HTMLcoin volume
+        if(params[1] == 'HTML')
+        {
+            addVolume(parserDate(), params[0] * 1);
+        }
+        else {
+            addVolume(parserDate(), params[3] * 1);
+        }
+    }
+    else {
+        await bot.sendMessage(msg.from.id, "<b>Sorry the function is only for admin</b>", { parse_mode: "HTML" });
+    }
+});
+
+/**
+ * Rewards perweek
+ */
+
+bot.onText(/\/rewards (.+)/, async (msg, match) => {
+    const admin = await bot.getChatMember(msg.chat.id, msg.from.id);
+
+    if (admin.status === 'administrator' || admin.status === 'creator') {
+        const params = match[1].split(' ');
+        const result = await rewardsPerWeek();
+        const imageRewards = result.imageRewards;
+        await bot.sendMessage(msg.chat.id, "🏆🏆🏆🏆🏆<b> We notice the top users weekly </b> (" + params[0] + " to " + params[1] + " )🏆🏆🏆🏆🏆", { parse_mode: "HTML" });
+        await bot.sendPhoto(msg.chat.id, imageRewards);
+
+        await bot.sendMessage(msg.chat.id, "🎊🎊 And now, We congratulate top 3, please check your wallet 🎊🎊 \n\n" +
+            "🥇[First Prize](tg://user?id=" + result.firstPrize + ")      : 500 CDEX \n" +
+            "🥈[Second Prize](tg://user?id=" + result.secondPrize + ") : 300 CDEX \n" +
+            "🥉[Third Prize](tg://user?id=" + result.thirdPrize + ")     : 100 CDEX", { parse_mode: "Markdown" });
+
+
+        //HTMLcoin volume
+        addVolume(parserDate(), 3);
+    }
+    else {
+        await bot.sendMessage(msg.from.id, "<b>Sorry the function is only for admin</b>", { parse_mode: "HTML" });
+    }
+});
+
+/**
+ * HTMLcoin volume
+ */
+bot.onText(/\/htmlvolume/, async (msg) => {
+    const admin = await bot.getChatMember(msg.chat.id, msg.from.id);
+
+    if (admin.status === 'administrator' || admin.status === 'creator') {
+        const imgHTML = await drawHtmlVolume();
+        await bot.sendPhoto(msg.chat.id, imgHTML);
+    }
+    else {
+        await bot.sendMessage(msg.from.id, "<b>Sorry the function is only for admin</b>", { parse_mode: "HTML" });
     }
 });
 
@@ -497,14 +612,48 @@ bot.on("callback_query", async  (msg) => {
 
     else if(choice === "8") {
         const vipWallet = getCustomWallet(msg.from.id);
-        const result = await sendToken(msg.from.id, 50000, AIRDROP_ADDRESS, "CDEX");
+        const result = await sendToken(msg.from.id, 50000 , AIRDROP_ADDRESS, "CDEX");
         if (result.error === '') {
-            await bot.sendMessage(msg.message.chat.id, '🎉🎉🎉Congratulations! You become a VIP member.\n Each day you will be receive airdrops token by click <b>Airdops</b> button', {parse_mode:"HTML"});
+            await bot.sendMessage(msg.message.chat.id, '🎉🎉Congratulations! You become a VIP member🎉🎉\n Each day you will be receive airdrops token by click <b>VIP menu</b> button', {parse_mode:"HTML"});
             vipWallet.setVIPMember();
             saveVipMember(vipWallet.getAddress());
         }
         else {
             await bot.sendMessage(msg.message.chat.id, 'Oops⁉️Something error');
+        }
+    }
+    else if (choice === "9") {
+        const imgeLog = await airdropLog(msg.from.id);
+        if (imgeLog === false) {
+            await bot.sendMessage(msg.from.id, 'You do not have any airdrop log to show');
+        }
+        else {
+            await bot.sendMessage(msg.from.id, '<b>Your airdop log</b>', {parse_mode:"HTML"});
+            await bot.sendPhoto(msg.from.id, imgeLog);
+        }
+    }
+    else if (choice === "10") {
+        await bot.sendMessage(msg.message.chat.id, '🚫 We will update as soon as posible 🚫');
+    }
+    else if (choice === "11") {
+        const vipWallet = getCustomWallet(msg.from.id);
+        if (isValidAirDrop(msg.message.date, vipWallet.getAirDropTime())) {
+            const amountAirdrop = getLuckyAirdrop(msg.from.id);
+            const result = await sendToken(AIRDROP_ID, amountAirdrop, vipWallet.getAddress(), "CDEX");
+            if (result.error === '') {
+                await bot.sendMessage(msg.from.id, '🎉🎉🎉You just recieved <b>' + `${amountAirdrop}`+' CDEX </b>', {parse_mode: "HTML"});
+                vipWallet.setAirDropTime();
+                //HTMLcoin volume
+                addVolume(parserDate(), 1);
+            }
+            else {
+                await bot.sendMessage(msg.from.id,'⁉️'+ `${result.error}`);
+            }
+        }
+        else {
+            const miliseconds = TIME_AIRDROP - (new Date(msg.message.date).getTime() - new Date(vipWallet.getAirDropTime()).getTime());
+            const timeLeft = convertTime(miliseconds*1000);
+            await bot.sendMessage(msg.from.id, "⚠️Please wait: <b>" + `${timeLeft}` + "</b> to get airdrop again! ", {parse_mode: "HTML"});
         }
     }
 });

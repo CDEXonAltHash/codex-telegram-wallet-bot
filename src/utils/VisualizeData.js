@@ -1,6 +1,6 @@
 'use strict';
 const svgToImg = require("svg-to-img");
-
+const { CanvasRenderService } = require('chartjs-node-canvas');
 
 const svgTemplate = (width, height) => {
     const svg =
@@ -82,122 +82,60 @@ const buildSvgFile = (yCoordinate, tokenName, tokenValuePercision, tokenValeDeci
     return rowValue;
 };
 
+const chartCallback = (ChartJS) => {
+    ChartJS.defaults.global.defaultFontFamily = '"Lato",sans-serif';
+    ChartJS.defaults.global.defaultFontColor = "#000";
+    ChartJS.defaults.global.defaultFontStyle = "'bold'";
+};
+const chartCanvas = async (width, height, title, label, data, type ) => {
+
+    const configuration = {
+        type: `${type}`,
+        data: {
+            labels: label,
+            datasets: [{
+                label: `${title}`,
+                data: data,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                ],
+                borderColor: [
+                    'rgba(255,99,132,1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true,
+                        callback: (value) => value
+                    }
+                }]
+            }
+        }
+    };
+    const canvasRenderService = new CanvasRenderService(width, height, chartCallback);
+    return await canvasRenderService.renderToBuffer(configuration);
+};
+
 const convertSvg2Png = async (svgFile) => {
     try {
-        const testFile =
-            "<!DOCTYPE html>" +
-            '<html lang="en"> ' +
-            "<head>" +
-            '<meta charset="utf-8">' +
-            '<script src="https://d3js.org/d3.v4.min.js"></script>' +
-            '<style>' +
-            'body { margin: 0; position: fixed; top: 0; right: 0; bottom: 0; left: 0; }' +
-            ' svg { width: 100%; height: 100%; }' +
-            ' </style>' +
-            ' </head>' +
-            ' <body>' +
-            '<svg></svg>' +
-            "<script>" +
-            " const sample = [ " +
-            " { " +
-            " language: '734398541'," +
-            " value: 78.9 " +
-            '},' +
-            '{ ' +
-            " language: '734398542'," +
-            '  value: 75.1 ' +
-            ' },' +
-            '{ ' +
-            " language: '734398543'," +
-            ' value: 68.0 ' +
-            ' },' +
-            '{ ' +
-            "  language: '734398544', " +
-            ' value: 67.0 ' +
-            ' },' +
-            '{ ' +
-            " language: '734398545', " +
-            ' value: 65.6 ' +
-            '},' +
-            '{ ' +
-            " language: '734398546'," +
-            ' value: 65.1' +
-            ' },' +
-            ' { ' +
-            " language: '734398547'," +
-            ' value: 61.9' +
-            ' },' +
-            ' { ' +
-            "  language: '734398548'," +
-            ' value: 60.4' +
-            '},' +
-            '{ ' +
-            " language: '734398549', " +
-            ' value: 59.6 ' +
-            '}, ' +
-            '{ ' +
-            " language: '734398552'," +
-            ' value: 59.6' +
-            ' } ' +
-            '];' +
-            " const svg = d3.select('svg'); " +
-            " const svgContainer = d3.select('#container');" +
-            " const margin = 80;" +
-            " const width = 900 - 2 * margin;" +
-            " const height = 500 - 2 * margin;" +
-            " const chart = svg.append('g') " +
-            "+  .attr('transform', `translate(${margin}, ${margin})`);" +
-            " const xScale = d3.scaleBand()" +
-            "  .range([0, width])" +
-            "  .domain(sample.map((s) => s.language))" +
-            "  .padding(0.4)" +
-            " const yScale = d3.scaleLinear()" +
-            "  .range([height, 0])" +
-            "  .domain([0, 100]);" +
-            " const makeYLines = () => d3.axisLeft()" +
-            "  .scale(yScale)" +
-            " chart.append('g')" +
-            "  .attr('transform', `translate(0, ${height})`)" +
-            "  .call(d3.axisBottom(xScale));" +
-            " chart.append('g')" +
-            " .call(d3.axisLeft(yScale));" +
-            " const barGroups = chart.selectAll()" +
-            "  .data(sample)" +
-            "  .enter()" +
-            "  .append('g')" +
-            " barGroups" +
-            "  .append('rect')" +
-            "  .attr('x', (g) => xScale(g.language))" +
-            "  .attr('y', (g) => yScale(g.value))" +
-            "  .attr('height', (g) => height - yScale(g.value))" +
-            "  .attr('width', xScale.bandwidth())" +
-            "  .attr('fill','teal')" +
-            " svg" +
-            "   .append('text')" +
-            "   .attr('class', 'label')" +
-            "   .attr('x', -(height / 2) - margin)" +
-            "   .attr('y', margin / 2.4)" +
-            "   .attr('transform', 'rotate(-90)')" +
-            "   .attr('text-anchor', 'middle')" +
-            "   .text('CDEX Tokens')" +
-            " svg.append('text')" +
-            "  .attr('class', 'label')" +
-            "  .attr('x', width / 2 + margin)" +
-            "  .attr('y', height + margin * 1.7)" +
-            "  .attr('text-anchor', 'middle')" +
-            "  .text('Telegram ID')" +
-            " svg.append('text')" +
-            "   .attr('class', 'title')" +
-            "   .attr('x', width / 2 + margin)" +
-            "   .attr('y', 40)" +
-            "   .attr('text-anchor', 'middle')" +
-            "   .text('Top received CDEX token in this week')" +
-            " </script> </body></html>"
-        return await svgToImg.from(testFile).toPng();
+        return await svgToImg.from(svgFile).toPng();
     }
     catch (err) {
         console.log(err);
     }
+
 };
 
 
@@ -205,4 +143,5 @@ module.exports = {
     svgTemplate,
     buildSvgFile,
     convertSvg2Png,
+    chartCanvas,
 };
