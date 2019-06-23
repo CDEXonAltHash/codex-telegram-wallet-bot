@@ -67,6 +67,11 @@ const {
     parserDate
 } = require('./src/utils/DateParser');
 
+const {
+    checkTokenSymbol,
+    validBalance
+} = require('./src/utils/ValidTokenSymbol');
+
 const token = TELEGRAM_TOKEN; 
 const bot = new TelegramBot(token, { polling: true });
 const keyboard_helpers = ["📬Public address", "💰Get balance", "🔑Get private key", "🔍Help", "🎁VIP menu"];
@@ -80,13 +85,29 @@ loadBotAccountFromFile();
 /**
  * Start bot
  */
-
+let isViewTransactions = true;
 bot.onText(/\/start/, async(msg) => {
-    const welcomeMessage =
-    'Welcome to HRC20 Codex Bot, use command below to access wallet\n'+
-    '1.	Access to wallet(have an address) -> /restore <private key>\n'+
-    '2.	No wallet -> /mywallet (We made one for you)';
-    await bot.sendMessage(msg.chat.id, welcomeMessage);
+    isViewTransactions = true;
+    const address = getAddress(msg.from.id);
+    if (address === '') {
+        const welcomeMessage =
+            'Welcome to HRC20 Codex Bot, use command below to access wallet\n' +
+            '1.	Access to wallet(have an address) -> /restore <private key>\n' +
+            '2.	No wallet -> /mywallet (We made one for you)';
+        await bot.sendMessage(msg.chat.id, welcomeMessage);
+    }
+    else {
+        await bot.sendMessage(msg.from.id, "Welcome back to Codex bot", {
+            "reply_markup": {
+                "keyboard": [
+                    [keyboard_helpers[0], keyboard_helpers[1]],
+                    [keyboard_helpers[2], keyboard_helpers[3]],
+                    [keyboard_helpers[4]],
+                ]
+            }
+        });
+    }
+
 });
 
 /**
@@ -96,7 +117,7 @@ bot.onText(/\/mywallet/, async (msg) => {
     const account = generateAccount();
     if (account.privKey !== undefined)
     {
-        saveAccount(msg.from.id, msg.from.username, account.wallet);
+        saveAccount(msg.from.id, msg.from.first_name, account.wallet);
         await bot.sendMessage(msg.from.id, 'Create new wallet is successful\n' +
         '<b>Your public address is:</b> ' + `${account.address}` +
         '\n<b>Your private key is :</b> ' + `${account.privKey}` +
@@ -117,12 +138,12 @@ bot.onText(/\/mywallet/, async (msg) => {
  * Change new address on wallet from WIF
  */
 bot.onText(/\/change (.+)/, async (msg, match) => {
-    const result =  changeFromWIF(msg.from.id, msg.from.username, match[1]);
+    const result =  changeFromWIF(msg.from.id, msg.from.first_name, match[1]);
     if (result === true) {
         await bot.sendMessage(msg.from.id, 'The change adddress is sucessful');
     }
     else {
-        await bot.sendMessage(msg.from.id, 'The private key is invalid or you do not have account on wallet');
+        await bot.sendMessage(msg.from.id, '❌The private key is invalid or you do not have account on wallet');
     }
 });
 
@@ -130,7 +151,7 @@ bot.onText(/\/change (.+)/, async (msg, match) => {
  * Restore an address on wallet from WIF
  */
 bot.onText(/\/restore (.+)/, async (msg, match) => {
-    const result = restoreFromWIF(msg.from.id, msg.from.username, match[1]);
+    const result = restoreFromWIF(msg.from.id, msg.from.first_name, match[1]);
     if (result === true) {
         await bot.sendMessage(msg.from.id, "Restore address is successful", {
             "reply_markup": {
@@ -159,6 +180,33 @@ bot.onText(/\/stats/,  async (msg) => {
 /**
  * Bot send token
  */
+const botCheckValid = async (msgId, userId, amount, symbol) => {
+    let isValid = 'ERROR';
+    const balance = await getBalance(userId);
+    if (balance === '') {
+        await bot.sendMessage(msgId, '❌Please setup your wallet first');
+        return isValid;
+    }
+    if (isNaN(amount) || (amount * 1 < 0)) {
+        await bot.sendMessage(msgId, '❌Sorry, the amount for token must be positive number');
+    }
+    else if (symbol === undefined) {
+        await bot.sendMessage(msgId, '❌Please type token symbol');
+    }
+    else {
+        const validSymbol = checkTokenSymbol(symbol);
+        if(validSymbol === symbol) {
+            isValid = validBalance(balance, symbol, amount * 1) ? 'OKAY' : 'NOT ENOUGH';
+        }
+        else if (validSymbol) {
+            await bot.sendMessage(msgId,'❌Sorry, Did you mean: ' + validSymbol);
+        }
+        else {
+            await bot.sendMessage(msgId, '❌Sorry, We do not support this token');
+        }
+    }
+    return isValid;
+}
 const botSendToken = async (msgId, msgContent,  ownerTelegramId, toAddress, amount, token) => {
 
     const result = await sendToken(ownerTelegramId, amount, toAddress, token);
@@ -183,7 +231,13 @@ const botSendToken = async (msgId, msgContent,  ownerTelegramId, toAddress, amou
  */
 bot.onText(/\/send (.+)/, async (msg, match) => {
     const params = match[1].split(' ');
-    await botSendToken(msg.from.id,'Send tokens is ', msg.from.id, params[0], params[1], params[2]);
+    const isValid = await botCheckValid(msg.from.id, msg.from.id, params[1], params[2]);
+    if (isValid === 'OKAY') {
+        await botSendToken(msg.from.id, 'Send tokens is ', msg.from.id, params[0], params[1], params[2]);
+    }
+    else if (isValid === 'NOT ENOUGH'){
+        await bot.sendMessage(msg.from.id, "<b>Sorry, You do not have enough balance </b>", { parse_mode: "HTML" });
+    }
 });
 
 /**
@@ -201,8 +255,13 @@ bot.onText(/\/tip (.+)/, async (msg, match) => {
     /**
      * After that send some tokens
      */
-    await botSendToken(msg.chat.id,'Tip tokens is ', msg.from.id, address, params[0], params[1]);
-
+    const isValid = await botCheckValid(msg.chat.id, msg.from.id, params[0], params[1]);
+    if (isValid === 'OKAY') {
+        await botSendToken(msg.chat.id, 'Tip tokens is ', msg.from.id, address, params[0], params[1]);
+    }
+    else if (isValid === 'NOT ENOUGH') {
+        await bot.sendMessage(msg.chat.id, "<b>Sorry, You do not have enough balance </b>", { parse_mode: "HTML" });
+    }
 });
 
 
@@ -292,31 +351,39 @@ bot.onText(/\/trade (.+)/,  async (msg, match) => {
  *  Get public address
  */
 bot.on('message', async (msg) => {
-    if (msg.text.indexOf(keyboard_helpers[0]) === 0) {
-        const address = getAddress(msg.from.id);
-        if (address !== '') {
-           await bot.sendMessage(msg.from.id, "Your public address is: " + `${address}`);
+    try {
+        if (msg.text.indexOf(keyboard_helpers[0]) === 0) {
+            const address = getAddress(msg.from.id);
+            if (address !== '') {
+                await bot.sendMessage(msg.from.id, "Your public address is: " + `${address}`);
+            }
+            else {
+                await bot.sendMessage(msg.from.id,
+                    "Your address does not exist, please click *Help* button for more information", { parse_mode: "Markdown" });
+            }
         }
-        else {
-            await bot.sendMessage(msg.from.id, 
-                "Your address does not exist, please click *Help* button for more information", { parse_mode: "Markdown" });
-        }
+    } catch (err) {
+        //ignore
     }
 });
 /**
  * Get balance
  */
 bot.on('message', async (msg) => {
-    if (msg.text.indexOf(keyboard_helpers[1]) === 0) {
-        const info = await getBalance(msg.from.id);
-        if (info === '') {
-            return await bot.sendMessage(msg.chat.id, "Your address does not exist, please click *Help* button for more information", { parse_mode: "Markdown" });
-        }
-        const svgFile = botGetBlance(info);
-        const imgBalance = await convertSvg2Png(svgFile);
-        await bot.sendMessage(msg.from.id, "[" + msg.from.username + "](tg://user?id=" + msg.from.id + "), your current balance is:", { parse_mode: "Markdown" });
+    try {
+        if (msg.text.indexOf(keyboard_helpers[1]) === 0) {
+            const info = await getBalance(msg.from.id);
+            if (info === '') {
+                return await bot.sendMessage(msg.chat.id, "Your address does not exist, please click *Help* button for more information", { parse_mode: "Markdown" });
+            }
+            const svgFile = botGetBlance(info);
+            const imgBalance = await convertSvg2Png(svgFile);
+            await bot.sendMessage(msg.from.id, "[" + msg.from.username + "](tg://user?id=" + msg.from.id + "), your current balance is:", { parse_mode: "Markdown" });
 
-        await bot.sendPhoto(msg.from.id, imgBalance);
+            await bot.sendPhoto(msg.from.id, imgBalance);
+        }
+    } catch(err) {
+        //ignore
     }
 });
 
@@ -324,54 +391,75 @@ bot.on('message', async (msg) => {
  * Get Private key
  */
 bot.on('message', async(msg) => {
-    if (msg.text.indexOf(keyboard_helpers[2]) === 0) {
-        const privKey = getPrivKey(msg.from.id);
-        if (privKey !== '') {
-            await bot.sendMessage(msg.from.id, "Your private key is: " + `${privKey}`);
+    try {
+        if (msg.text.indexOf(keyboard_helpers[2]) === 0) {
+            const privKey = getPrivKey(msg.from.id);
+            if (privKey !== '') {
+                await bot.sendMessage(msg.from.id, "Your private key is: " + `${privKey}`);
+            }
+            else {
+                await bot.sendMessage(msg.from.id,
+                    "Your address does not exist, please click *Help* for more information", { parse_mode: "Markdown" });
+            }
         }
-        else{
-            await bot.sendMessage(msg.from.id, 
-                                         "Your address does not exist, please click *Help* for more information", {parse_mode: "Markdown"});
-        }
+    } catch(err) {
+        //ignore
     }
+
 });
 
 /**
  * Show help
  */
 bot.on('message', async (msg) => {
-    if (msg.text.indexOf(keyboard_helpers[3]) === 0) {
-        const opts = {
-            reply_markup: {
-                inline_keyboard: [
-                    [{ text: "❔How to use this wallet", callback_data: "5" }, { text: "🏵Become a VIP member 🏵", callback_data: "4" }],
-                ]
-            },
-            parse_mode: "Markdown"
-        };
-        await bot.sendMessage(msg.from.id, "What do you want to help?", opts);
+    try {
+        if (msg.text.indexOf(keyboard_helpers[3]) === 0) {
+            const opts = {
+                reply_markup: {
+                    inline_keyboard: [
+                        [{ text: "❔How to use this wallet", callback_data: "5" }, { text: "🏵Become a VIP member 🏵", callback_data: "4" }],
+                    ]
+                },
+                parse_mode: "Markdown"
+            };
+            await bot.sendMessage(msg.from.id, "What do you want to help?", opts);
+        }
+    }  catch(err) {
+        //ignore
     }
+
 });
 
 /**
  * Airdrops
  */
 bot.on('message', async (msg) => {
-    if (msg.text.indexOf(keyboard_helpers[4]) === 0) {
-        const vipWallet = getCustomWallet(msg.from.id);
-        if (!vipWallet.isVIP) {
-            return await bot.sendMessage(msg.from.id, "Sorry, the function only for VIP member");
+    try {
+        if (msg.text.indexOf(keyboard_helpers[4]) === 0) {
+            const vipWallet = getCustomWallet(msg.from.id);
+            if (!vipWallet.isVIP) {
+                return await bot.sendMessage(msg.from.id, "Sorry, the function only for VIP member");
+            }
+            let inlineKeyboard = [];
+            if (isViewTransactions) {
+                inlineKeyboard = [[{ text: "📊Airdrop Log", callback_data: "9" }, { text: "👀View transactions", callback_data: "10" }],
+                [{ text: "🎁Get Aidrop", callback_data: "11" }]]
+            }
+            else {
+                inlineKeyboard = [[{ text: "📊Airdrop Log", callback_data: "9" }],
+                [{ text: "🎁Get Aidrop", callback_data: "11" }]]
+            }
+            const opts = {
+                reply_markup: {
+                    inline_keyboard: inlineKeyboard
+                },
+                parse_mode: "HTML"
+            };
+
+            await bot.sendMessage(msg.from.id, "<b>Please choose action</b>", opts);
         }
-        const opts = {
-            reply_markup: {
-                inline_keyboard: [
-                    [{ text: "📊Airdrop Log", callback_data: "9" }, { text: "👀View transactions", callback_data: "10" }],
-                    [{ text: "🎁Get Aidrop", callback_data: "11" }],
-                ]
-            },
-            parse_mode: "HTML"
-        };
-        await bot.sendMessage(msg.from.id, "<b>Please choose action</b>", opts);
+    } catch (err) {
+        //ignore
     }
 });
 
@@ -424,38 +512,43 @@ bot.onText(/\/rain (.+)/, async (msg, match) => {
 
     if (admin.status === 'administrator' || admin.status === 'creator') {
         const params = match[1].split(' ');
-        let listUser = [];
-        await bot.sendMessage(msg.chat.id, "🌩🌩🌩<b> WE ARE MAKING IT RAIN " + params[0] +' ' + params[1] + " TOKENS </b>🌩🌩🌩\n"+
-                                            "🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧", { parse_mode: "HTML" });
-        try {
-            listUser = await rainTokenPerDay(msg.from.id,params[0] * 1, params[3] * 1, params[1]);
-        }
-        catch (err) {
-            console.log("Rain function is error: ", `${err}`);
-        }
- 
-        let rainMsg = '';
-        if(!listUser.length) {
-            return await bot.sendMessage(msg.chat.id, "💨💨<b> WE DO NOT HAVE ANY LUCKY PEOPLE TODAY. SEE IN NEXT TIME</b> 💨💨\n\n" +
-                rainMsg, { parse_mode: "HTML" });
-        }
-        for(const user of listUser) {
-            rainMsg += user['volume'] +' '+ params[1] +' to '+ '@' + user['name'] + '\n';
-        }
-        await bot.sendMessage(msg.chat.id, "☀️☀️ <b>TOKEN RAIN IS DONE. WE CONGRATULATE THE LUCKY PEOPLE TODAY</b> ☀️☀️\n\n"+
-                                                    rainMsg, { parse_mode: "HTML" });
 
-        //HTMLcoin volume
-        if(params[1] == 'HTML')
-        {
-            addVolume(parserDate(), params[0] * 1);
+        //Check valid syntax
+        if (isNaN(params[3]) || (params[3] * 1) < 0) {
+            return await bot.sendMessage(msg.chat.id, "❌Sorry, the number of people must be a positive number", { parse_mode: "HTML" }); 
         }
-        else {
-            addVolume(parserDate(), params[3] * 1);
+        const isValid = await botCheckValid(msg.chat.id, msg.from.id, params[0], params[1]);
+        if (isValid === 'OKAY') {
+            let listUser = [];
+            await bot.sendMessage(msg.chat.id, "🌩🌩🌩<b> WE ARE MAKING IT RAIN " + params[0] + ' ' + params[1] + " TOKENS </b>🌩🌩🌩\n" +
+                "🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧", { parse_mode: "HTML" });
+            try {
+                listUser = await rainTokenPerDay(msg.from.id, params[0] * 1, params[3] * 1, params[1]);
+            }
+            catch (err) {
+                console.log("Rain function is error: ", `${err}`);
+            }
+            let rainMsg = '';
+            if (!listUser.length) {
+                return await bot.sendMessage(msg.chat.id, "💨💨<b> WE DO NOT HAVE ANY LUCKY PEOPLE TODAY. SEE IN NEXT TIME</b> 💨💨\n\n" +
+                    rainMsg, { parse_mode: "HTML" });
+            }
+            for (const user of listUser) {
+                rainMsg += user.volume + ' ' + params[1] + ' to ' + '[' + user.name + '](tg://user?id=' + user.userId + ')\n';
+            }
+            await bot.sendMessage(msg.chat.id, "☀️☀️ *TOKEN RAIN IS DONE. WE CONGRATULATE THE LUCKY PEOPLE TODAY* ☀️☀️\n\n" +
+                rainMsg, { parse_mode: "Markdown" });
+
+            //HTMLcoin volume
+            params[1] === 'HTML' ? addVolume(parserDate(), params[0] * 1) : addVolume(parserDate(), 1);
         }
+        else if (isValid === 'NOT ENOUGH'){
+            await bot.sendMessage(msg.chat.id, "<b>Sorry, You do not have enough balance </b>", { parse_mode: "HTML" });
+        }
+       
     }
     else {
-        await bot.sendMessage(msg.from.id, "<b>Sorry the function is only for admin</b>", { parse_mode: "HTML" });
+        await bot.sendMessage(msg.chat.id, "<b>Sorry the function is only for admin</b>", { parse_mode: "HTML" });
     }
 });
 
@@ -633,7 +726,8 @@ bot.on("callback_query", async  (msg) => {
         }
     }
     else if (choice === "10") {
-        await bot.sendMessage(msg.message.chat.id, '🚫 We will update as soon as posible 🚫');
+        await bot.sendMessage(msg.message.chat.id, 'View transactions will be coming soon ... ');
+        isViewTransactions = false;
     }
     else if (choice === "11") {
         const vipWallet = getCustomWallet(msg.from.id);
