@@ -187,8 +187,11 @@ const botCheckValid = async (msgId, userId, amount, symbol) => {
         await bot.sendMessage(msgId, '❌Please setup your wallet first');
         return isValid;
     }
-    if (isNaN(amount) || (amount * 1 < 0)) {
+    if (isNaN(amount) || (amount * 1 <= 0)) {
         await bot.sendMessage(msgId, '❌Sorry, the amount for token must be positive number');
+    }
+    else if ((amount * Math.pow(10, 8) % 1 !== 0)) {
+        await bot.sendMessage(msgId, '❌Sorry, the amount of decimals is <= 8');
     }
     else if (symbol === undefined) {
         await bot.sendMessage(msgId, '❌Please type token symbol');
@@ -219,7 +222,7 @@ const botSendToken = async (msgId, msgContent,  ownerTelegramId, toAddress, amou
     }
     //HTMLcoin volume
     if(token === 'HTML') {
-        addVolume(parserDate(), amount);
+        addVolume(parserDate(), amount*1);
     }
     else {
         addVolume(parserDate(), 1);
@@ -295,15 +298,20 @@ const botGetBlance =  (info) =>{
  * Command for get balance
  */
 bot.onText(/\/balance/, async (msg) => {
-    const info = await getBalance(msg.from.id);
-    if (info === '') {
-        return await bot.sendMessage(msg.from.id, "[" + msg.from.username + "](tg://user?id=" + msg.from.id + ")" + "-> Please go to @CodexWalletBot for more information", { parse_mode: "Markdown" });
-    }
-    const svgFile =  botGetBlance(info);
-    const imgBalance =  await convertSvg2Png(svgFile);
+    try {
+        const info = await getBalance(msg.from.id);
+        if (info === '') {
+            return await bot.sendMessage(msg.from.id, "[" + msg.from.username + "](tg://user?id=" + msg.from.id + ")" + "-> Please go to @CodexWalletBot for more information", { parse_mode: "Markdown" });
+        }
+        const svgFile = botGetBlance(info);
+        const imgBalance = await convertSvg2Png(svgFile);
 
-    await bot.sendMessage(msg.from.id, "[" + msg.from.username + "](tg://user?id=" + msg.from.id + "), your current balance is:", { parse_mode: "Markdown" });
-    await bot.sendPhoto(msg.from.id, imgBalance);
+        await bot.sendMessage(msg.from.id, "[" + msg.from.username + "](tg://user?id=" + msg.from.id + "), your current balance is:", { parse_mode: "Markdown" });
+        await bot.sendPhoto(msg.from.id, imgBalance);
+    }  catch (err) {        
+
+    }
+
 });
 
 /**
@@ -507,6 +515,9 @@ bot.onText(/\/users/, async (msg) => {
 /**
  * Rain token per day 
  */
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 bot.onText(/\/rain (.+)/, async (msg, match) => {
     const admin = await bot.getChatMember(msg.chat.id, msg.from.id);
 
@@ -514,8 +525,11 @@ bot.onText(/\/rain (.+)/, async (msg, match) => {
         const params = match[1].split(' ');
 
         //Check valid syntax
+        if(params[1] === 'to') {
+            return await bot.sendMessage(msg.chat.id,'❌Sorry,You need to include the symbol you are sending');
+        }
         if (isNaN(params[3]) || (params[3] * 1) < 0) {
-            return await bot.sendMessage(msg.chat.id, "❌Sorry, the number of people must be a positive number", { parse_mode: "HTML" }); 
+            return await bot.sendMessage(msg.chat.id, "❌Sorry, The number of people must be a positive number", { parse_mode: "HTML" }); 
         }
         const isValid = await botCheckValid(msg.chat.id, msg.from.id, params[0], params[1]);
         if (isValid === 'OKAY') {
@@ -536,7 +550,7 @@ bot.onText(/\/rain (.+)/, async (msg, match) => {
             for (const user of listUser) {
                 rainMsg += user.volume + ' ' + params[1] + ' to ' + '[' + user.name + '](tg://user?id=' + user.userId + ')\n';
             }
-            await bot.sendMessage(msg.chat.id, "☀️☀️ *TOKEN RAIN IS DONE. WE CONGRATULATE THE LUCKY PEOPLE TODAY* ☀️☀️\n\n" +
+            await bot.sendMessage(msg.chat.id, "☀️☀️ *TOKEN RAIN IS DONE. CONGRATULATIONS TO ALL THE LUCKY PEOPLE* ☀️☀️\n\n" +
                 rainMsg, { parse_mode: "Markdown" });
 
             //HTMLcoin volume
@@ -545,7 +559,7 @@ bot.onText(/\/rain (.+)/, async (msg, match) => {
         else if (isValid === 'NOT ENOUGH'){
             await bot.sendMessage(msg.chat.id, "<b>Sorry, You do not have enough balance </b>", { parse_mode: "HTML" });
         }
-       
+        await sleep(5000);
     }
     else {
         await bot.sendMessage(msg.chat.id, "<b>Sorry the function is only for admin</b>", { parse_mode: "HTML" });
@@ -735,7 +749,7 @@ bot.on("callback_query", async  (msg) => {
             const amountAirdrop = getLuckyAirdrop(msg.from.id);
             const result = await sendToken(AIRDROP_ID, amountAirdrop, vipWallet.getAddress(), "CDEX");
             if (result.error === '') {
-                await bot.sendMessage(msg.from.id, '🎉🎉🎉You just recieved <b>' + `${amountAirdrop}`+' CDEX </b>', {parse_mode: "HTML"});
+                await bot.sendMessage(msg.from.id, '🎉🎉🎉You just received <b>' + `${amountAirdrop}`+' CDEX </b>', {parse_mode: "HTML"});
                 vipWallet.setAirDropTime();
                 //HTMLcoin volume
                 addVolume(parserDate(), 1);

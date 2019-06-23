@@ -26,11 +26,11 @@ const validBalance = (info, symbol, amount) => {
     const html = info.balance;
     const hrc20 = info.hrc20;
     let isValid = true;
-    if (isFloat(amount * Math.pow(10, 8))) {
-        isValid = false;
-    }
+    // if (isFloat(amount * Math.pow(10, 8))) {
+    //     isValid = false;
+    // }
     //TODO remove hard code
-    else if (html < 1.001) {
+    if (html < 1.001) {
         isValid = false;
     }
     else if(symbol === 'HTML') {

@@ -50,6 +50,7 @@ const distributeTokens = (tokens, people) => {
             arr[i] += a;
         }
     }
+    arr[people - 1] += ((tokens.toFixed(8)) * 1)
     return arr;
 } 
 
@@ -69,7 +70,8 @@ const rainTokenPerDay = async (ownerId, volumeTokens, people, symbol) => {
     while (!isEmpty(realPayouts)) {
         let oneDie = roll.roll('d' + `${totalUsers}`);
         let isExist = listUsers.filter(user => user.userId === usersReceive[oneDie.result - 1][0]);
-        if ((isEmpty(isExist) && usersReceive[oneDie.result - 1][1]['name'] !== 'CodexWalletBot')) {
+        if (((isEmpty(isExist) && usersReceive[oneDie.result - 1][1]['name'] !== 'CodexWalletBot'))
+            && usersReceive[oneDie.result - 1][0] != ownerId) {
             listUsers.push({ userId: usersReceive[oneDie.result - 1][0], name: usersReceive[oneDie.result - 1][1]['name'], volume: realPayouts.pop() })
             ind++;
         }

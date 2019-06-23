@@ -71,14 +71,14 @@ const buildSvgFile = (yCoordinate, tokenName, tokenValuePercision, tokenValeDeci
         ' text-anchor=\"start\"' +
         ' id=\"' + `${tokenSymbol}` + '\O6"> ' + `${tokenValeDecimal}` + '</tspan></text>' +
         ' <text' +
-        ' style="font-style:normal;font-weight:normal;font-size:20px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:transparent;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"' +
-        ' x=\"600\"' +
+        ' style="font-style:normal;font-weight:bold;font-size:20px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:transparent;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"' +
+        ' x=\"700\"' +
         ' y = \"' + `${yCoordinate}` + '\"' +
         ' id=\"' + `${tokenSymbol}` + '\O7"><tspan' +
         ' id=\"' + `${tokenSymbol}` + '\O8"' +
-        ' x=\"600\"' +
+        ' x=\"700\"' +
         ' y = \"' + `${yCoordinate}` + '\"' +
-        '  style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:\\\'Droid Sans\\\';-inkscape-font-specification:\\\'Droid Sans\\\'">' + `${tokenSymbol}` + '</tspan></text>';
+        '  style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:\\\'Droid Sans\\\';-inkscape-font-specification:\\\'Droid Sans\\\'">' + `${tokenSymbol}` + '</tspan></text>';
     return rowValue;
 };
 
