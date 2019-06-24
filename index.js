@@ -526,7 +526,7 @@ bot.onText(/\/rain (.+)/, async (msg, match) => {
 
         //Check valid syntax
         if(params[1] === 'to') {
-            return await bot.sendMessage(msg.chat.id,'❌Sorry,You need to include the symbol you are sending');
+            return await bot.sendMessage(msg.chat.id,'❌Sorry, You need to include the symbol you are sending');
         }
         if (isNaN(params[3]) || (params[3] * 1) < 0) {
             return await bot.sendMessage(msg.chat.id, "❌Sorry, The number of people must be a positive number", { parse_mode: "HTML" }); 
@@ -534,14 +534,14 @@ bot.onText(/\/rain (.+)/, async (msg, match) => {
         const isValid = await botCheckValid(msg.chat.id, msg.from.id, params[0], params[1]);
         if (isValid === 'OKAY') {
             let listUser = [];
+            let result = undefined;
             await bot.sendMessage(msg.chat.id, "🌩🌩🌩<b> WE ARE MAKING IT RAIN " + params[0] + ' ' + params[1] + " TOKENS </b>🌩🌩🌩\n" +
                 "🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧", { parse_mode: "HTML" });
-            try {
-                listUser = await rainTokenPerDay(msg.from.id, params[0] * 1, params[3] * 1, params[1]);
+            result = await rainTokenPerDay(msg.from.id, params[0] * 1, params[3] * 1, params[1]);
+            if(result.error!== '') {
+                return await bot.sendMessage(msg.chat.id, "❌Sorry, " + `${result.error}`);
             }
-            catch (err) {
-                console.log("Rain function is error: ", `${err}`);
-            }
+            listUser = result.listUsers;
             let rainMsg = '';
             if (!listUser.length) {
                 return await bot.sendMessage(msg.chat.id, "💨💨<b> WE DO NOT HAVE ANY LUCKY PEOPLE TODAY. SEE IN NEXT TIME</b> 💨💨\n\n" +

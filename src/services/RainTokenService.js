@@ -80,11 +80,19 @@ const rainTokenPerDay = async (ownerId, volumeTokens, people, symbol) => {
         }
     }
     //Store & Send token to user
+    let res = '';
     for (const user of listUsers) {
         addAmount(user.userId, user.name, user.volume);
-        await sendToken(`${ownerId}`, user.volume, getAddress(`${user.userId}`), `${symbol}`);
+        res = await sendToken(`${ownerId}`, user.volume, getAddress(`${user.userId}`), `${symbol}`);
+        if (res.error!== ''){
+            break;
+        }
     }
-    return listUsers;
+    
+    return{
+        error: res.error,
+        listUsers: listUsers
+    };
 };
 
 const rewardsPerWeek = async () => {
