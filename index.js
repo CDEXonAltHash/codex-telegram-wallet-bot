@@ -114,6 +114,10 @@ bot.onText(/\/start/, async(msg) => {
  * Made new address
  */
 bot.onText(/\/mywallet/, async (msg) => {
+    const address = getAddress(msg.from.id);
+    if (address !== '') {
+        return await bot.sendMessage(msg.chat.id, "Your address is existed");
+    }
     const account = generateAccount();
     if (account.privKey !== undefined)
     {

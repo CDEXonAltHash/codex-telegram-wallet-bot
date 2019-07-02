@@ -23,7 +23,7 @@ const viewTransaction = async (telegramId) => {
 };
 
 const addAirdropLog = (telegramId, amount) => {
-    const day = parserDate;
+    const day = parserDate();
     const airDrop = AirdopLog.get(`${telegramId}`);
 
     if (airDrop)
@@ -41,7 +41,7 @@ const addAirdropLog = (telegramId, amount) => {
 }
 const getLuckyAirdrop = (telegramId) => {
     const oneDie = roll.roll('5d20');
-    addAirdropLog(telegramId, oneDie);
+    addAirdropLog(telegramId, oneDie.result);
     return oneDie.result;
 }
 const airdropLog = async (telegramId) => {
