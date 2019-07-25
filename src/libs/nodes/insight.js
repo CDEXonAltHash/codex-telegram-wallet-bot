@@ -7,10 +7,10 @@ switch (config.getNetwork()) {
     domain = 'https://testnet.htmlcoin.com'
     break
   case 'mainnet':
-    domain = 'https://explorer.htmlcoin.com'
+    domain = 'http://10.0.0.200:6677'
     break
 }
-const apiPrefix = domain + '/api'
+const apiPrefix = domain + '/htmlcoin-api'
 
 const _get = async url => {
   return (await axios.get(apiPrefix + url)).data

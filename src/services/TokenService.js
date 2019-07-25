@@ -7,7 +7,7 @@ const tokenInfo = {
     addTokenDecimals: 8,
     gasPrice: '40',
     gasLimit: '2500000',
-    fee: '0.001',
+    fee: '0.01',
 };
 const sendToken = async (telegramId, amount, toAddress, symbol) => {
     const wallet = getCustomWallet(telegramId);
@@ -27,7 +27,7 @@ const sendToken = async (telegramId, amount, toAddress, symbol) => {
         }
     } catch (e) {
         return {
-            error: `${e}`,
+            error: e.response.data,
         }
     }
 };

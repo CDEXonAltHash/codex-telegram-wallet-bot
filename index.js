@@ -222,6 +222,7 @@ const botSendToken = async (msgId, msgContent,  ownerTelegramId, toAddress, amou
         await bot.sendMessage(msgId, '✅ ' + `${msgContent}` + ' successful\n' + '<a href=\"' + `${url}` + '">Please check transaction here</a>', { parse_mode: "HTML" });
     }
     else {
+        // console.log(JSON.stringify(result.error, ["message", "arguments", "type", "name"]));
         return await bot.sendMessage(msgId, '❌' + `${result.error}`,{parse_mode:"Markdown"});
     }
     //HTMLcoin volume
@@ -522,6 +523,7 @@ bot.onText(/\/users/, async (msg) => {
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
+
 bot.onText(/\/rain (.+)/, async (msg, match) => {
     const admin = await bot.getChatMember(msg.chat.id, msg.from.id);
 
