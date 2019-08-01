@@ -84,13 +84,13 @@ const rainTokenPerDay = async (ownerId, volumeTokens, people, symbol) => {
     for (const user of listUsers) {
         addAmount(user.userId, user.name, user.volume);
         res = await sendToken(`${ownerId}`, user.volume, getAddress(`${user.userId}`), `${symbol}`);
-        if (res!== ''){
+        if (res.error!== ''){
             break;
         }
     }
     
-    return{
-        error: res,
+    return {
+        error: `${res.error}`,
         listUsers: listUsers
     };
 };

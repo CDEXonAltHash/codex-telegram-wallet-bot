@@ -542,7 +542,7 @@ bot.onText(/\/rain (.+)/, async (msg, match) => {
             "🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧", { parse_mode: "HTML" });
         result = await rainTokenPerDay(msg.from.id, params[0] * 1, params[3] * 1, params[1]);
         if (result.error !== '') {
-            return await bot.sendMessage(msg.chat.id, "❌Sorry, " + `${result.error}`);
+            return await bot.sendMessage(msg.chat.id, "❌Sorry, " + result.error);
         }
         listUser = result.listUsers;
         let rainMsg = '';
