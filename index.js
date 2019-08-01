@@ -525,51 +525,44 @@ function sleep(ms) {
 }
 
 bot.onText(/\/rain (.+)/, async (msg, match) => {
-    const admin = await bot.getChatMember(msg.chat.id, msg.from.id);
+    const params = match[1].split(' ');
 
-    if (admin.status === 'administrator' || admin.status === 'creator') {
-        const params = match[1].split(' ');
-
-        //Check valid syntax
-        if(params[1] === 'to') {
-            return await bot.sendMessage(msg.chat.id,'❌Sorry, You need to include the symbol you are sending');
-        }
-        if (isNaN(params[3]) || (params[3] * 1) < 0) {
-            return await bot.sendMessage(msg.chat.id, "❌Sorry, The number of people must be a positive number", { parse_mode: "HTML" }); 
-        }
-        const isValid = await botCheckValid(msg.chat.id, msg.from.id, params[0], params[1]);
-        if (isValid === 'OKAY') {
-            let listUser = [];
-            let result = undefined;
-            await bot.sendMessage(msg.chat.id, "🌩🌩🌩<b> WE ARE MAKING IT RAIN " + params[0] + ' ' + params[1] + " TOKENS </b>🌩🌩🌩\n" +
-                "🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧", { parse_mode: "HTML" });
-            result = await rainTokenPerDay(msg.from.id, params[0] * 1, params[3] * 1, params[1]);
-            if(result.error!== '') {
-                return await bot.sendMessage(msg.chat.id, "❌Sorry, " + `${result.error}`);
-            }
-            listUser = result.listUsers;
-            let rainMsg = '';
-            if (!listUser.length) {
-                return await bot.sendMessage(msg.chat.id, "💨💨<b> WE DO NOT HAVE ANY LUCKY PEOPLE TODAY. SEE IN NEXT TIME</b> 💨💨\n\n" +
-                    rainMsg, { parse_mode: "HTML" });
-            }
-            for (const user of listUser) {
-                rainMsg += user.volume + ' ' + params[1] + ' to ' + '[' + user.name + '](tg://user?id=' + user.userId + ')\n';
-            }
-            await bot.sendMessage(msg.chat.id, "☀️☀️ *TOKEN RAIN IS DONE. CONGRATULATIONS TO ALL THE LUCKY PEOPLE* ☀️☀️\n\n" +
-                rainMsg, { parse_mode: "Markdown" });
-
-            //HTMLcoin volume
-            params[1] === 'HTML' ? addVolume(parserDate(), params[0] * 1) : addVolume(parserDate(), 1);
-        }
-        else if (isValid === 'NOT ENOUGH'){
-            await bot.sendMessage(msg.chat.id, "<b>Sorry, You do not have enough balance </b>", { parse_mode: "HTML" });
-        }
-        await sleep(5000);
+    //Check valid syntax
+    if (params[1] === 'to') {
+        return await bot.sendMessage(msg.chat.id, '❌Sorry, You need to include the symbol you are sending');
     }
-    else {
-        await bot.sendMessage(msg.chat.id, "<b>Sorry the function is only for admin</b>", { parse_mode: "HTML" });
+    if (isNaN(params[3]) || (params[3] * 1) < 0) {
+        return await bot.sendMessage(msg.chat.id, "❌Sorry, The number of people must be a positive number", { parse_mode: "HTML" });
     }
+    const isValid = await botCheckValid(msg.chat.id, msg.from.id, params[0], params[1]);
+    if (isValid === 'OKAY') {
+        let listUser = [];
+        let result = undefined;
+        await bot.sendMessage(msg.chat.id, "🌩🌩🌩<b> WE ARE MAKING IT RAIN " + params[0] + ' ' + params[1] + " TOKENS </b>🌩🌩🌩\n" +
+            "🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧", { parse_mode: "HTML" });
+        result = await rainTokenPerDay(msg.from.id, params[0] * 1, params[3] * 1, params[1]);
+        if (result.error !== '') {
+            return await bot.sendMessage(msg.chat.id, "❌Sorry, " + `${result.error}`);
+        }
+        listUser = result.listUsers;
+        let rainMsg = '';
+        if (!listUser.length) {
+            return await bot.sendMessage(msg.chat.id, "💨💨<b> WE DO NOT HAVE ANY LUCKY PEOPLE TODAY. SEE IN NEXT TIME</b> 💨💨\n\n" +
+                rainMsg, { parse_mode: "HTML" });
+        }
+        for (const user of listUser) {
+            rainMsg += user.volume + ' ' + params[1] + ' to ' + '[' + user.name + '](tg://user?id=' + user.userId + ')\n';
+        }
+        await bot.sendMessage(msg.chat.id, "☀️☀️ *TOKEN RAIN IS DONE. CONGRATULATIONS TO ALL THE LUCKY PEOPLE* ☀️☀️\n\n" +
+            rainMsg, { parse_mode: "Markdown" });
+
+        //HTMLcoin volume
+        params[1] === 'HTML' ? addVolume(parserDate(), params[0] * 1) : addVolume(parserDate(), 1);
+    }
+    else if (isValid === 'NOT ENOUGH') {
+        await bot.sendMessage(msg.chat.id, "<b>Sorry, You do not have enough balance </b>", { parse_mode: "HTML" });
+    }
+    await sleep(5000);
 });
 
 /**

@@ -25,9 +25,9 @@ const sendToken = async (telegramId, amount, toAddress, symbol) => {
             error: '',
             trxId: trxId,
         }
-    } catch (e) {
+    } catch (err) {
         return {
-            error: e.response.data,
+            error: err,
         }
     }
 };
