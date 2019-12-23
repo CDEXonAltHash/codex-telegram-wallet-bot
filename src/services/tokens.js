@@ -1,13 +1,12 @@
-'use strict';
 const hrc20 = require('../libs/hrc20');
-const { getCustomWallet, getVip } = require('./AddressService');
+const { getCustomWallet, getVip } = require('./address');
 
 const tokenInfo = {
     symbol: 'HTML',
     addTokenDecimals: 8,
     gasPrice: '40',
-    gasLimit: '5000000',
-    fee: '0.05',
+    gasLimit: '2500000',
+    fee: '0.01',
 };
 const sendToken = async (telegramId, amount, toAddress, symbol) => {
     const wallet = getCustomWallet(telegramId);
@@ -25,9 +24,9 @@ const sendToken = async (telegramId, amount, toAddress, symbol) => {
             error: '',
             trxId: trxId,
         }
-    } catch (err) {
+    } catch (e) {
         return {
-            error: `${JSON.stringify(err.response.data)}`,
+            error: `${e}`,
         }
     }
 };
@@ -42,39 +41,30 @@ const getBalance = async (telegramId) => {
     return (wallet !== '') ? wallet.info : '';
 };
 
-const getTransaction = async(telegramId) => {
-    const wallet = getCustomWallet(telegramId);
-    if (wallet !== '') {
-        await wallet.setTxList()
-    }
-    return (wallet !== '') ? wallet.txList.txs : '';
-}
-
 const checkVip = (telegramId) => {
     const vip = getVip(telegramId);
     if(vip !==''){
         return true;
     }
     return false;
-};
+}
 
 const checkCDEX = (telegramId) => {
     const wallet = getCustomWallet(telegramId);
     const hrc20Coin = wallet.info.hrc20;
     const tokenAmount = 50000;
-    for (const token of hrc20Coin) {
+    for (token of hrc20Coin) {
         if (token.contract.symbol === 'CDEX' && tokenAmount <= (token.amount / Math.pow(10, token.contract.decimals))) {
             return true;
         }
     }
     return false;
-};
+}   
 
 
 module.exports =  {
     sendToken,
     getBalance,
     checkCDEX,
-    checkVip,
-    getTransaction
-};
+    checkVip
+}

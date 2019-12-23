@@ -531,8 +531,8 @@ bot.onText(/\/rain (.+)/, async (msg, match) => {
     if (params[1] === 'to') {
         return await bot.sendMessage(msg.chat.id, '❌Sorry, You need to include the symbol you are sending');
     }
-    if (isNaN(params[3]) || (params[3] * 1) < 0) {
-        return await bot.sendMessage(msg.chat.id, "❌Sorry, The number of people must be a positive number", { parse_mode: "HTML" });
+    if (isNaN(params[3]) || (params[3] * 1) < 0 || (params[3]*1) > 25 ) {
+        return await bot.sendMessage(msg.chat.id, "❌Sorry, The number of people must be a positive number and smaller than 25", { parse_mode: "HTML" });
     }
     const isValid = await botCheckValid(msg.chat.id, msg.from.id, params[0], params[1]);
     if (isValid === 'OKAY') {
