@@ -152,7 +152,7 @@ const rainTokenForVip = async(ownerId, volumeTokens, symbol) => {
             listVIP.push({ userId: usersReceive[oneDie.result - 1][0], volume: realPayouts.pop() })
             ind++;
         }
-        if (ind >= (listVIP - 1)) {
+        if (ind >= (totalVIPs - 1)) {
             break;
         }
     }
