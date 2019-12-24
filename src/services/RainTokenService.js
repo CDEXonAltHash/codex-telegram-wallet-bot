@@ -19,6 +19,8 @@ const RainToken = new Map();
 
 const { chartCanvas } = require('../utils/VisualizeData');
 
+const { sleep } = require('../utils/DateParser');
+
 const Roll = require('roll');
 const roll = new Roll();
 
@@ -185,10 +187,16 @@ const sendTokenToVip = async(ownerId, volumeTokens, symbol) => {
 
     //Store & Send token to user
     let res = '';
+    let cnt = 0;
     for (const user of listVIP) {
         res = await sendToken(`${ownerId}`, user.volume, getAddress(`${user.userId}`), `${symbol}`);
         if (res.error!== ''){
             return false;
+        }
+        cnt ++;
+        if(cnt > 24) {
+            await sleep(60000);
+            cnt = 0
         }
     }
     return true;

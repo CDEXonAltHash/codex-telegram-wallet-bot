@@ -66,7 +66,8 @@ const {
 } = require('./src/services/HtmlVolumeService');
 
 const {
-    parserDate
+    parserDate,
+    sleep
 } = require('./src/utils/DateParser');
 
 const {
@@ -519,12 +520,7 @@ bot.onText(/\/users/, async (msg) => {
     }
 });
 
-/**
- * Rain token per day 
- */
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
+
 
 bot.onText(/\/rain (.+)/, async (msg, match) => {
     const params = match[1].split(' ');
@@ -631,7 +627,7 @@ bot.onText(/\/raintoallVIPs/, async (msg) => {
         if(!result) {
             return await bot.sendMessage(msg.chat.id, "❌ Opps!! Cannot make it rain to VIPs now. Please try in a minute");
         } else {
-            return await bot.sendMessage(msg.chat.id, "WE HAVE JUST MADE IT RAIN TOKEN TO VIPs. KINDLY CHECK YOUR WALLET");
+            return await bot.sendMessage(msg.chat.id, "WE HAVE JUST MADE IT RAIN TOKENS TO VIPs. KINDLY CHECK YOUR WALLET");
         }
     } catch(err) {
 
@@ -660,7 +656,7 @@ bot.onText(/\/sendtoallVIPs/, async (msg) => {
         if(!result) {
             return await bot.sendMessage(msg.chat.id, "❌ Opps!! Cannot send tokens to VIPs now. Please try in a minute");
         } else {
-            return await bot.sendMessage(msg.chat.id, "WE HAVE JUST GIVEN TOKEN TO VIPS USER. KINDLY CHECK YOUR WALLET");
+            return await bot.sendMessage(msg.chat.id, "WE HAVE JUST GIVEN TOKENS TO VIPS USER. KINDLY CHECK YOUR WALLET");
         }
     } catch(err) {
 
