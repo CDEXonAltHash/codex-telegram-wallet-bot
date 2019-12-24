@@ -56,6 +56,8 @@ const {
 const {
     rainTokenPerDay,
     rewardsPerWeek,
+    rainTokenForVip,
+    sendTokenToVip
 } = require('./src/services/RainTokenService');
 
 const {
@@ -529,20 +531,20 @@ bot.onText(/\/rain (.+)/, async (msg, match) => {
 
     //Check valid syntax
     if (params[1] === 'to') {
-        return await bot.sendMessage(msg.chat.id, '❌Sorry, You need to include the symbol you are sending');
+        return await bot.sendMessage(msg.chat.id, '❌ Sorry, You need to include the symbol you are sending');
     }
     if (isNaN(params[3]) || (params[3] * 1) < 0 || (params[3]*1) > 25 ) {
-        return await bot.sendMessage(msg.chat.id, "❌Sorry, The number of people must be a positive number and smaller than 25", { parse_mode: "HTML" });
+        return await bot.sendMessage(msg.chat.id, "❌ Sorry, The number of people must be a positive number and smaller than 25", { parse_mode: "HTML" });
     }
     const isValid = await botCheckValid(msg.chat.id, msg.from.id, params[0], params[1]);
     if (isValid === 'OKAY') {
         let listUser = [];
         let result = undefined;
-        await bot.sendMessage(msg.chat.id, "🌩🌩🌩<b> WE ARE MAKING IT RAIN " + params[0] + ' ' + params[1] + " TOKENS </b>🌩🌩🌩\n" +
-            "🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧", { parse_mode: "HTML" });
+        // await bot.sendMessage(msg.chat.id, "🌩🌩🌩<b> WE ARE MAKING IT RAIN " + params[0] + ' ' + params[1] + " TOKENS </b>🌩🌩🌩\n" +
+        //     "🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧", { parse_mode: "HTML" });
         result = await rainTokenPerDay(msg.from.id, params[0] * 1, params[3] * 1, params[1]);
         if (result.error !== '') {
-            return await bot.sendMessage(msg.chat.id, "❌Sorry, " + result.error);
+            return await bot.sendMessage(msg.chat.id, "❌ Opps!! Cannot make it rain now. Please try in a minute");
         }
         listUser = result.listUsers;
         let rainMsg = '';
@@ -551,7 +553,9 @@ bot.onText(/\/rain (.+)/, async (msg, match) => {
                 rainMsg, { parse_mode: "HTML" });
         }
         for (const user of listUser) {
-            rainMsg += user.volume + ' ' + params[1] + ' to ' + '[' + user.name + '](tg://user?id=' + user.userId + ')\n';
+            let name = user.name
+            name = name.replace(/[&\/\\#,+()$~%.;!'":*?<>{}\[\]]/g, '');
+            rainMsg += user.volume + ' ' + params[1] + ' to ' + '[' + name + '](tg://user?id=' + user.userId + ')\n';
         }
         await bot.sendMessage(msg.chat.id, "☀️☀️ *TOKEN RAIN IS DONE. CONGRATULATIONS TO ALL THE LUCKY PEOPLE* ☀️☀️\n\n" +
             rainMsg, { parse_mode: "Markdown" });
@@ -608,7 +612,61 @@ bot.onText(/\/volumeonbot/, async (msg) => {
     }
 });
 
+/**
+ * Rain token for VIPs
+ */
+bot.onText(/\/raintoallVIPs/, async (msg) => {
+    const params = match[1].split(' ');
+    let result = true;
+    try {
+        const admin = await bot.getChatMember(msg.chat.id, msg.from.id);
 
+        if (admin.status === 'administrator' || admin.status === 'creator') {
+            result = await rainTokenForVip(msg.from.id, params[0] * 1, params[1]);
+        }
+        else {
+            await bot.sendMessage(msg.from.id, "<b>Sorry the function is only for admin</b>", { parse_mode: "HTML" });
+        }
+
+        if(!result) {
+            return await bot.sendMessage(msg.chat.id, "❌ Opps!! Cannot make it rain to VIPs now. Please try in a minute");
+        } else {
+            return await bot.sendMessage(msg.chat.id, "WE HAVE JUST MADE IT RAIN TOKEN TO VIPs. KINDLY CHECK YOUR WALLET");
+        }
+    } catch(err) {
+
+    }
+
+});
+
+
+
+/**
+ * Send token for VIPs
+ */
+bot.onText(/\/sendtoallVIPs/, async (msg) => {
+    const params = match[1].split(' ');
+    let result = true;
+    try {
+        const admin = await bot.getChatMember(msg.chat.id, msg.from.id);
+
+        if (admin.status === 'administrator' || admin.status === 'creator') {
+            result = await sendTokenToVip(msg.from.id, params[0] * 1, params[1]);
+        }
+        else {
+            await bot.sendMessage(msg.from.id, "<b>Sorry the function is only for admin</b>", { parse_mode: "HTML" });
+        }
+
+        if(!result) {
+            return await bot.sendMessage(msg.chat.id, "❌ Opps!! Cannot send tokens to VIPs now. Please try in a minute");
+        } else {
+            return await bot.sendMessage(msg.chat.id, "WE HAVE JUST GIVEN TOKEN TO VIPS USER. KINDLY CHECK YOUR WALLET");
+        }
+    } catch(err) {
+
+    }
+
+});
 /**
  * Handle polling question
  */
@@ -636,7 +694,7 @@ bot.on("callback_query", async  (msg) => {
                 parse_mode: "Markdown"
             };
 
-            await bot.sendMessage(msg.from.id, "It costs 50k CDEX for VIP. Do you want to continue?", opts);
+            await bot.sendMessage(msg.from.id, "This function will deduct 50k ‘CDEX’ from your wallet. This is a one time charge to be VIP for life! <b>These funds are unretrievable</b>\nDo you want to continue?", opts);
         }
         else {
             await bot.sendMessage(msg.from.id, '⚠️You must have CDEX token greater than 50k');
@@ -720,12 +778,12 @@ bot.on("callback_query", async  (msg) => {
         const vipWallet = getCustomWallet(msg.from.id);
         const result = await sendToken(msg.from.id, 50000 , AIRDROP_ADDRESS, "CDEX");
         if (result.error === '') {
-            await bot.sendMessage(msg.message.chat.id, '🎉🎉Congratulations! You become a VIP member🎉🎉\n Each day you will be receive airdrops token by click <b>VIP menu</b> button', {parse_mode:"HTML"});
+            await bot.sendMessage(msg.message.chat.id, '🎉🎉Congratulations! You are now a Lifetime VIP member🎉🎉\n Each day you are able to claim <b>CDEX</b> by clicking <b>VIP menu</b> button and by pressing <b>Get Airdrop<\b>.\n To see additional features head over to the VIP menu and click <b>VIP Features</b>. ', {parse_mode:"HTML"});
             vipWallet.setVIPMember();
             saveVipMember(vipWallet.getAddress());
         }
         else {
-            await bot.sendMessage(msg.message.chat.id, 'Oops⁉️Something error');
+            await bot.sendMessage(msg.message.chat.id, 'Oops⁉️ Something is error');
         }
     }
     else if (choice === "9") {

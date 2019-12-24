@@ -3,6 +3,7 @@ const { isEmpty } = require('lodash');
 
 const {
     CodexWallet,
+    CodexVIP
 } = require('./StorageService');
 
 const {
@@ -128,7 +129,74 @@ const rewardsPerWeek = async () => {
     }
 };
 
+const rainTokenForVip = async(ownerId, volumeTokens, symbol) => {
+    const listVIP = [];
+    let totalVIPs = CodexVIP.size;
+    if(totalVIPs > 24) {
+        totalVIPs = 24;
+    }
+    const payouts = distributeTokens(volumeTokens, totalVIPs);
+    const realPayouts = payouts.filter(token => token > 0);
+
+    const usersReceive = [...CodexVIP.entries()];
+    let address = getAddress(`${ownerId}`)
+
+    //Rolling dice
+    let ind = 0;
+    while (!isEmpty(realPayouts)) {
+        let oneDie = roll.roll('d' + `${totalVIPs}`);
+        let isExist = listVIP.filter(user => user.userId === usersReceive[oneDie.result - 1][0]);
+        if ((isEmpty(isExist) && usersReceive[oneDie.result - 1][0] != address)) {
+            listVIP.push({ userId: usersReceive[oneDie.result - 1][0], volume: realPayouts.pop() })
+            ind++;
+        }
+        if (ind >= (listVIP - 1)) {
+            break;
+        }
+    }
+
+    //Store & Send token to user
+    let res = '';
+    for (const user of listVIP) {
+        res = await sendToken(`${ownerId}`, user.volume, getAddress(`${user.userId}`), `${symbol}`);
+        if (res.error!== ''){
+            return false;
+        }
+    }
+    return true;
+};
+
+const sendTokenToVip = async(ownerId, volumeTokens, symbol) => {
+    const listVIP = [];
+    let totalVIPs = CodexVIP.size;
+    if(totalVIPs > 24) {
+        totalVIPs = 24;
+    }
+    const usersReceive = [...CodexVIP.entries()];
+    let address = getAddress(`${ownerId}`)
+
+    //Rolling dice
+    for(const vip of usersReceive) {
+        let isExist = listVIP.filter(user => user.userId === vip[0]);
+        if ((isEmpty(isExist) && vip != address)) {
+            listVIP.push({ userId: vip[0], volume: volumeTokens })
+        }
+    }
+
+    //Store & Send token to user
+    let res = '';
+    for (const user of listVIP) {
+        res = await sendToken(`${ownerId}`, user.volume, getAddress(`${user.userId}`), `${symbol}`);
+        if (res.error!== ''){
+            return false;
+        }
+    }
+    return true;
+};
+
 module.exports = {
     rainTokenPerDay,
     rewardsPerWeek,
+    rainTokenForVip,
+    sendTokenToVip
 }

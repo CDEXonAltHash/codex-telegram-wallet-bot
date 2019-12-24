@@ -31,7 +31,7 @@
     "chart.js": "^2.8.0",
     "chartjs-node-canvas": "^2.4.0",
     "ethjs-abi": "^0.2.1",
-    "htmlcoinjs-lib": "^0.1.9",
+    "htmlcoinjs-lib": "^0.1.12",
     "imagely": "^1.0.2",
     "js-sha256": "^0.9.0",
     "line-reader": "^0.4.0",
