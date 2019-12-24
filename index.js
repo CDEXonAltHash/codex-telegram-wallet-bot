@@ -611,7 +611,7 @@ bot.onText(/\/volumeonbot/, async (msg) => {
 /**
  * Rain token for VIPs
  */
-bot.onText(/\/raintoallVIPs/, async (msg) => {
+bot.onText(/\/raintoallVIPs/, async (msg, match) => {
     const params = match[1].split(' ');
     let result = true;
     try {
@@ -640,7 +640,7 @@ bot.onText(/\/raintoallVIPs/, async (msg) => {
 /**
  * Send token for VIPs
  */
-bot.onText(/\/sendtoallVIPs/, async (msg) => {
+bot.onText(/\/sendtoallVIPs/, async (msg, match) => {
     const params = match[1].split(' ');
     let result = true;
     try {
