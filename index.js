@@ -615,22 +615,28 @@ bot.onText(/\/raintoallVIPs (.+)/, async (msg, match) => {
     const params = match[1].split(' ');
     let result = true;
     try {
-        const admin = await bot.getChatMember(msg.chat.id, msg.from.id);
+        const isValid = await botCheckValid(msg.chat.id, msg.from.id, params[0], params[1]);
+        if (isValid === 'OKAY') {
+            const admin = await bot.getChatMember(msg.chat.id, msg.from.id);
 
-        if (admin.status === 'administrator' || admin.status === 'creator') {
-            result = await rainTokenForVip(msg.from.id, params[0] * 1, params[1]);
-        }
-        else {
-           return await bot.sendMessage(msg.from.id, "<b>Sorry the function is only for admin</b>", { parse_mode: "HTML" });
+            if (admin.status === 'administrator' || admin.status === 'creator') {
+                result = await rainTokenForVip(msg.from.id, params[0] * 1, params[1]);
+            }
+            else {
+               return await bot.sendMessage(msg.from.id, "<b>Sorry the function is only for admin</b>", { parse_mode: "HTML" });
+            }
+    
+            if(!result) {
+                return await bot.sendMessage(msg.chat.id, "❌ Opps!! Cannot make it rain to VIPs now. Please try in a minute");
+            } else {
+                return await bot.sendMessage(msg.chat.id, "WE HAVE JUST MADE IT RAIN TOKENS TO VIPs. KINDLY CHECK YOUR WALLET");
+            }
+        } else if (isValid === 'NOT ENOUGH') {
+            await bot.sendMessage(msg.chat.id, "<b>Sorry, You do not have enough balance </b>", { parse_mode: "HTML" });
         }
 
-        if(!result) {
-            return await bot.sendMessage(msg.chat.id, "❌ Opps!! Cannot make it rain to VIPs now. Please try in a minute");
-        } else {
-            return await bot.sendMessage(msg.chat.id, "WE HAVE JUST MADE IT RAIN TOKENS TO VIPs. KINDLY CHECK YOUR WALLET");
-        }
     } catch(err) {
-
+        await bot.sendMessage(msg.from.id, "❌ Opps!! Something went wrong let try again in a minute", { parse_mode: "HTML" });
     }
 
 });
@@ -644,21 +650,29 @@ bot.onText(/\/sendtoallVIPs (.+)/, async (msg, match) => {
     const params = match[1].split(' ');
     let result = true;
     try {
-        const admin = await bot.getChatMember(msg.chat.id, msg.from.id);
+        const isValid = await botCheckValid(msg.chat.id, msg.from.id, params[0], params[1]);
+        if (isValid === 'OKAY') {
 
-        if (admin.status === 'administrator' || admin.status === 'creator') {
-            result = await sendTokenToVip(msg.from.id, params[0] * 1, params[1]);
-        }
-        else {
-            return await bot.sendMessage(msg.from.id, "<b>Sorry the function is only for admin</b>", { parse_mode: "HTML" });
+            const admin = await bot.getChatMember(msg.chat.id, msg.from.id);
+
+            if (admin.status === 'administrator' || admin.status === 'creator') {
+                result = await sendTokenToVip(msg.from.id, params[0] * 1, params[1]);
+            }
+            else {
+                return await bot.sendMessage(msg.chat.id, "<b>Sorry the function is only for admin</b>", { parse_mode: "HTML" });
+            }
+
+            if(!result) {
+                return await bot.sendMessage(msg.chat.id, "❌ Opps!! Cannot send tokens to VIPs now. Please try in a minute");
+            } else {
+                return await bot.sendMessage(msg.chat.id, "WE HAVE JUST GIVEN TOKENS TO VIPS USER. KINDLY CHECK YOUR WALLET");
+            }
+        }else if (isValid === 'NOT ENOUGH') {
+            await bot.sendMessage(msg.chat.id, "<b>Sorry, You do not have enough balance </b>", { parse_mode: "HTML" });
         }
 
-        if(!result) {
-            return await bot.sendMessage(msg.chat.id, "❌ Opps!! Cannot send tokens to VIPs now. Please try in a minute");
-        } else {
-            return await bot.sendMessage(msg.chat.id, "WE HAVE JUST GIVEN TOKENS TO VIPS USER. KINDLY CHECK YOUR WALLET");
-        }
     } catch(err) {
+        await bot.sendMessage(msg.from.id, "❌ Opps!! Something went wrong let try again in a minute", { parse_mode: "HTML" });
 
     }
 
