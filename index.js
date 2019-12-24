@@ -621,7 +621,7 @@ bot.onText(/\/raintoallVIPs (.+)/, async (msg, match) => {
             result = await rainTokenForVip(msg.from.id, params[0] * 1, params[1]);
         }
         else {
-            await bot.sendMessage(msg.from.id, "<b>Sorry the function is only for admin</b>", { parse_mode: "HTML" });
+           return await bot.sendMessage(msg.from.id, "<b>Sorry the function is only for admin</b>", { parse_mode: "HTML" });
         }
 
         if(!result) {
@@ -650,7 +650,7 @@ bot.onText(/\/sendtoallVIPs (.+)/, async (msg, match) => {
             result = await sendTokenToVip(msg.from.id, params[0] * 1, params[1]);
         }
         else {
-            await bot.sendMessage(msg.from.id, "<b>Sorry the function is only for admin</b>", { parse_mode: "HTML" });
+            return await bot.sendMessage(msg.from.id, "<b>Sorry the function is only for admin</b>", { parse_mode: "HTML" });
         }
 
         if(!result) {
