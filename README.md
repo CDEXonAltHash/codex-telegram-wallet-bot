@@ -4,7 +4,7 @@ This project to help you can use telegram bot as a wallet. We based on [althash 
 
 # Getting started
 
-1. Get your own telegram access token via `@BotFather` then repalace it for `YOUR-TELEGRAM-TOKEN` in `config.js` file
+1. Get your own telegram access token via `@BotFather` then repalace it for `YOUR-TELEGRAM-TOKEN` in `.env` file
 2. Setup & Run
 
 ```javasctipt

@@ -91,6 +91,17 @@ const convertTime = (duration) => {
 
     return hours + ":" + minutes + ":" + seconds;
 }
+
+const validDecimals = (number) =>{
+    let decimals = 0
+    if(Math.floor(number) === number){
+      decimals = 0
+    }
+    decimals =  number.toString().split(".")[1].length || 0
+  
+    return (decimals < 9) ? true: false
+  }
+
 module.exports = {
     TIME_AIRDROP,
     parseCommandTrading,
@@ -98,5 +109,6 @@ module.exports = {
     isValidOffer,
     getVal,
     isValidAirDrop,
-    convertTime
+    convertTime,
+    validDecimals
 }

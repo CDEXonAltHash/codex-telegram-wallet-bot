@@ -3,4 +3,4 @@ node_modules
 .DS_*
 src/config/config.*
 codex*
-
+.env

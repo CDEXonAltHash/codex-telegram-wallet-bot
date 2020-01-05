@@ -1,0 +1,5 @@
+AIRDROP_ID=airdrop-id
+AIRDROP_ADDRESS=airdrop-address
+TELEGRAM_TOKEN=telegram-token
+CODEX_CREDENTIAL=your password
+BOT_ERROR=@channel-name

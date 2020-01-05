@@ -31,7 +31,8 @@ const {
 const {
     TELEGRAM_TOKEN,
     AIRDROP_ID,
-    AIRDROP_ADDRESS
+    AIRDROP_ADDRESS,
+    BOT_ERROR,
 } = require('./src/config/Config');
 
 const hrc20 = require('./src/libs/hrc20');
@@ -74,6 +75,11 @@ const {
     checkTokenSymbol,
     validBalance
 } = require('./src/utils/ValidTokenSymbol');
+
+const {
+    validDecimals
+} = require('./src/utils/parser');
+
 
 const token = TELEGRAM_TOKEN; 
 const bot = new TelegramBot(token, { polling: true });
@@ -119,7 +125,7 @@ bot.onText(/\/start/, async(msg) => {
 bot.onText(/\/mywallet/, async (msg) => {
     const address = getAddress(msg.from.id);
     if (address !== '') {
-        return await bot.sendMessage(msg.chat.id, "Your address is existed");
+        return await bot.sendMessage(msg.chat.id, "You already have an active wallet with me, to change it to another one please use the  / change  command");
     }
     const account = generateAccount();
     if (account.privKey !== undefined)
@@ -197,7 +203,7 @@ const botCheckValid = async (msgId, userId, amount, symbol) => {
     if (isNaN(amount) || (amount * 1 <= 0)) {
         await bot.sendMessage(msgId, '❌Sorry, the amount for token must be positive number');
     }
-    else if ((amount * Math.pow(10, 8) % 1 !== 0)) {
+    else if (!validDecimals(amount)) {
         await bot.sendMessage(msgId, '❌Sorry, the amount of decimals is <= 8');
     }
     else if (symbol === undefined) {
@@ -217,6 +223,7 @@ const botCheckValid = async (msgId, userId, amount, symbol) => {
     }
     return isValid;
 }
+
 const botSendToken = async (msgId, msgContent,  ownerTelegramId, toAddress, amount, token) => {
 
     const result = await sendToken(ownerTelegramId, amount, toAddress, token);
@@ -226,7 +233,8 @@ const botSendToken = async (msgId, msgContent,  ownerTelegramId, toAddress, amou
     }
     else {
         // console.log(JSON.stringify(result.error, ["message", "arguments", "type", "name"]));
-        return await bot.sendMessage(msgId, '❌' + `${result.error}`,{parse_mode:"Markdown"});
+        await bot.sendMessage(BOT_ERROR, `Send token is error: ${result.error}`)
+        return await bot.sendMessage(msgId, '❌' + 'Opps! The system is busy, please try in a minute',{parse_mode:"Markdown"});
     }
     //HTMLcoin volume
     if(token === 'HTML') {
@@ -317,7 +325,7 @@ bot.onText(/\/balance/, async (msg) => {
         await bot.sendMessage(msg.from.id, "[" + msg.from.username + "](tg://user?id=" + msg.from.id + "), your current balance is:", { parse_mode: "Markdown" });
         await bot.sendPhoto(msg.from.id, imgBalance);
     }  catch (err) {        
-
+        await bot.sendMessage(BOT_ERROR, `Cannot get balance: ${err}`);
     }
 
 });
@@ -379,9 +387,10 @@ bot.on('message', async (msg) => {
             }
         }
     } catch (err) {
-        //ignore
+        await bot.sendMessage(BOT_ERROR, `Cannot get public address: ${err}`)
     }
 });
+
 /**
  * Get balance
  */
@@ -399,7 +408,7 @@ bot.on('message', async (msg) => {
             await bot.sendPhoto(msg.from.id, imgBalance);
         }
     } catch(err) {
-        //ignore
+        await bot.sendMessage(BOT_ERROR, `Cannot get balance: ${err}`)
     }
 });
 
@@ -419,7 +428,7 @@ bot.on('message', async(msg) => {
             }
         }
     } catch(err) {
-        //ignore
+        await bot.sendMessage(BOT_ERROR, `Cannot get private address: ${err}`)
     }
 
 });
@@ -441,7 +450,8 @@ bot.on('message', async (msg) => {
             await bot.sendMessage(msg.from.id, "What do you want to help?", opts);
         }
     }  catch(err) {
-        //ignore
+        await bot.sendMessage(BOT_ERROR, `Cannot show help: ${err}`)
+
     }
 
 });
@@ -475,7 +485,8 @@ bot.on('message', async (msg) => {
             await bot.sendMessage(msg.from.id, "<b>Please choose action</b>", opts);
         }
     } catch (err) {
-        //ignore
+        await bot.sendMessage(BOT_ERROR, `Cannot make an airdrop: ${err}`)
+
     }
 });
 
@@ -523,46 +534,50 @@ bot.onText(/\/users/, async (msg) => {
 
 
 bot.onText(/\/rain (.+)/, async (msg, match) => {
-    const params = match[1].split(' ');
+    try {
+        const params = match[1].split(' ');
 
-    //Check valid syntax
-    if (params[1] === 'to') {
-        return await bot.sendMessage(msg.chat.id, '❌ Sorry, You need to include the symbol you are sending');
+        //Check valid syntax
+        if (params[1] === 'to') {
+            return await bot.sendMessage(msg.chat.id, '❌ Sorry, You need to include the symbol you are sending');
+        }
+        if (isNaN(params[3]) || (params[3] * 1) < 0 || (params[3]*1) > 25 ) {
+            return await bot.sendMessage(msg.chat.id, "❌ Sorry, The number of people must be a positive number and smaller than 25", { parse_mode: "HTML" });
+        }
+        const isValid = await botCheckValid(msg.chat.id, msg.from.id, params[0], params[1]);
+        if (isValid === 'OKAY') {
+            let listUser = [];
+            let result = undefined;
+            result = await rainTokenPerDay(msg.from.id, params[0] * 1, params[3] * 1, params[1]);
+            if (result.error !== '') {
+                await bot.sendMessage(BOT_ERROR, `Cannot make it rain: ${result.error}`)
+                return await bot.sendMessage(msg.chat.id, "❌ Opps!! Cannot make it rain now. Please try in a minute");
+            } 
+            listUser = result.listUsers;
+            let rainMsg = '';
+            if (!listUser.length) {
+                return await bot.sendMessage(msg.chat.id, "<b> WE DO NOT HAVE ANY LUCKY PEOPLE TODAY. SEE IN NEXT TIME</b>\n\n" +
+                    rainMsg, { parse_mode: "HTML" });
+            }
+            for (const user of listUser) {
+                let name = user.name
+                name = name.replace(/[&\/\\#,+()$~%.;!'":*?<>{}\[\]]/g, '');
+                rainMsg += user.volume + ' ' + params[1] + ' to ' + '[' + name + '](tg://user?id=' + user.userId + ')\n';
+            }
+            await bot.sendMessage(msg.chat.id, "☀️☀️ *TOKEN RAIN IS DONE. CONGRATULATIONS TO ALL THE LUCKY PEOPLE* ☀️☀️\n\n" +
+                rainMsg, { parse_mode: "Markdown" });
+    
+            //HTMLcoin volume
+            params[1] === 'HTML' ? addVolume(parserDate(), params[0] * 1) : addVolume(parserDate(), 1);
+        }
+        else if (isValid === 'NOT ENOUGH') {
+            await bot.sendMessage(msg.chat.id, "<b>Sorry, You do not have enough balance </b>", { parse_mode: "HTML" });
+        }
+        await sleep(5000);
+    } catch(err) {
+        await bot.sendMessage(BOT_ERROR, `Cannot get make it rain: ${err}`)
     }
-    if (isNaN(params[3]) || (params[3] * 1) < 0 || (params[3]*1) > 25 ) {
-        return await bot.sendMessage(msg.chat.id, "❌ Sorry, The number of people must be a positive number and smaller than 25", { parse_mode: "HTML" });
-    }
-    const isValid = await botCheckValid(msg.chat.id, msg.from.id, params[0], params[1]);
-    if (isValid === 'OKAY') {
-        let listUser = [];
-        let result = undefined;
-        // await bot.sendMessage(msg.chat.id, "🌩🌩🌩<b> WE ARE MAKING IT RAIN " + params[0] + ' ' + params[1] + " TOKENS </b>🌩🌩🌩\n" +
-        //     "🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧🌧", { parse_mode: "HTML" });
-        result = await rainTokenPerDay(msg.from.id, params[0] * 1, params[3] * 1, params[1]);
-        if (result.error !== '') {
-            return await bot.sendMessage(msg.chat.id, "❌ Opps!! Cannot make it rain now. Please try in a minute");
-        }
-        listUser = result.listUsers;
-        let rainMsg = '';
-        if (!listUser.length) {
-            return await bot.sendMessage(msg.chat.id, "💨💨<b> WE DO NOT HAVE ANY LUCKY PEOPLE TODAY. SEE IN NEXT TIME</b> 💨💨\n\n" +
-                rainMsg, { parse_mode: "HTML" });
-        }
-        for (const user of listUser) {
-            let name = user.name
-            name = name.replace(/[&\/\\#,+()$~%.;!'":*?<>{}\[\]]/g, '');
-            rainMsg += user.volume + ' ' + params[1] + ' to ' + '[' + name + '](tg://user?id=' + user.userId + ')\n';
-        }
-        await bot.sendMessage(msg.chat.id, "☀️☀️ *TOKEN RAIN IS DONE. CONGRATULATIONS TO ALL THE LUCKY PEOPLE* ☀️☀️\n\n" +
-            rainMsg, { parse_mode: "Markdown" });
 
-        //HTMLcoin volume
-        params[1] === 'HTML' ? addVolume(parserDate(), params[0] * 1) : addVolume(parserDate(), 1);
-    }
-    else if (isValid === 'NOT ENOUGH') {
-        await bot.sendMessage(msg.chat.id, "<b>Sorry, You do not have enough balance </b>", { parse_mode: "HTML" });
-    }
-    await sleep(5000);
 });
 
 /**
@@ -583,7 +598,6 @@ bot.onText(/\/rewards (.+)/, async (msg, match) => {
             "🥇[First Prize](tg://user?id=" + result.firstPrize + ")      : 500 CDEX \n" +
             "🥈[Second Prize](tg://user?id=" + result.secondPrize + ") : 300 CDEX \n" +
             "🥉[Third Prize](tg://user?id=" + result.thirdPrize + ")     : 100 CDEX", { parse_mode: "Markdown" });
-
 
         //HTMLcoin volume
         addVolume(parserDate(), 3);
@@ -627,6 +641,8 @@ bot.onText(/\/raintoallVIPs (.+)/, async (msg, match) => {
             }
     
             if(!result) {
+                await bot.sendMessage(BOT_ERROR, `Cannot make it rain to VIPs: ${result.error}`)
+
                 return await bot.sendMessage(msg.chat.id, "❌ Opps!! Cannot make it rain to VIPs now. Please try in a minute");
             } else {
                 return await bot.sendMessage(msg.chat.id, "WE HAVE JUST MADE IT RAIN TOKENS TO VIPs. KINDLY CHECK YOUR WALLET");
@@ -640,8 +656,6 @@ bot.onText(/\/raintoallVIPs (.+)/, async (msg, match) => {
     }
 
 });
-
-
 
 /**
  * Send token for VIPs
@@ -663,6 +677,8 @@ bot.onText(/\/sendtoallVIPs (.+)/, async (msg, match) => {
             }
 
             if(!result) {
+                await bot.sendMessage(BOT_ERROR, `Cannot send token to VIPs: ${result.error}`)
+
                 return await bot.sendMessage(msg.chat.id, "❌ Opps!! Cannot send tokens to VIPs now. Please try in a minute");
             } else {
                 return await bot.sendMessage(msg.chat.id, "WE HAVE JUST GIVEN TOKENS TO VIPS USER. KINDLY CHECK YOUR WALLET");
@@ -681,154 +697,158 @@ bot.onText(/\/sendtoallVIPs (.+)/, async (msg, match) => {
  * Handle polling question
  */
 bot.on("callback_query", async  (msg) => {
-    const choice = msg.data;
-    if ((choice === '6'|| choice === '7') && (msg.from.id !== commandTrade.traderId)) {
-        return await bot.answerCallbackQuery(msg.id,'This message does not apply to you');
-    }
-    await bot.deleteMessage(msg.message.chat.id, msg.message.message_id);
-    if (choice === "4") {
-        const vipWallet = getCustomWallet(msg.from.id);
-        if(vipWallet === ''){
-            return await bot.sendMessage(msg.from.id, '⚠️Your address does not exist');
+    try {
+        const choice = msg.data;
+        if ((choice === '6'|| choice === '7') && (msg.from.id !== commandTrade.traderId)) {
+            return await bot.answerCallbackQuery(msg.id,'This message does not apply to you');
         }
-        if (vipWallet.isVIP) {
-            return await bot.sendMessage(msg.from.id, '⚠️You are a VIP member');
-        }
-        const codex = checkCDEX(msg.from.id);
-        if(codex) {
-            const opts = {
-                reply_markup: {
-                    inline_keyboard: [
-                        [{ text: "YES", callback_data: "8" }, { text: "NO", callback_data: "9" }]]
-                },
-                parse_mode: "Markdown"
-            };
-
-            await bot.sendMessage(msg.from.id, "This function will deduct 50k ‘CDEX’ from your wallet. This is a one time charge to be VIP for life! <b>These funds are unretrievable</b>\nDo you want to continue?", opts);
-        }
-        else {
-            await bot.sendMessage(msg.from.id, '⚠️You must have CDEX token greater than 50k');
-        }
-    }
-    else if (choice === "5") {
-        await bot.sendMessage(msg.message.chat.id,
-            "Welcome to your virtual wallet, secure management and transfer of your funds in application has never been easier. Send the commands below directly to the bot to manage your wallet(s).\n" + 
-            "1.	Access wallet (have an address) -> /restore &lt;private key&gt\n"+
-            "2.	Change wallet -> /change &lt;private key&gt\n"+
-            "3.	No wallet -> /mywallet (We made one for you)\n"+
-            "4.	Get public address (for someone send tokens to you) -> press <b>Get public address</b> button\n"+
-            "5.	Get private key (for send tokens to someone or access into Althash or HTMLcoin wallet) -> press <b>Get private key</b> button\n"+
-            "6.	Send tokens to someone ->  /send &lt;recipient’s public address&gt &lt;amount&gt&lt;token&gt\n"+
-            "7.	Tip tokens for person who you reply message -> /tip &lt;amount&gt&lt;token&gt",
-            { parse_mode: "HTML" });    
-    }
-    else if (choice === "6") {
-        const adsAccount = await getBalance(commandTrade.adsId);
-        const traderAccount = await getBalance(commandTrade.traderId);
-        const checkTrade = await tradingToken(traderAccount, adsAccount, commandTrade);
-        let deleteMsg = '';
-        if (checkTrade.validTrader === 400 && checkTrade.validAds === 300) {
-            let result = undefined;
-            if (checkTrade.type === 'autosell') {
-                //ads send
-                deleteMsg = await bot.sendMessage(msg.message.chat.id, "1️⃣Transfering " + checkTrade.adsAmount + ' ' + checkTrade.adsToken + ' from  ' + "[" + commandTrade.adsUsername + "](tg://user?id=" + commandTrade.adsAmount + ")", {parse_mode: "Markdown"});
-                result = await sendToken(commandTrade.adsId, checkTrade.adsAmount, getAddress(commandTrade.traderId), checkTrade.adsToken);
-                //trader send
-                if (result.error === '') {
-                    await bot.deleteMessage(msg.message.chat.id, deleteMsg.message_id);
-                    deleteMsg = await bot.sendMessage(msg.message.chat.id, "2️⃣Transfering " + checkTrade.traderAmount + ' ' + checkTrade.traderToken + ' from  ' + "[" + commandTrade.traderUsername + "](tg://user?id=" + commandTrade.traderId + ")", {parse_mode: "Markdown"});
-                    result = await sendToken(commandTrade.traderId, checkTrade.traderAmount, getAddress(commandTrade.adsId), checkTrade.traderToken);
-                }
+        await bot.deleteMessage(msg.message.chat.id, msg.message.message_id);
+        if (choice === "4") {
+            const vipWallet = getCustomWallet(msg.from.id);
+            if(vipWallet === ''){
+                return await bot.sendMessage(msg.from.id, '⚠️Your address does not exist');
             }
-            else if (checkTrade.type === 'autobuy') {
-                //trader send
-                deleteMsg = await bot.sendMessage(msg.message.chat.id, "1️⃣Transfering " + checkTrade.traderAmount + ' ' + checkTrade.traderToken + ' from  ' + "[" + commandTrade.traderUsername + "](tg://user?id=" + commandTrade.traderId + ")", {parse_mode: "Markdown"});
-                result = await sendToken(commandTrade.traderId, checkTrade.traderAmount, getAddress(commandTrade.adsId), checkTrade.traderToken);
-                //ads send
-                if (result === '') {
-                    await bot.deleteMessage(msg.message.chat.id, deleteMsg.message_id);
-                    deleteMsg = await bot.sendMessage(msg.message.chat.id, "2️⃣Transfering " + checkTrade.adsAmount + ' ' + checkTrade.adsToken + ' from  ' + "[" + commandTrade.adsUsername + "](tg://user?id=" + commandTrade.adsId + ")", {parse_mode: "Markdown"});
-                    result = await sendToken(commandTrade.adsId, checkTrade.adsAmount, getAddress(commandTrade.traderId), checkTrade.adsToken);
-                }
+            if (vipWallet.isVIP) {
+                return await bot.sendMessage(msg.from.id, '⚠️You are a VIP member');
             }
-            if (result.error !== '') {
-                await bot.deleteMessage(msg.message.chat.id, deleteMsg.message_id);
-                await bot.sendMessage(msg.message.chat.id, "❌Transaction on trade: \n" + " between "
-                    + "[" + commandTrade.adsUsername + "](tg://user?id=" + commandTrade.adsId + ")" + ' and ' + "[" + commandTrade.traderUsername + "](tg://user?id=" + commandTrade.traderId + ")" + ' has an error: \n'
-                    + result.error, {parse_mode: "Markdown"});
-            }
-            if (result.error === '') {
-                await bot.deleteMessage(msg.message.chat.id, deleteMsg.message_id);
-                await bot.sendMessage(msg.message.chat.id, "✅Trade of  " + "[" + commandTrade.traderUsername + "](tg://user?id=" + commandTrade.traderId + ")" + " completed! \n"
-                    + "[" + commandTrade.adsUsername + "](tg://user?id=" + commandTrade.adsId + ")" + " (" + checkTrade.adsAmount + ' ' + checkTrade.adsToken + ') <-> '
-                    + "[" + commandTrade.traderUsername + "](tg://user?id=" + commandTrade.traderId + ")" + " (" + checkTrade.traderAmount + ' ' + checkTrade.traderToken + ')',
-                    {parse_mode: "Markdown"});
-
-            }
-
-        }
-        else if (checkTrade.validAds === 301) {
-            await bot.sendMessage(msg.message.chat.id, "❌" + "[" + commandTrade.adsUsername + "](tg://user?id=" + commandTrade.adsId +")" + ': Insufficient HTML tokens!', {parse_mode: "Markdown"});
-        }
-        else if (checkTrade.validAds === 302) {
-            await bot.sendMessage(msg.message.chat.id, "❌ " + "[" + commandTrade.adsUsername + "](tg://user?id=" + commandTrade.adsId + ")"+ ': Insufficient ' + commandTrade.ownToken + ' tokens!', { parse_mode: "Markdown" });
-        }
-        else if (checkTrade.validTrader === 401) {
-            await bot.sendMessage(msg.message.chat.id, "❌ " + "[" + commandTrade.traderUsername + "](tg://user?id=" + commandTrade.traderId + ")" + ': Insufficient HTML tokens!', { parse_mode: "Markdown" });
-        }
-        else if (checkTrade.validTrader === 402) {
-            await bot.sendMessage(msg.message.chat.id, "❌ " + "[" + commandTrade.traderUsername + "](tg://user?id=" + commandTrade.traderId + ")" + ': Insufficient ' + commandTrade.exchangeToken + ' tokens!', { parse_mode: "Markdown" });
-        }
-    }
-    else if(choice === "7") {
-        await bot.sendMessage(msg.message.chat.id, "❌ " + "[" + commandTrade.traderUsername + "](tg://user?id=" + commandTrade.traderId + ")" + ' canceled trade!', { parse_mode: "Markdown"});
-    }
-
-    else if(choice === "8") {
-        const vipWallet = getCustomWallet(msg.from.id);
-        const result = await sendToken(msg.from.id, 50000 , AIRDROP_ADDRESS, "CDEX");
-        if (result.error === '') {
-            await bot.sendMessage(msg.message.chat.id, '🎉🎉Congratulations! You are now a Lifetime VIP member🎉🎉\n Each day you are able to claim <b>CDEX</b> by clicking <b>VIP menu</b> button and by pressing <b>Get Airdrop<\b>.\n To see additional features head over to the VIP menu and click <b>VIP Features</b>. ', {parse_mode:"HTML"});
-            vipWallet.setVIPMember();
-            saveVipMember(vipWallet.getAddress());
-        }
-        else {
-            await bot.sendMessage(msg.message.chat.id, 'Oops⁉️ Something is error');
-        }
-    }
-    else if (choice === "9") {
-        const imgeLog = await airdropLog(msg.from.id);
-        if (imgeLog === false) {
-            await bot.sendMessage(msg.from.id, 'You do not have any airdrop log to show');
-        }
-        else {
-            await bot.sendMessage(msg.from.id, '<b>Your airdop log</b>', {parse_mode:"HTML"});
-            await bot.sendPhoto(msg.from.id, imgeLog);
-        }
-    }
-    else if (choice === "10") {
-        await bot.sendMessage(msg.message.chat.id, 'View transactions will be coming soon ... ');
-        isViewTransactions = false;
-    }
-    else if (choice === "11") {
-        const vipWallet = getCustomWallet(msg.from.id);
-        if (isValidAirDrop(msg.message.date, vipWallet.getAirDropTime())) {
-            const amountAirdrop = getLuckyAirdrop(msg.from.id);
-            const result = await sendToken(AIRDROP_ID, amountAirdrop, vipWallet.getAddress(), "CDEX");
-            if (result.error === '') {
-                await bot.sendMessage(msg.from.id, '🎉🎉🎉You just received <b>' + `${amountAirdrop}`+' CDEX </b>', {parse_mode: "HTML"});
-                vipWallet.setAirDropTime();
-                //HTMLcoin volume
-                addVolume(parserDate(), 1);
+            const codex = checkCDEX(msg.from.id);
+            if(codex) {
+                const opts = {
+                    reply_markup: {
+                        inline_keyboard: [
+                            [{ text: "YES", callback_data: "8" }, { text: "NO", callback_data: "9" }]]
+                    },
+                    parse_mode: "Markdown"
+                };
+    
+                await bot.sendMessage(msg.from.id, "This function will deduct 50k ‘CDEX’ from your wallet. This is a one time charge to be VIP for life! <b>These funds are unretrievable</b>\nDo you want to continue?", opts);
             }
             else {
-                await bot.sendMessage(msg.from.id,'⁉️'+ `${result.error}`);
+                await bot.sendMessage(msg.from.id, '⚠️You must have CDEX token greater than 50k');
             }
         }
-        else {
-            const miliseconds = TIME_AIRDROP - (new Date(msg.message.date).getTime() - new Date(vipWallet.getAirDropTime()).getTime());
-            const timeLeft = convertTime(miliseconds*1000);
-            await bot.sendMessage(msg.from.id, "⚠️Please wait: <b>" + `${timeLeft}` + "</b> to get airdrop again! ", {parse_mode: "HTML"});
+        else if (choice === "5") {
+            await bot.sendMessage(msg.message.chat.id,
+                "Welcome to your virtual wallet, secure management and transfer of your funds in application has never been easier. Send the commands below directly to the bot to manage your wallet(s).\n" + 
+                "1.	Access wallet (have an address) -> /restore &lt;private key&gt\n"+
+                "2.	Change wallet -> /change &lt;private key&gt\n"+
+                "3.	No wallet -> /mywallet (We made one for you)\n"+
+                "4.	Get public address (for someone send tokens to you) -> press <b>Get public address</b> button\n"+
+                "5.	Get private key (for send tokens to someone or access into Althash or HTMLcoin wallet) -> press <b>Get private key</b> button\n"+
+                "6.	Send tokens to someone ->  /send &lt;recipient’s public address&gt &lt;amount&gt&lt;token&gt\n"+
+                "7.	Tip tokens for person who you reply message -> /tip &lt;amount&gt&lt;token&gt",
+                { parse_mode: "HTML" });    
         }
+        else if (choice === "6") {
+            const adsAccount = await getBalance(commandTrade.adsId);
+            const traderAccount = await getBalance(commandTrade.traderId);
+            const checkTrade = await tradingToken(traderAccount, adsAccount, commandTrade);
+            let deleteMsg = '';
+            if (checkTrade.validTrader === 400 && checkTrade.validAds === 300) {
+                let result = undefined;
+                if (checkTrade.type === 'autosell') {
+                    //ads send
+                    deleteMsg = await bot.sendMessage(msg.message.chat.id, "1️⃣Transfering " + checkTrade.adsAmount + ' ' + checkTrade.adsToken + ' from  ' + "[" + commandTrade.adsUsername + "](tg://user?id=" + commandTrade.adsAmount + ")", {parse_mode: "Markdown"});
+                    result = await sendToken(commandTrade.adsId, checkTrade.adsAmount, getAddress(commandTrade.traderId), checkTrade.adsToken);
+                    //trader send
+                    if (result.error === '') {
+                        await bot.deleteMessage(msg.message.chat.id, deleteMsg.message_id);
+                        deleteMsg = await bot.sendMessage(msg.message.chat.id, "2️⃣Transfering " + checkTrade.traderAmount + ' ' + checkTrade.traderToken + ' from  ' + "[" + commandTrade.traderUsername + "](tg://user?id=" + commandTrade.traderId + ")", {parse_mode: "Markdown"});
+                        result = await sendToken(commandTrade.traderId, checkTrade.traderAmount, getAddress(commandTrade.adsId), checkTrade.traderToken);
+                    }
+                }
+                else if (checkTrade.type === 'autobuy') {
+                    //trader send
+                    deleteMsg = await bot.sendMessage(msg.message.chat.id, "1️⃣Transfering " + checkTrade.traderAmount + ' ' + checkTrade.traderToken + ' from  ' + "[" + commandTrade.traderUsername + "](tg://user?id=" + commandTrade.traderId + ")", {parse_mode: "Markdown"});
+                    result = await sendToken(commandTrade.traderId, checkTrade.traderAmount, getAddress(commandTrade.adsId), checkTrade.traderToken);
+                    //ads send
+                    if (result === '') {
+                        await bot.deleteMessage(msg.message.chat.id, deleteMsg.message_id);
+                        deleteMsg = await bot.sendMessage(msg.message.chat.id, "2️⃣Transfering " + checkTrade.adsAmount + ' ' + checkTrade.adsToken + ' from  ' + "[" + commandTrade.adsUsername + "](tg://user?id=" + commandTrade.adsId + ")", {parse_mode: "Markdown"});
+                        result = await sendToken(commandTrade.adsId, checkTrade.adsAmount, getAddress(commandTrade.traderId), checkTrade.adsToken);
+                    }
+                }
+                if (result.error !== '') {
+                    await bot.deleteMessage(msg.message.chat.id, deleteMsg.message_id);
+                    await bot.sendMessage(msg.message.chat.id, "❌Transaction on trade: \n" + " between "
+                        + "[" + commandTrade.adsUsername + "](tg://user?id=" + commandTrade.adsId + ")" + ' and ' + "[" + commandTrade.traderUsername + "](tg://user?id=" + commandTrade.traderId + ")" + ' has an error: \n'
+                        + result.error, {parse_mode: "Markdown"});
+                }
+                if (result.error === '') {
+                    await bot.deleteMessage(msg.message.chat.id, deleteMsg.message_id);
+                    await bot.sendMessage(msg.message.chat.id, "✅Trade of  " + "[" + commandTrade.traderUsername + "](tg://user?id=" + commandTrade.traderId + ")" + " completed! \n"
+                        + "[" + commandTrade.adsUsername + "](tg://user?id=" + commandTrade.adsId + ")" + " (" + checkTrade.adsAmount + ' ' + checkTrade.adsToken + ') <-> '
+                        + "[" + commandTrade.traderUsername + "](tg://user?id=" + commandTrade.traderId + ")" + " (" + checkTrade.traderAmount + ' ' + checkTrade.traderToken + ')',
+                        {parse_mode: "Markdown"});
+    
+                }
+    
+            }
+            else if (checkTrade.validAds === 301) {
+                await bot.sendMessage(msg.message.chat.id, "❌" + "[" + commandTrade.adsUsername + "](tg://user?id=" + commandTrade.adsId +")" + ': Insufficient HTML tokens!', {parse_mode: "Markdown"});
+            }
+            else if (checkTrade.validAds === 302) {
+                await bot.sendMessage(msg.message.chat.id, "❌ " + "[" + commandTrade.adsUsername + "](tg://user?id=" + commandTrade.adsId + ")"+ ': Insufficient ' + commandTrade.ownToken + ' tokens!', { parse_mode: "Markdown" });
+            }
+            else if (checkTrade.validTrader === 401) {
+                await bot.sendMessage(msg.message.chat.id, "❌ " + "[" + commandTrade.traderUsername + "](tg://user?id=" + commandTrade.traderId + ")" + ': Insufficient HTML tokens!', { parse_mode: "Markdown" });
+            }
+            else if (checkTrade.validTrader === 402) {
+                await bot.sendMessage(msg.message.chat.id, "❌ " + "[" + commandTrade.traderUsername + "](tg://user?id=" + commandTrade.traderId + ")" + ': Insufficient ' + commandTrade.exchangeToken + ' tokens!', { parse_mode: "Markdown" });
+            }
+        }
+        else if(choice === "7") {
+            await bot.sendMessage(msg.message.chat.id, "❌ " + "[" + commandTrade.traderUsername + "](tg://user?id=" + commandTrade.traderId + ")" + ' canceled trade!', { parse_mode: "Markdown"});
+        }
+    
+        else if(choice === "8") {
+            const vipWallet = getCustomWallet(msg.from.id);
+            const result = await sendToken(msg.from.id, 50000 , AIRDROP_ADDRESS, "CDEX");
+            if (result.error === '') {
+                await bot.sendMessage(msg.message.chat.id, '🎉🎉Congratulations! You are now a Lifetime VIP member🎉🎉\n Each day you are able to claim <b>CDEX</b> by clicking <b>VIP menu</b> button and by pressing <b>Get Airdrop<\b>.\n To see additional features head over to the VIP menu and click <b>VIP Features</b>. ', {parse_mode:"HTML"});
+                vipWallet.setVIPMember();
+                saveVipMember(vipWallet.getAddress());
+            }
+            else {
+                await bot.sendMessage(msg.message.chat.id, 'Oops⁉️ Something is error');
+            }
+        }
+        else if (choice === "9") {
+            const imgeLog = await airdropLog(msg.from.id);
+            if (imgeLog === false) {
+                await bot.sendMessage(msg.from.id, 'You do not have any airdrop log to show');
+            }
+            else {
+                await bot.sendMessage(msg.from.id, '<b>Your airdop log</b>', {parse_mode:"HTML"});
+                await bot.sendPhoto(msg.from.id, imgeLog);
+            }
+        }
+        else if (choice === "10") {
+            await bot.sendMessage(msg.message.chat.id, 'View transactions will be coming soon ... ');
+            isViewTransactions = false;
+        }
+        else if (choice === "11") {
+            const vipWallet = getCustomWallet(msg.from.id);
+            if (isValidAirDrop(msg.message.date, vipWallet.getAirDropTime())) {
+                const amountAirdrop = getLuckyAirdrop(msg.from.id);
+                const result = await sendToken(AIRDROP_ID, amountAirdrop, vipWallet.getAddress(), "CDEX");
+                if (result.error === '') {
+                    await bot.sendMessage(msg.from.id, '🎉🎉🎉You just received <b>' + `${amountAirdrop}`+' CDEX </b>', {parse_mode: "HTML"});
+                    vipWallet.setAirDropTime();
+                    //HTMLcoin volume
+                    addVolume(parserDate(), 1);
+                }
+                else {
+                    await bot.sendMessage(msg.from.id,'⁉️'+ `${result.error}`);
+                }
+            }
+            else {
+                const miliseconds = TIME_AIRDROP - (new Date(msg.message.date).getTime() - new Date(vipWallet.getAirDropTime()).getTime());
+                const timeLeft = convertTime(miliseconds*1000);
+                await bot.sendMessage(msg.from.id, "⚠️Please wait: <b>" + `${timeLeft}` + "</b> to get airdrop again! ", {parse_mode: "HTML"});
+            }
+        }
+    } catch(err) {
+        await bot.sendMessage(BOT_ERROR, `System has an error: ${err}`)
     }
 });
