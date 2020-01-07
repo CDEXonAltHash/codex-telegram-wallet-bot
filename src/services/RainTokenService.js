@@ -14,6 +14,9 @@ const {
     getAddress
 } = require('./AddressService');
 
+const {
+    codexBot
+} = require('./initBot');
 
 const RainToken = new Map();
 
@@ -98,6 +101,49 @@ const rainTokenPerDay = async (ownerId, volumeTokens, people, symbol) => {
     };
 };
 
+const rainTokenOnRoom = async (chatId, ownerId, volumeTokens, people, symbol) => {
+    const listUsers = [];
+    const totalUsers = CodexWallet.size;
+    if(people > totalUsers - 2) {
+        people = totalUsers - 2;
+    }
+    const payouts = distributeTokens(volumeTokens, people);
+    const realPayouts = payouts.filter(token => token > 0);
+
+    const usersReceive = [...CodexWallet.entries()];
+
+    //Rolling dice
+    let ind = 0;
+    while (!isEmpty(realPayouts)) {
+        let oneDie = roll.roll('d' + `${totalUsers}`);
+        let codexUser = usersReceive[oneDie.result - 1][0];
+        let isExist = listUsers.filter(user => user.userId === codexUser);
+        const member  = await codexBot.getChatMember(chatId, codexUser)
+
+        if (((isEmpty(isExist) && usersReceive[oneDie.result - 1][1]['name'] !== 'CodexWalletBot'))
+            && codexUser != ownerId && member.is_member) {
+            listUsers.push({ userId: codexUser, name: usersReceive[oneDie.result - 1][1]['name'], volume: realPayouts.pop() })
+            ind++;
+        }
+        if (ind >= (totalUsers - 2)) {
+            break;
+        }
+    }
+    //Store & Send token to user
+    let res = '';
+    for (const user of listUsers) {
+        addAmount(user.userId, user.name, user.volume);
+        res = await sendToken(`${ownerId}`, user.volume, getAddress(`${user.userId}`), `${symbol}`);
+        if (res.error!== ''){
+            break;
+        }
+    }
+    
+    return {
+        error: `${res.error}`,
+        listUsers: listUsers
+    };
+};
 const rewardsPerWeek = async () => {
     const totalUsers = RainToken.size;
     const arrayRainToken = [...RainToken.entries()];
@@ -131,41 +177,36 @@ const rewardsPerWeek = async () => {
     }
 };
 
+const getRandomInt = (max) =>{
+  return Math.floor(Math.random() * Math.floor(max));
+}
 const rainTokenForVip = async(ownerId, volumeTokens, symbol) => {
-    const listVIP = [];
+    let res = {hasError: false, error: ''};
     let totalVIPs = CodexVIP.size;
-    if(totalVIPs > 24) {
-        totalVIPs = 24;
+    if(totalVIPs === 0) {
+        res.hasError = true;
+        res.error = 'We do not any VIPs member for make it rain'
+        return res;
     }
-    const payouts = distributeTokens(volumeTokens, totalVIPs);
-    const realPayouts = payouts.filter(token => token > 0);
-
     const usersReceive = [...CodexVIP.entries()];
     let address = getAddress(`${ownerId}`)
+    let listVIP = {};
 
-    //Rolling dice
-    let ind = 0;
-    while (!isEmpty(realPayouts)) {
-        let oneDie = roll.roll('d' + `${totalVIPs}`);
-        let isExist = listVIP.filter(user => user.userId === usersReceive[oneDie.result - 1][0]);
-        if ((isEmpty(isExist) && usersReceive[oneDie.result - 1][0] != address)) {
-            listVIP.push({ userId: usersReceive[oneDie.result - 1][0], volume: realPayouts.pop() })
-            ind++;
-        }
-        if (ind >= (totalVIPs - 1)) {
-            break;
+    while (1) {
+        let vip = getRandomInt(totalVIPs);
+        if (usersReceive[vip][0] != address) {
+            listVIP = { userId: usersReceive[vip][0], volume: volumeTokens }
+            break
         }
     }
 
     //Store & Send token to user
-    let res = '';
-    for (const user of listVIP) {
-        res = await sendToken(`${ownerId}`, user.volume, `${user.userId}`, `${symbol}`);
-        if (res.error!== ''){
-            return false;
-        }
+    res = await sendToken(`${ownerId}`, listVIP.volume, `${listVIP.userId}`, `${symbol}`);
+    if (res.error!== ''){
+        res.hasError = true;
+        return res;
     }
-    return true;
+    return res;
 };
 
 const sendTokenToVip = async(ownerId, volumeTokens, symbol) => {
@@ -206,5 +247,6 @@ module.exports = {
     rainTokenPerDay,
     rewardsPerWeek,
     rainTokenForVip,
-    sendTokenToVip
+    sendTokenToVip,
+    rainTokenOnRoom
 }

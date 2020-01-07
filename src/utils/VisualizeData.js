@@ -92,7 +92,26 @@ const chartCanvas = async (width, height, title, label, data, type ) => {
     const configuration = {
         type: `${type}`,
         data: {
-            labels: label
+            labels: label,
+            datasets: [{
+                    label: `${title}`,
+                    data: data,
+                    backgroundColor: [
+                        'rgba(255,255,255,0.1)',
+                        'rgba(255,255,255,0.1)',
+                        'rgba(255,255,255,0.1)',
+                        'rgba(255,255,255,0.1)',
+                        'rgba(255,255,255,0.1)',
+                    ],
+                    borderColor: [
+                        'rgba(97,143,25,0.8)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                    ],
+                    borderWidth: 1
+                }]
         },
         options: {
             scales: {
