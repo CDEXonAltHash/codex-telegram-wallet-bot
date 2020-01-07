@@ -95,8 +95,9 @@ const validDecimals = (number) =>{
     let decimals = 0
     if(Math.floor(number) === number){
       decimals = 0
+    } else {
+        decimals =  number.toString().split(".")[1].length || 0
     }
-    decimals =  number.toString().split(".")[1].length || 0
   
     return (decimals < 9) ? true: false
   }
