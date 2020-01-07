@@ -205,7 +205,7 @@ const botCheckValid = async (msgId, userId, amount, symbol) => {
     if (isNaN(amount) || (amount * 1 <= 0)) {
         await codexBot.sendMessage(msgId, '❌Sorry, the amount for token must be positive number');
     }
-    else if (!validDecimals(amount)) {
+    else if (!validDecimals(amount*1)) {
         await codexBot.sendMessage(msgId, '❌Sorry, the amount of decimals is <= 8');
     }
     else if (symbol === undefined) {
