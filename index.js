@@ -774,7 +774,7 @@ codexBot.on("callback_query", async  (msg) => {
                     parse_mode: "Markdown"
                 };
     
-                await codexBot.sendMessage(msg.from.id, "This function will deduct 50k ‘CDEX’ from your wallet. This is a one time charge to be VIP for life! <b>These funds are unretrievable</b>\nDo you want to continue?", opts);
+                await codexBot.sendMessage(msg.from.id, "This function will deduct 50k ‘CDEX’ from your wallet. This is a one time charge to be VIP for life! *These funds are unretrievable*\nDo you want to continue?", opts);
             }
             else {
                 await codexBot.sendMessage(msg.from.id, '⚠️You must have CDEX token greater than 50k');
