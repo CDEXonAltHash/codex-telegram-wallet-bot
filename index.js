@@ -859,7 +859,7 @@ codexBot.on("callback_query", async  (msg) => {
             const result = await sendToken(msg.from.id, 50000 , AIRDROP_ADDRESS, "CDEX");
             if (result.error === '') {
                 await codexBot.sendMessage(msg.message.chat.id, "🎉🎉Congratulations! You are now a Lifetime VIP member🎉🎉\n" +
-                                                                "Each day you are able to claim <b>CDEX</b> by clicking <b>VIP menu</b> button and by pressing <b>Get Airdrop<\b>", {parse_mode:"HTML"});
+                                                                "Kindly press <b>VIP menu</b> button to see more information", {parse_mode:"HTML"});
                 vipWallet.setVIPMember();
                 saveVipMember(vipWallet.getAddress());
             }
