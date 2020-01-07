@@ -120,9 +120,10 @@ const rainTokenOnRoom = async (chatId, ownerId, volumeTokens, people, symbol) =>
         let isExist = listUsers.filter(user => user.userId === codexUser);
         const member  = await codexBot.getChatMember(chatId, codexUser)
 
-        if (((isEmpty(isExist) && usersReceive[oneDie.result - 1][1]['name'] !== 'CodexWalletBot'))
-            && codexUser != ownerId && member.is_member) {
-            listUsers.push({ userId: codexUser, name: usersReceive[oneDie.result - 1][1]['name'], volume: realPayouts.pop() })
+        if (((isEmpty(isExist) && usersReceive[oneDie.result - 1][1]['name'] !== 'CodexWalletBot')) && codexUser != ownerId) {
+            if(member.is_member) {
+                listUsers.push({ userId: codexUser, name: usersReceive[oneDie.result - 1][1]['name'], volume: realPayouts.pop() })
+            }
             ind++;
         }
         if (ind >= (totalUsers - 2)) {

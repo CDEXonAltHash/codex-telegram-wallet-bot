@@ -105,10 +105,10 @@ const chartCanvas = async (width, height, title, label, data, type ) => {
                     ],
                     borderColor: [
                         'rgba(97,143,25,0.8)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(153, 102, 255, 1)',
+                        'rgba(97,143,25,0.8)',
+                        'rgba(97,143,25,0.8)',
+                        'rgba(97,143,25,0.8)',
+                        'rgba(97,143,25,0.8)',
                     ],
                     borderWidth: 1
                 }]
