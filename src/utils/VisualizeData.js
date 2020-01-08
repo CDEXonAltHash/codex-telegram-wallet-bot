@@ -37,7 +37,10 @@ const svgTemplate = (width, height) => {
 }
 
 const buildSvgFile = (yCoordinate, tokenName, tokenValuePercision, tokenValeDecimal, tokenSymbol) => {
-
+    let fontWeight = 'normal'
+    if(tokenName === 'Codex') {
+        fontWeight = 'bold'
+    }
     let rowValue = ' <text' +
         ' style="font-style:normal;font-weight:normal;font-size:20px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:transparent;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"' +
         ' x = \"36\"' +
@@ -47,7 +50,7 @@ const buildSvgFile = (yCoordinate, tokenName, tokenValuePercision, tokenValeDeci
         ' id=\"' + `${tokenSymbol}` + '\O2"' +
         ' x=\"36\"' +
         ' y=\"' + `${yCoordinate}` + '\"' +
-        '  style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:\\\'Droid Sans\\\';-inkscape-font-specification:\\\'Droid Sans\\\'">' + `${tokenName}` + '</tspan></text>' +
+        '  style="font-style:normal;font-variant:normal;font-weight:'+`${fontWeight}`+';font-stretch:normal;font-family:\\\'Droid Sans\\\';-inkscape-font-specification:\\\'Droid Sans\\\'">' + `${tokenName}` + '</tspan></text>' +
         '  <text' +
         ' id=\"' + `${tokenSymbol}` + '\O3"' +
         ' y = \"' + `${yCoordinate}` + '\"' +

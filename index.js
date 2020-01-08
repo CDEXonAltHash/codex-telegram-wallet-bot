@@ -28,7 +28,6 @@ const {
 } = require('./src/utils/StringParser');
 
 const {
-    TELEGRAM_TOKEN,
     AIRDROP_ID,
     AIRDROP_ADDRESS,
     BOT_ERROR,
@@ -285,7 +284,6 @@ codexBot.onText(/\/tip (.+)/, async (msg, match) => {
     }
 });
 
-
 const botGetBlance =  (info) =>{
     const balance = info.balance;
     const unconfirmedBalance = info.unconfirmedBalance;
@@ -312,6 +310,7 @@ const botGetBlance =  (info) =>{
     svgFile += '</g></svg>';
     return svgFile;
 }
+
 /**
  * Command for get balance
  */
@@ -389,7 +388,7 @@ codexBot.on('message', async (msg) => {
             }
         }
     } catch (err) {
-        await codexBot.sendMessage(BOT_ERROR, `Cannot get public address: ${err}`)
+        // await codexBot.sendMessage(BOT_ERROR, `Cannot get public address: ${err}`)
     }
 });
 
@@ -410,7 +409,7 @@ codexBot.on('message', async (msg) => {
             await codexBot.sendPhoto(msg.from.id, imgBalance);
         }
     } catch(err) {
-        await codexBot.sendMessage(BOT_ERROR, `Cannot get balance: ${err}`)
+        // await codexBot.sendMessage(BOT_ERROR, `Cannot get balance: ${err}`)
     }
 });
 
@@ -430,7 +429,7 @@ codexBot.on('message', async(msg) => {
             }
         }
     } catch(err) {
-        await codexBot.sendMessage(BOT_ERROR, `Cannot get private address: ${err}`)
+        // await codexBot.sendMessage(BOT_ERROR, `Cannot get private address: ${err}`)
     }
 
 });
@@ -452,7 +451,7 @@ codexBot.on('message', async (msg) => {
             await codexBot.sendMessage(msg.from.id, "What do you want to help?", opts);
         }
     }  catch(err) {
-        await codexBot.sendMessage(BOT_ERROR, `Cannot show help: ${err}`)
+        // await codexBot.sendMessage(BOT_ERROR, `Cannot show help: ${err}`)
 
     }
 
@@ -487,7 +486,7 @@ codexBot.on('message', async (msg) => {
             await codexBot.sendMessage(msg.from.id, "<b>Please choose action</b>", opts);
         }
     } catch (err) {
-        await codexBot.sendMessage(BOT_ERROR, `Cannot make an airdrop: ${err}`)
+        // await codexBot.sendMessage(BOT_ERROR, `Cannot make an airdrop: ${err}`)
 
     }
 });
@@ -628,7 +627,7 @@ codexBot.onText(/\/raintothisroom (.+)/, async (msg, match) => {
         }
         await sleep(60000);
     } catch(err) {
-        await codexBot.sendMessage(BOT_ERROR, `Cannot get make it rain: ${err}`)
+        await codexBot.sendMessage(BOT_ERROR, `Cannot make it rain: ${err}`)
     }
 
 });
@@ -865,6 +864,7 @@ codexBot.on("callback_query", async  (msg) => {
             }
             else {
                 await codexBot.sendMessage(msg.message.chat.id, 'Oops⁉️ Something is error');
+                await codexBot.sendMessage(BOT_ERROR, `Make VIP is error:${result.error}`);
             }
         }
         else if (choice === "9") {
