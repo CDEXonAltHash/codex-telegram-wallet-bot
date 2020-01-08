@@ -121,7 +121,7 @@ const rainTokenOnRoom = async (chatId, ownerId, volumeTokens, people, symbol) =>
         const member  = await codexBot.getChatMember(chatId, codexUser)
 
         if (isEmpty(isExist) && codexUser != ownerId) {
-            if(member.status === 'creator' || member.status ===  'administrator' ||member.status ===  'member' && member.user.is_bot === false) {
+            if(member.status === 'creator' || member.status ===  'administrator' ||member.status === 'member' && member.user.is_bot === false) {
                 listUsers.push({ userId: codexUser, name: usersReceive[oneDie.result - 1][1]['name'], volume: realPayouts.pop() })
             }
             ind++;
