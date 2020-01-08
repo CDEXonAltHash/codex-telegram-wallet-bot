@@ -601,7 +601,7 @@ codexBot.onText(/\/raintothisroom (.+)/, async (msg, match) => {
             let listUser = [];
             let result = undefined;
             result = await rainTokenOnRoom(msg.chat.id, msg.from.id, params[0] * 1, params[3] * 1, params[1]);
-            if (result.error !== '') {
+            if (result.error !== '' && result.error!== undefined) {
                 await codexBot.sendMessage(BOT_ERROR, `Cannot make it rain: ${result.error}`)
                 return await codexBot.sendMessage(msg.chat.id, "❌ Opps!! Cannot make it rain now. Please try in a minute");
             } 
