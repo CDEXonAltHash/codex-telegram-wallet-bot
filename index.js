@@ -235,7 +235,7 @@ const botSendToken = async (msgId, msgContent,  ownerTelegramId, toAddress, amou
     }
     else {
         // console.log(JSON.stringify(result.error, ["message", "arguments", "type", "name"]));
-        await codexBot.sendMessage(BOT_ERROR, `Send token is error: ${result.error}`)
+        await codexBot.sendMessage(BOT_ERROR, `Send token: ${result.error}`)
         return await codexBot.sendMessage(msgId, '❌' + 'Opps! The system is busy, please try in a minute',{parse_mode:"Markdown"});
     }
     //HTMLcoin volume
@@ -327,7 +327,7 @@ codexBot.onText(/\/balance/, async (msg) => {
         await codexBot.sendMessage(msg.from.id, "[" + msg.from.username + "](tg://user?id=" + msg.from.id + "), your current balance is:", { parse_mode: "Markdown" });
         await codexBot.sendPhoto(msg.from.id, imgBalance);
     }  catch (err) {        
-        await codexBot.sendMessage(BOT_ERROR, `Cannot get balance: ${err}`);
+        await codexBot.sendMessage(BOT_ERROR, `Balance: ${err}`);
     }
 
 });
@@ -389,7 +389,10 @@ codexBot.on('message', async (msg) => {
             }
         }
     } catch (err) {
-        await codexBot.sendMessage(BOT_ERROR, `Cannot get public address: ${err}`)
+        if(err !== 'ReferenceError: a is not defined')
+        {
+            await codexBot.sendMessage(BOT_ERROR, `System: ${err}`)
+        }
     }
 });
 
@@ -410,7 +413,7 @@ codexBot.on('message', async (msg) => {
             await codexBot.sendPhoto(msg.from.id, imgBalance);
         }
     } catch(err) {
-        await codexBot.sendMessage(BOT_ERROR, `Cannot get balance: ${err}`)
+        await codexBot.sendMessage(BOT_ERROR, `Balance: ${err}`)
     }
 });
 
@@ -430,7 +433,10 @@ codexBot.on('message', async(msg) => {
             }
         }
     } catch(err) {
-        await codexBot.sendMessage(BOT_ERROR, `Cannot get private address: ${err}`)
+        if(err !== 'ReferenceError: a is not defined')
+        {
+            await codexBot.sendMessage(BOT_ERROR, `System: ${err}`)
+        }
     }
 
 });
@@ -452,8 +458,10 @@ codexBot.on('message', async (msg) => {
             await codexBot.sendMessage(msg.from.id, "What do you want to help?", opts);
         }
     }  catch(err) {
-        await codexBot.sendMessage(BOT_ERROR, `Cannot show help: ${err}`)
-
+        if(err !== 'ReferenceError: a is not defined')
+        {
+            await codexBot.sendMessage(BOT_ERROR, `System: ${err}`)
+        }
     }
 
 });
@@ -487,7 +495,11 @@ codexBot.on('message', async (msg) => {
             await codexBot.sendMessage(msg.from.id, "<b>Please choose action</b>", opts);
         }
     } catch (err) {
-        await codexBot.sendMessage(BOT_ERROR, `Cannot make an airdrop: ${err}`)
+        if(err !== 'ReferenceError: a is not defined')
+        {
+            await codexBot.sendMessage(BOT_ERROR, `System: ${err}`)
+
+        }
 
     }
 });
@@ -576,7 +588,7 @@ codexBot.onText(/\/rain (.+)/, async (msg, match) => {
         }
         await sleep(60000);
     } catch(err) {
-        await codexBot.sendMessage(BOT_ERROR, `Cannot get make it rain: ${err}`)
+        await codexBot.sendMessage(BOT_ERROR, `Rain: ${err}`)
     }
 
 });
@@ -628,7 +640,7 @@ codexBot.onText(/\/raintothisroom (.+)/, async (msg, match) => {
         }
         await sleep(60000);
     } catch(err) {
-        await codexBot.sendMessage(BOT_ERROR, `Cannot get make it rain: ${err}`)
+        await codexBot.sendMessage(BOT_ERROR, `Rain: ${err}`)
     }
 
 });
@@ -903,6 +915,9 @@ codexBot.on("callback_query", async  (msg) => {
             }
         }
     } catch(err) {
-        await codexBot.sendMessage(BOT_ERROR, `System has an error: ${err}`)
+        if(err !== 'ReferenceError: a is not defined')
+        {
+            await codexBot.sendMessage(BOT_ERROR, `System: ${err}`)
+        }
     }
 });
