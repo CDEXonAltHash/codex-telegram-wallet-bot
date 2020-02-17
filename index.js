@@ -28,7 +28,6 @@ const {
 } = require('./src/utils/StringParser');
 
 const {
-    TELEGRAM_TOKEN,
     AIRDROP_ID,
     AIRDROP_ADDRESS,
     BOT_ERROR,
@@ -285,7 +284,6 @@ codexBot.onText(/\/tip (.+)/, async (msg, match) => {
     }
 });
 
-
 const botGetBlance =  (info) =>{
     const balance = info.balance;
     const unconfirmedBalance = info.unconfirmedBalance;
@@ -312,6 +310,7 @@ const botGetBlance =  (info) =>{
     svgFile += '</g></svg>';
     return svgFile;
 }
+
 /**
  * Command for get balance
  */
@@ -326,8 +325,11 @@ codexBot.onText(/\/balance/, async (msg) => {
 
         await codexBot.sendMessage(msg.from.id, "[" + msg.from.username + "](tg://user?id=" + msg.from.id + "), your current balance is:", { parse_mode: "Markdown" });
         await codexBot.sendPhoto(msg.from.id, imgBalance);
-    }  catch (err) {        
-        await codexBot.sendMessage(BOT_ERROR, `Balance: ${err}`);
+    }  catch (err) {       
+        if(err !== 'ReferenceError: a is not defined')
+        { 
+            await codexBot.sendMessage(BOT_ERROR, `Balance: ${err}`);
+        }
     }
 
 });
@@ -413,7 +415,10 @@ codexBot.on('message', async (msg) => {
             await codexBot.sendPhoto(msg.from.id, imgBalance);
         }
     } catch(err) {
-        await codexBot.sendMessage(BOT_ERROR, `Balance: ${err}`)
+        if(err !== 'ReferenceError: a is not defined')
+        {
+            await codexBot.sendMessage(BOT_ERROR, `Balance: ${err}`)
+        }
     }
 });
 
@@ -614,7 +619,7 @@ codexBot.onText(/\/raintothisroom (.+)/, async (msg, match) => {
             let listUser = [];
             let result = undefined;
             result = await rainTokenOnRoom(msg.chat.id, msg.from.id, params[0] * 1, params[3] * 1, params[1]);
-            if (result.error !== '') {
+            if (result.error !== '' && result.error!== undefined) {
                 await codexBot.sendMessage(BOT_ERROR, `Cannot make it rain: ${result.error}`)
                 return await codexBot.sendMessage(msg.chat.id, "❌ Opps!! Cannot make it rain now. Please try in a minute");
             } 
@@ -640,7 +645,7 @@ codexBot.onText(/\/raintothisroom (.+)/, async (msg, match) => {
         }
         await sleep(60000);
     } catch(err) {
-        await codexBot.sendMessage(BOT_ERROR, `Rain: ${err}`)
+        await codexBot.sendMessage(BOT_ERROR, `Cannot make it rain: ${err}`)
     }
 
 });
@@ -877,6 +882,7 @@ codexBot.on("callback_query", async  (msg) => {
             }
             else {
                 await codexBot.sendMessage(msg.message.chat.id, 'Oops⁉️ Something is error');
+                await codexBot.sendMessage(BOT_ERROR, `Make VIP is error:${result.error}`);
             }
         }
         else if (choice === "9") {
