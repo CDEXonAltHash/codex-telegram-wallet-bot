@@ -8,12 +8,10 @@ const {
 } = require('./TokenService');
 
 const handleJobQueue =  ( data, done ) => {
-    try {
-        sendToken(`${data.from}`, data.volume, `${data.to}`, `${data.symbol}`)
-        .then((data) => {})
-    } catch(err) {
-        done(new Error(`${err.message}`));
-    }
+    sendToken(`${data.from}`, data.volume, `${data.to}`, `${data.symbol}`)
+    .then((data) => {})
+    .catch(err => console.log(err))
+   
     sleep.sleep(5)
     done();
 };
