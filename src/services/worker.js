@@ -19,6 +19,7 @@ const handleJobQueue =  ( data, done ) => {
 
 
 queue.process('rain', async (job, done) => {
+    console.log('Handle queue')
     handleJobQueue(job.data, done);
     done();
 });

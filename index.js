@@ -85,6 +85,7 @@ const {
 const {
     codexBot,
 } = require('./src/services/initBot')
+
 require('./src/services/worker')
 
 const keyboard_helpers = ["📬Public address", "💰Get balance", "🔑Get private key", "🔍Help", "🎁VIP menu"];

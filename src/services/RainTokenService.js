@@ -257,7 +257,10 @@ const sendTokenToVip = async(ownerId, volumeTokens, symbol) => {
             symbol: `${symbol}`
         })
         .removeOnComplete(true)
-        .save( )
+        .save( function(err){
+            if( !err ) console.log( err );
+            else console.log('Add data to queue')
+        })
         // res = await sendToken(`${ownerId}`, user.volume, `${user.userId}`, `${symbol}`);
         // if (res.error!== ''){
         //     return false;
