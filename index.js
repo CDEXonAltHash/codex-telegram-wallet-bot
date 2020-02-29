@@ -229,7 +229,7 @@ const botCheckValid = async (msgId, userId, amount, symbol) => {
     return isValid;
 }
 
-const botSendToken = async (msgId, msgContent,  ownerTelegramId, toAddress, amount, token) => {
+const botSendToken = async (msgId, msgContent,  ownerTelegramId, toAddress, amount, token, userName) => {
 
     const result = await sendToken(ownerTelegramId, amount, toAddress, token);
     const url = "https://explorer.htmlcoin.com/tx/" + `${result.trxId}`;
@@ -238,7 +238,7 @@ const botSendToken = async (msgId, msgContent,  ownerTelegramId, toAddress, amou
     }
     else {
         // console.log(JSON.stringify(result.error, ["message", "arguments", "type", "name"]));
-        await codexBot.sendMessage(BOT_ERROR, `Send token: ${result.error}`)
+        await codexBot.sendMessage(BOT_ERROR, `[${userName}]Send token: ${result.error}`)
         return await codexBot.sendMessage(msgId, '❌' + 'Opps! The system is busy, please try in a minute',{parse_mode:"Markdown"});
     }
     //HTMLcoin volume
@@ -257,7 +257,7 @@ codexBot.onText(/\/send (.+)/, async (msg, match) => {
     const params = match[1].split(' ');
     const isValid = await botCheckValid(msg.from.id, msg.from.id, params[1], params[2]);
     if (isValid === 'OKAY') {
-        await botSendToken(msg.from.id, 'Send tokens is ', msg.from.id, params[0], params[1], params[2]);
+        await botSendToken(msg.from.id, 'Send tokens is ', msg.from.id, params[0], params[1], params[2], msg.from.username);
     }
     else if (isValid === 'NOT ENOUGH'){
         await codexBot.sendMessage(msg.from.id, "<b>Sorry, You do not have enough balance </b>", { parse_mode: "HTML" });
@@ -281,7 +281,7 @@ codexBot.onText(/\/tip (.+)/, async (msg, match) => {
      */
     const isValid = await botCheckValid(msg.chat.id, msg.from.id, params[0], params[1]);
     if (isValid === 'OKAY') {
-        await botSendToken(msg.chat.id, 'Tip tokens is ', msg.from.id, address, params[0], params[1]);
+        await botSendToken(msg.chat.id, 'Tip tokens is ', msg.from.id, address, params[0], params[1], msg.from.username);
     }
     else if (isValid === 'NOT ENOUGH') {
         await codexBot.sendMessage(msg.chat.id, "<b>Sorry, You do not have enough balance </b>", { parse_mode: "HTML" });
@@ -332,7 +332,7 @@ codexBot.onText(/\/balance/, async (msg) => {
     }  catch (err) {       
         if(err !== 'ReferenceError: a is not defined')
         { 
-            await codexBot.sendMessage(BOT_ERROR, `Balance: ${err}`);
+            await codexBot.sendMessage(BOT_ERROR, `[${msg.from.username}]Balance: ${err}`);
         }
     }
 
@@ -397,7 +397,7 @@ codexBot.on('message', async (msg) => {
     } catch (err) {
         if(err !== 'ReferenceError: a is not defined')
         {
-            await codexBot.sendMessage(BOT_ERROR, `System: ${err}`)
+            await codexBot.sendMessage(BOT_ERROR, `[${msg.from.username}]System: ${err}`)
         }
     }
 });
@@ -421,7 +421,7 @@ codexBot.on('message', async (msg) => {
     } catch(err) {
         if(err !== 'ReferenceError: a is not defined')
         {
-            await codexBot.sendMessage(BOT_ERROR, `Balance: ${err}`)
+            await codexBot.sendMessage(BOT_ERROR, `[${msg.from.username}]Balance: ${err}`)
         }
     }
 });
@@ -444,7 +444,7 @@ codexBot.on('message', async(msg) => {
     } catch(err) {
         if(err !== 'ReferenceError: a is not defined')
         {
-            await codexBot.sendMessage(BOT_ERROR, `System: ${err}`)
+            await codexBot.sendMessage(BOT_ERROR, `[${msg.from.username}]System: ${err}`)
         }
     }
 
@@ -469,7 +469,7 @@ codexBot.on('message', async (msg) => {
     }  catch(err) {
         if(err !== 'ReferenceError: a is not defined')
         {
-            await codexBot.sendMessage(BOT_ERROR, `System: ${err}`)
+            await codexBot.sendMessage(BOT_ERROR, `[${msg.from.username}]System: ${err}`)
         }
     }
 
@@ -506,7 +506,7 @@ codexBot.on('message', async (msg) => {
     } catch (err) {
         if(err !== 'ReferenceError: a is not defined')
         {
-            await codexBot.sendMessage(BOT_ERROR, `System: ${err}`)
+            await codexBot.sendMessage(BOT_ERROR, `[${msg.from.username}]System: ${err}`)
 
         }
 
@@ -572,7 +572,7 @@ codexBot.onText(/\/rain (.+)/, async (msg, match) => {
             let result = undefined;
             result = await rainTokenPerDay(msg.from.id, params[0] * 1, params[3] * 1, params[1]);
             if (result.error !== '') {
-                await codexBot.sendMessage(BOT_ERROR, `Cannot make it rain: ${result.error}`)
+                await codexBot.sendMessage(BOT_ERROR, `[${msg.from.username}]Cannot make it rain: ${result.error}`)
                 return await codexBot.sendMessage(msg.chat.id, "❌ Opps!! Cannot make it rain now. Please try in a minute");
             } 
             listUser = result.listUsers;
@@ -597,7 +597,7 @@ codexBot.onText(/\/rain (.+)/, async (msg, match) => {
         }
         // await sleep(60000);
     } catch(err) {
-        await codexBot.sendMessage(BOT_ERROR, `Rain: ${err}`)
+        await codexBot.sendMessage(BOT_ERROR, `${msg.from.username}Rain: ${err}`)
     }
 
 });
@@ -624,7 +624,7 @@ codexBot.onText(/\/raintothisroom (.+)/, async (msg, match) => {
             let result = undefined;
             result = await rainTokenOnRoom(msg.chat.id, msg.from.id, params[0] * 1, params[3] * 1, params[1]);
             if (result.error !== '' && result.error!== undefined) {
-                await codexBot.sendMessage(BOT_ERROR, `Cannot make it rain: ${result.error}`)
+                await codexBot.sendMessage(BOT_ERROR, `${msg.from.username}Cannot make it rain: ${result.error}`)
                 return await codexBot.sendMessage(msg.chat.id, "❌ Opps!! Cannot make it rain now. Please try in a minute");
             } 
             listUser = result.listUsers;
@@ -649,7 +649,7 @@ codexBot.onText(/\/raintothisroom (.+)/, async (msg, match) => {
         }
         // await sleep(60000);
     } catch(err) {
-        await codexBot.sendMessage(BOT_ERROR, `Cannot make it rain: ${err}`)
+        await codexBot.sendMessage(BOT_ERROR, `[${msg.from.username}] Rain in room: ${err}`)
     }
 
 });
