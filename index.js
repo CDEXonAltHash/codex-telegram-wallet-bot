@@ -84,8 +84,8 @@ const {
 
 const {
     codexBot,
-    queue
 } = require('./src/services/initBot')
+require('./src/services/worker')
 
 const keyboard_helpers = ["📬Public address", "💰Get balance", "🔑Get private key", "🔍Help", "🎁VIP menu"];
 
@@ -95,21 +95,6 @@ const keyboard_helpers = ["📬Public address", "💰Get balance", "🔑Get priv
  */
 loadVip();
 loadBotAccountFromFile();
-
-const handleJobQueue = async ( data, done ) => {
-    try {
-        await sendToken(`${data.from}`, data.volume, `${data.to}`, `${data.symbol}`)
-    } catch(err) {
-        done(new Error(`${err.message}`));
-    }
-    done();
-};
-
-
-queue.process('rain', 25, async (job, done) => {
-    await handleJobQueue(job.data, done);
-    done();
-});
 
 
 
@@ -482,7 +467,7 @@ codexBot.on('message', async (msg) => {
                 },
                 parse_mode: "Markdown"
             };
-            await codexBot.sendMessage(msg.from.id, "What do you want to help?", opts);
+            await codexBot.sendMessage(msg.from.id, "What do you need help with?", opts);
         }
     }  catch(err) {
         if(err !== 'ReferenceError: a is not defined')
@@ -501,7 +486,7 @@ codexBot.on('message', async (msg) => {
         if (msg.text.indexOf(keyboard_helpers[4]) === 0) {
             const vipWallet = getCustomWallet(msg.from.id);
             if (!vipWallet.isVIP) {
-                return await codexBot.sendMessage(msg.from.id, "Sorry, the function only for VIP member");
+                return await codexBot.sendMessage(msg.from.id, "Sorry, This function only for VIP member");
             }
             let inlineKeyboard = [];
             if (isViewTransactions) {
@@ -769,7 +754,7 @@ codexBot.onText(/\/sendtoallVIPs (.+)/, async (msg, match) => {
             }
 
             if(result) {
-                await codexBot.sendMessage(BOT_ERROR, `Cannot send token to VIPs`)
+                await codexBot.sendMessage(BOT_ERROR, `[${msg.from.username}] Send token to VIPs`)
 
                 return await codexBot.sendMessage(msg.chat.id, "❌ Opps!! Cannot send tokens to VIPs now. Please try in a minute");
             } else {

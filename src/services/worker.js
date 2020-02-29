@@ -6,9 +6,10 @@ const {
     sendToken
 } = require('./TokenService');
 
-const handleJobQueue = async ( data, done ) => {
+const handleJobQueue =  ( data, done ) => {
     try {
-        await sendToken(`${data.from}`, data.volume, `${data.to}`, `${data.symbol}`)
+        sendToken(`${data.from}`, data.volume, `${data.to}`, `${data.symbol}`)
+        .then((data) => {})
     } catch(err) {
         done(new Error(`${err.message}`));
     }
@@ -17,7 +18,8 @@ const handleJobQueue = async ( data, done ) => {
 
 
 queue.process('rain', 25, async (job, done) => {
-    await handleJobQueue(job.data, done);
+    console.log('Hande Data')
+     handleJobQueue(job.data, done);
     done();
 });
 
