@@ -12,12 +12,11 @@ const handleJobQueue =  async ( data, done ) => {
     await sendToken(`${data.from}`, data.volume, `${data.to}`, `${data.symbol}`)
     // .then((data) => {})
     // .catch(err => console.log(err))
-    sleep.sleep(2)
     done();
 };
 
 
-queue.process('rain',5, async (job, done) => {
+queue.process('rain', async (job, done) => {
     console.log('Handle queue:', job.data)
     await handleJobQueue(job.data, done);
     done();
