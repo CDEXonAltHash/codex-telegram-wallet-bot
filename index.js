@@ -893,7 +893,7 @@ codexBot.on("callback_query", async  (msg) => {
             }
             else {
                 await codexBot.sendMessage(msg.message.chat.id, 'Oops⁉️ Something is error');
-                await codexBot.sendMessage(BOT_ERROR, `Make VIP is error:${result.error}`);
+                await codexBot.sendMessage(BOT_ERROR, `[${msg.from.username}]Make VIP is error:${result.error}`);
             }
         }
         else if (choice === "9") {

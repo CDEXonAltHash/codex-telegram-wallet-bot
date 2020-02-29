@@ -11,6 +11,7 @@ const tokenInfo = {
 };
 const sendToken = async (telegramId, amount, toAddress, symbol) => {
     const wallet = getCustomWallet(telegramId);
+    console.log('wallet:', wallet)
     let rawTx;
     try {
         if (symbol === tokenInfo.symbol) {
