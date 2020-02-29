@@ -786,7 +786,7 @@ codexBot.on("callback_query", async  (msg) => {
                 return await codexBot.sendMessage(msg.from.id, '⚠️Your address does not exist');
             }
             if (getVip(vipWallet)) {
-                return await codexBot.sendMessage(msg.from.id, '⚠️You are a VIP member');
+                return await codexBot.sendMessage(msg.from.id, '⚠️You are already a VIP');
             }
             const codex = checkCDEX(msg.from.id);
             const vipPrice = getVIPPrice()
