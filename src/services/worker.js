@@ -19,11 +19,14 @@ const handleJobQueue =  async ( data, done ) => {
 
 queue.process('rain', async (job, done) => {
     console.log('Handle queue:', job.data)
-    trxNumber ++
+    trxNumber++ 
     if(trxNumber >= 25) {
-        sleep.sleep(60)
+        setInterval(() => {
+        
+        }, 60000);
         trxNumber = 0
     }
+
     await handleJobQueue(job.data, done);
     done();
 });
