@@ -15,14 +15,14 @@ const {
 } = require('./AddressService');
 
 const {
-    codexBot
+    codexBot,
+    queue
 } = require('./initBot');
+
 
 const RainToken = new Map();
 
 const { chartCanvas } = require('../utils/VisualizeData');
-
-const { sleep } = require('../utils/DateParser');
 
 const Roll = require('roll');
 const roll = new Roll();
@@ -181,67 +181,91 @@ const rewardsPerWeek = async () => {
 const getRandomInt = (max) =>{
   return Math.floor(Math.random() * Math.floor(max));
 }
+
 const rainTokenForVip = async(ownerId, volumeTokens, symbol) => {
     let res = {hasError: false, error: ''};
-    let totalVIPs = CodexVIP.size;
+    let totalVIPs = CodexVIP.size - 1;
     if(totalVIPs === 0) {
         res.hasError = true;
         res.error = 'We do not any VIPs member for make it rain'
         return res;
     }
+    const payouts = distributeTokens(volumeTokens, people);
+    const realPayouts = payouts.filter(token => token > 0);
+
     const usersReceive = [...CodexVIP.entries()];
     let address = getAddress(`${ownerId}`)
-    let listVIP = {};
+    let listVIP = [];
 
-    while (1) {
-        let vip = getRandomInt(totalVIPs);
-        if (usersReceive[vip][0] != address) {
-            listVIP = { userId: usersReceive[vip][0], volume: volumeTokens }
-            break
+    //Rolling dice
+    for(const vip of usersReceive) {
+        let oneDie = roll.roll('d' + `${totalUsers}`);
+        let codexUser = usersReceive[oneDie.result - 1][0];
+        let isExist = listUsers.filter(user => user.userId === codexUser);
+
+        if ((isEmpty(isExist) && codexUser !== address)) {
+            listVIP.push({ userId: codexUser, volume: realPayouts.pop() })
         }
     }
 
     //Store & Send token to user
-    res = await sendToken(`${ownerId}`, listVIP.volume, `${listVIP.userId}`, `${symbol}`);
-    if (res.error!== ''){
-        res.hasError = true;
-        return res;
+    for (const user of listVIP) {
+        queue.create("rain", {
+            from: `${ownerId}`,
+            volume: user.volume,
+            to: `${user.userId}`,
+            symbol: `${symbol}`
+        })
+        .removeOnComplete(true)
+        .save( function(err){
+            if( !err ) console.log( job.id );
+        })
     }
+
+    // res = await sendToken(`${ownerId}`, listVIP.volume, `${listVIP.userId}`, `${symbol}`);
+    // if (res.error!== ''){
+    //     res.hasError = true;
+    //     return res;
+    // }
     return res;
 };
 
 const sendTokenToVip = async(ownerId, volumeTokens, symbol) => {
     const listVIP = [];
-    let totalVIPs = CodexVIP.size;
-    if(totalVIPs > 24) {
-        totalVIPs = 24;
-    }
+    // let totalVIPs = CodexVIP.size - 1;
+    // // if(totalVIPs > 24) {
+    // //     totalVIPs = 24;
+    // // }
     const usersReceive = [...CodexVIP.entries()];
     let address = getAddress(`${ownerId}`)
 
     //Rolling dice
     for(const vip of usersReceive) {
         let isExist = listVIP.filter(user => user.userId === vip[0]);
-        if ((isEmpty(isExist) && vip != address)) {
+        if ((isEmpty(isExist) && vip[0] != address)) {
             listVIP.push({ userId: vip[0], volume: volumeTokens })
         }
     }
 
     //Store & Send token to user
-    let res = '';
-    let cnt = 0;
+    // let res = '';
     for (const user of listVIP) {
-        res = await sendToken(`${ownerId}`, user.volume, `${user.userId}`, `${symbol}`);
-        if (res.error!== ''){
-            return false;
-        }
-        cnt ++;
-        if(cnt > 24) {
-            await sleep(60000);
-            cnt = 0
-        }
+        queue.create("rain", {
+            from: `${ownerId}`,
+            volume: user.volume,
+            to: `${user.userId}`,
+            symbol: `${symbol}`
+        })
+        .removeOnComplete(true)
+        .save( function(err){
+            if( !err ) console.log( job.id );
+        })
+        // res = await sendToken(`${ownerId}`, user.volume, `${user.userId}`, `${symbol}`);
+        // if (res.error!== ''){
+        //     return false;
+        // }
     }
-    return true;
+    return false;
 };
 
 module.exports = {

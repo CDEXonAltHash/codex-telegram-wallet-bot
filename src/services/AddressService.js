@@ -5,8 +5,11 @@ const {
     CodexWallet,
     CodexVIP,
     saveAccountToWallet,
-    saveVip
+    saveVip,
+    saveAllVip
 } = require('./StorageService');
+
+const VIP_PRICE = 60000
 
 const generateAccount = () => {
     const wallet = webWallet.restoreFromMnemonic(webWallet.generateMnemonic(), Date.now());
@@ -91,6 +94,19 @@ const changeFromWIF = (telegramId, username, privKey) => {
     return true;
 };
 
+const getVIPPrice = () => {
+    const totalVips = CodexVIP.size
+    let price = VIP_PRICE
+    let mul = totalVips/100
+    if(!mul.isInteger) {
+        mul = Math.trunc(mul)
+    } 
+    price = (mul-1)*500 + VIP_PRICE
+
+    return price
+
+};
+
 module.exports = {
     generateAccount,
     saveAccount,
@@ -100,5 +116,6 @@ module.exports = {
     restoreFromWIF,
     changeFromWIF,
     getVip,
-    saveVipMember
+    saveVipMember,
+    getVIPPrice
 };

@@ -9,7 +9,8 @@ const {
     changeFromWIF,
     getCustomWallet,
     saveVipMember,
-    getVip
+    getVip,
+    getVIPPrice
 } = require('./src/services/AddressService'); 
 
 const { 
@@ -38,7 +39,9 @@ const hrc20 = require('./src/libs/hrc20');
 const { 
     loadBotAccountFromFile,
     loadVip,
-    CodexWallet
+    CodexWallet,
+    saveAllVip,
+    CodexVIP
 } = require('./src/services/StorageService');
 
 const {
@@ -84,6 +87,7 @@ const {
 } = require('./src/services/initBot')
 
 const keyboard_helpers = ["📬Public address", "💰Get balance", "🔑Get private key", "🔍Help", "🎁VIP menu"];
+
 
 /**
  * Load address of bot to airdrop function
@@ -591,7 +595,7 @@ codexBot.onText(/\/rain (.+)/, async (msg, match) => {
         else if (isValid === 'NOT ENOUGH') {
             await codexBot.sendMessage(msg.chat.id, "<b>Sorry, You do not have enough balance </b>", { parse_mode: "HTML" });
         }
-        await sleep(60000);
+        // await sleep(60000);
     } catch(err) {
         await codexBot.sendMessage(BOT_ERROR, `Rain: ${err}`)
     }
@@ -643,7 +647,7 @@ codexBot.onText(/\/raintothisroom (.+)/, async (msg, match) => {
         else if (isValid === 'NOT ENOUGH') {
             await codexBot.sendMessage(msg.chat.id, "<b>Sorry, You do not have enough balance </b>", { parse_mode: "HTML" });
         }
-        await sleep(60000);
+        // await sleep(60000);
     } catch(err) {
         await codexBot.sendMessage(BOT_ERROR, `Cannot make it rain: ${err}`)
     }
@@ -774,14 +778,15 @@ codexBot.on("callback_query", async  (msg) => {
         }
         await codexBot.deleteMessage(msg.message.chat.id, msg.message.message_id);
         if (choice === "4") {
-            const vipWallet = getCustomWallet(msg.from.id);
+            const vipWallet = getAddress(msg.from.id);
             if(vipWallet === ''){
                 return await codexBot.sendMessage(msg.from.id, '⚠️Your address does not exist');
             }
-            if (vipWallet.isVIP) {
+            if (getVip(vipWallet)) {
                 return await codexBot.sendMessage(msg.from.id, '⚠️You are a VIP member');
             }
             const codex = checkCDEX(msg.from.id);
+            const vipPrice = getVIPPrice()
             if(codex) {
                 const opts = {
                     reply_markup: {
@@ -790,11 +795,11 @@ codexBot.on("callback_query", async  (msg) => {
                     },
                     parse_mode: "Markdown"
                 };
-    
-                await codexBot.sendMessage(msg.from.id, "This function will deduct 50k ‘CDEX’ from your wallet. This is a one time charge to be VIP for life! *These funds are unretrievable*\nDo you want to continue?", opts);
+                
+                await codexBot.sendMessage(msg.from.id, "This function will deduct " +`${vipPrice}`+" ‘CDEX’ from your wallet. This is a one time charge to be VIP for life! *These funds are unretrievable*\nDo you want to continue?", opts);
             }
             else {
-                await codexBot.sendMessage(msg.from.id, '⚠️You must have CDEX token greater than 50k');
+                await codexBot.sendMessage(msg.from.id, '⚠️You must have CDEX token greater than ' + `${vipPrice}`);
             }
         }
         else if (choice === "5") {
@@ -873,7 +878,9 @@ codexBot.on("callback_query", async  (msg) => {
     
         else if(choice === "8") {
             const vipWallet = getCustomWallet(msg.from.id);
-            const result = await sendToken(msg.from.id, 50000 , AIRDROP_ADDRESS, "CDEX");
+            const vipPrice = getVIPPrice()
+
+            const result = await sendToken(msg.from.id, vipPrice , AIRDROP_ADDRESS, "CDEX");
             if (result.error === '') {
                 await codexBot.sendMessage(msg.message.chat.id, "🎉🎉Congratulations! You are now a Lifetime VIP member🎉🎉\n" +
                                                                 "Kindly press <b>VIP menu</b> button to see more information", {parse_mode:"HTML"});
@@ -907,6 +914,10 @@ codexBot.on("callback_query", async  (msg) => {
                 if (result.error === '') {
                     await codexBot.sendMessage(msg.from.id, '🎉🎉🎉You just received <b>' + `${amountAirdrop}`+' CDEX </b>', {parse_mode: "HTML"});
                     vipWallet.setAirDropTime();
+                    
+                    CodexVIP.set(`${vipWallet.getAddress()}`, airDropTime);
+
+                    saveAllVip();
                     //HTMLcoin volume
                     addVolume(parserDate(), 1);
                 }
