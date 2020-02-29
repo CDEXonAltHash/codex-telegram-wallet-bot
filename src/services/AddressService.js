@@ -97,6 +97,9 @@ const changeFromWIF = (telegramId, username, privKey) => {
 const getVIPPrice = () => {
     const totalVips = CodexVIP.size
     let price = VIP_PRICE
+    if(totalVips < 100) {
+        return price
+    }
     let mul = totalVips/100
     if(!mul.isInteger) {
         mul = Math.trunc(mul)
