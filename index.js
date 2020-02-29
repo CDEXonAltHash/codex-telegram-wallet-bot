@@ -84,7 +84,7 @@ const {
 
 const {
     codexBot,
-    kue
+    queue
 } = require('./src/services/initBot')
 
 const keyboard_helpers = ["📬Public address", "💰Get balance", "🔑Get private key", "🔍Help", "🎁VIP menu"];
@@ -96,7 +96,23 @@ const keyboard_helpers = ["📬Public address", "💰Get balance", "🔑Get priv
 loadVip();
 loadBotAccountFromFile();
 
-kue.app.listen( 3000 )
+const handleJobQueue = async ( data, done ) => {
+    try {
+        await sendToken(`${data.from}`, data.volume, `${data.to}`, `${data.symbol}`)
+    } catch(err) {
+        done(new Error(`${err.message}`));
+    }
+    done();
+};
+
+
+queue.process('rain', 25, async (job, done) => {
+    await handleJobQueue(job.data, done);
+    done();
+});
+
+
+
 /**
  * Start bot
  */

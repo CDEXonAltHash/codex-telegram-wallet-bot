@@ -44,6 +44,8 @@ const validBalance = (info, symbol, amount) => {
             if (token.contract.symbol === symbol){
                 isValid = amount <= (token.amount / Math.pow(10, token.contract.decimals)) ? true : false;
                 break;
+            } else {
+                isValid = false
             }
         }
 
