@@ -258,7 +258,7 @@ const sendTokenToVip = async(ownerId, volumeTokens, symbol) => {
         })
         .removeOnComplete(true)
         .save( function(err){
-            if( !err ) console.log( err );
+            if( !err ) console.log( 'Queue for make a send token to all VIP' );
             else return true;
         })
         // res = await sendToken(`${ownerId}`, user.volume, `${user.userId}`, `${symbol}`);

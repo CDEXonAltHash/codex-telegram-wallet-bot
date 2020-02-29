@@ -11,5 +11,6 @@ const codexBot = new TelegramBot(TELEGRAM_TOKEN, { polling: true });
  
 module.exports = {
     codexBot,
-    queue
+    queue,
+    kue
 }

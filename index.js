@@ -83,7 +83,8 @@ const {
 } = require('./src/utils/parser');
 
 const {
-    codexBot
+    codexBot,
+    kue
 } = require('./src/services/initBot')
 
 const keyboard_helpers = ["📬Public address", "💰Get balance", "🔑Get private key", "🔍Help", "🎁VIP menu"];
@@ -95,6 +96,7 @@ const keyboard_helpers = ["📬Public address", "💰Get balance", "🔑Get priv
 loadVip();
 loadBotAccountFromFile();
 
+kue.app.listen( 3000 )
 /**
  * Start bot
  */
@@ -755,7 +757,7 @@ codexBot.onText(/\/sendtoallVIPs (.+)/, async (msg, match) => {
 
                 return await codexBot.sendMessage(msg.chat.id, "❌ Opps!! Cannot send tokens to VIPs now. Please try in a minute");
             } else {
-                return await codexBot.sendMessage(msg.chat.id, "WE HAVE JUST GIVEN TOKENS TO VIPS USER. KINDLY CHECK YOUR WALLET");
+                return await codexBot.sendMessage(msg.chat.id, "WE HAVE JUST SENT TOKENS TO VIP USERS. KINDLY CHECK YOUR WALLETS");
             }
         }else if (isValid === 'NOT ENOUGH') {
             await codexBot.sendMessage(msg.chat.id, "<b>Sorry, You do not have enough balance </b>", { parse_mode: "HTML" });
