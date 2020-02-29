@@ -7,6 +7,7 @@ const {
     sendToken
 } = require('./TokenService');
 
+let trxNumber = 0
 const handleJobQueue =  async ( data, done ) => {
     console.log(`Send token to VIP: ${data.from}, ${data.to}`)
     await sendToken(`${data.from}`, data.volume, `${data.to}`, `${data.symbol}`)
@@ -18,6 +19,11 @@ const handleJobQueue =  async ( data, done ) => {
 
 queue.process('rain', async (job, done) => {
     console.log('Handle queue:', job.data)
+    trxNumber ++
+    if(trxNumber >= 25) {
+        sleep.sleep(60)
+        trxNumber = 0
+    }
     await handleJobQueue(job.data, done);
     done();
 });
