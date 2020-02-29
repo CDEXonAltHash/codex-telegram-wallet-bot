@@ -26,6 +26,7 @@ const sendToken = async (telegramId, amount, toAddress, symbol) => {
             trxId: trxId,
         }
     } catch (err) {
+        console.log('[Send token error]:', err.stack)
         return {
             error: `${JSON.stringify(err.response.data)}`,
         }
