@@ -7,19 +7,19 @@ const {
     sendToken
 } = require('./TokenService');
 
-const handleJobQueue =  ( data, done ) => {
+const handleJobQueue =  async ( data, done ) => {
     console.log(`Send token to VIP: ${data.from}, ${data.to}`)
-    sendToken(`${data.from}`, data.volume, `${data.to}`, `${data.symbol}`)
-    .then((data) => {})
-    .catch(err => console.log(err))
-    sleep.sleep(5)
+    await sendToken(`${data.from}`, data.volume, `${data.to}`, `${data.symbol}`)
+    // .then((data) => {})
+    // .catch(err => console.log(err))
+    sleep.sleep(2)
     done();
 };
 
 
 queue.process('rain',5, async (job, done) => {
     console.log('Handle queue:', job.data)
-    handleJobQueue(job.data, done);
+    await handleJobQueue(job.data, done);
     done();
 });
 
