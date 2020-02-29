@@ -332,7 +332,7 @@ codexBot.onText(/\/balance/, async (msg) => {
     }  catch (err) {       
         if(err !== 'ReferenceError: a is not defined')
         { 
-            await codexBot.sendMessage(BOT_ERROR, `[${msg.from.username}]Balance: ${err}`);
+            // await codexBot.sendMessage(BOT_ERROR, `[${msg.from.username}]Balance: ${err}`);
         }
     }
 
@@ -397,7 +397,7 @@ codexBot.on('message', async (msg) => {
     } catch (err) {
         if(err !== 'ReferenceError: a is not defined')
         {
-            await codexBot.sendMessage(BOT_ERROR, `[${msg.from.username}]System: ${err}`)
+            // await codexBot.sendMessage(BOT_ERROR, `[${msg.from.username}]System: ${err}`)
         }
     }
 });
@@ -421,7 +421,7 @@ codexBot.on('message', async (msg) => {
     } catch(err) {
         if(err !== 'ReferenceError: a is not defined')
         {
-            await codexBot.sendMessage(BOT_ERROR, `[${msg.from.username}]Balance: ${err}`)
+            // await codexBot.sendMessage(BOT_ERROR, `[${msg.from.username}]Balance: ${err}`)
         }
     }
 });
@@ -444,7 +444,7 @@ codexBot.on('message', async(msg) => {
     } catch(err) {
         if(err !== 'ReferenceError: a is not defined')
         {
-            await codexBot.sendMessage(BOT_ERROR, `[${msg.from.username}]System: ${err}`)
+            // await codexBot.sendMessage(BOT_ERROR, `[${msg.from.username}]System: ${err}`)
         }
     }
 
@@ -469,7 +469,7 @@ codexBot.on('message', async (msg) => {
     }  catch(err) {
         if(err !== 'ReferenceError: a is not defined')
         {
-            await codexBot.sendMessage(BOT_ERROR, `[${msg.from.username}]System: ${err}`)
+            // await codexBot.sendMessage(BOT_ERROR, `[${msg.from.username}]System: ${err}`)
         }
     }
 
@@ -506,7 +506,7 @@ codexBot.on('message', async (msg) => {
     } catch (err) {
         if(err !== 'ReferenceError: a is not defined')
         {
-            await codexBot.sendMessage(BOT_ERROR, `[${msg.from.username}]System: ${err}`)
+            // await codexBot.sendMessage(BOT_ERROR, `[${msg.from.username}]System: ${err}`)
 
         }
 
