@@ -750,8 +750,8 @@ codexBot.onText(/\/sendtoallVIPs (.+)/, async (msg, match) => {
                 return await codexBot.sendMessage(msg.chat.id, "<b>Sorry the function is only for admin</b>", { parse_mode: "HTML" });
             }
 
-            if(!result) {
-                await codexBot.sendMessage(BOT_ERROR, `Cannot send token to VIPs: ${result.error}`)
+            if(result) {
+                await codexBot.sendMessage(BOT_ERROR, `Cannot send token to VIPs`)
 
                 return await codexBot.sendMessage(msg.chat.id, "❌ Opps!! Cannot send tokens to VIPs now. Please try in a minute");
             } else {

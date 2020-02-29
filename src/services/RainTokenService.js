@@ -218,7 +218,7 @@ const rainTokenForVip = async(ownerId, volumeTokens, symbol) => {
         })
         .removeOnComplete(true)
         .save( function(err){
-            if( !err ) console.log( job.id );
+            if( !err ) console.log( err );
         })
     }
 
@@ -258,7 +258,8 @@ const sendTokenToVip = async(ownerId, volumeTokens, symbol) => {
         })
         .removeOnComplete(true)
         .save( function(err){
-            if( !err ) console.log( job.id );
+            if( !err ) console.log( err );
+            else return true;
         })
         // res = await sendToken(`${ownerId}`, user.volume, `${user.userId}`, `${symbol}`);
         // if (res.error!== ''){
