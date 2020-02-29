@@ -12,7 +12,7 @@ const handleJobQueue =  ( data, done ) => {
     sendToken(`${data.from}`, data.volume, `${data.to}`, `${data.symbol}`)
     .then((data) => {})
     .catch(err => console.log(err))
-    sleep(5)
+    sleep.sleep(5)
     done();
 };
 
