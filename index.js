@@ -717,7 +717,7 @@ codexBot.onText(/\/raintoallVIPs (.+)/, async (msg, match) => {
             }
     
             if(result.hasError) {
-                await codexBot.sendMessage(BOT_ERROR, `Cannot make it rain to VIPs: ${result.error}`)
+                await codexBot.sendMessage(BOT_ERROR, `[${msg.from.username}] Rain to VIPs: ${result.error}`)
 
                 return await codexBot.sendMessage(msg.chat.id, "❌ Opps!! Cannot make it rain to VIPs now. Please try in a minute");
             } else {

@@ -1,6 +1,6 @@
-const tokenSymbols = ['HTML', 'BUNK', 'CDEX', 'XOLA', 'MAG', 'ASW', 'BIFD', 'TEEN', 'YMA', 'LAC',
+const tokenSymbols = ['HTML', 'BUNK', 'CDEX', 'XOLA', 'MAG', 'ASW', 'BIFD', 'BIFF', 'YMA', 'LAC', 'IVO',
 
-                       'BIFP', 'TRS', 'BIFG', 'BFCC', 'PHO', 'JUL', 'HOLY', 'BCDX', 'Roy', 'KKC', 'RAIN', 'LOVE', 'BBCT', 'SMILE' ]
+                       'BIFP', 'VCTR', 'BIFG', , 'TRS', 'BFCC', 'PHO', 'JUL', 'HOLY', 'BCDX', 'Roy', 'KKC', 'RAIN', 'LOVE', 'BBCT', 'SMILE', 'LOVE' ]
 
 
 const checkTokenSymbol = (symbol) => {
