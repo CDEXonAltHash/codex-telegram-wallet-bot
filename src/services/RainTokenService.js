@@ -221,7 +221,7 @@ const rainTokenForVip = async(ownerId, volumeTokens, symbol) => {
             symbol: `${symbol}`
         })
         .removeOnComplete(true)
-        .reattempt(3)
+        .attempts(5)
         .save()
 
     }
@@ -263,7 +263,7 @@ const sendTokenToVip = async(ownerId, volumeTokens, symbol) => {
             symbol: `${symbol}`
         })
         .removeOnComplete(true)
-        .reattempt(3)
+        .attempts(5)
         .save()
 
         // res = await sendToken(`${ownerId}`, user.volume, `${user.userId}`, `${symbol}`);
