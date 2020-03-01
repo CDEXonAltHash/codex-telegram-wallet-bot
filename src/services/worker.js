@@ -4,12 +4,19 @@ const {
 
 const {isEmpty} = require('lodash')
 const {
-    sendToken
+    sendToken,
+    getBalance
 } = require('./TokenService');
 
 const handleJobQueue =  async ( data, done ) => {
+    let htmlbalanceunconfrim = 0
     try {
         if(!isEmpty(data)) {
+            while(htmlbalanceunconfrim <  0) {
+                let balance = await getBalance(ownerId);
+                let unconfirmedBalance = balance.unconfirmedBalance;
+                htmlbalanceunconfrim = unconfirmedBalance.toString().split('.');
+            }
             await sendToken(`${data.from}`, data.volume, `${data.to}`, `${data.symbol}`)
         }
     } catch(err) {
