@@ -13,15 +13,9 @@ function sleep(ms) {
   }
 
 const handleJobQueue =  async ( data, done ) => {
-    let htmlbalanceunconfrim = 0
     try {
         if(!isEmpty(data)) {
-            let balance = await getBalance(`${data.from}`);
-            let unconfirmedBalance = balance.unconfirmedBalance;
-            htmlbalanceunconfrim = unconfirmedBalance.toString().split('.');
-            if((htmlbalanceunconfrim[0])*1 <= -32 ) {
-               await sleep(300000)
-            }
+
             await sendToken(`${data.from}`, data.volume, `${data.to}`, `${data.symbol}`)
         }
     } catch(err) {
@@ -34,6 +28,12 @@ const handleJobQueue =  async ( data, done ) => {
 
 
 queue.process('rain', async (job, done) => {
+    let balance = await getBalance(`${job.data.from}`);
+    let unconfirmedBalance = balance.unconfirmedBalance;
+    let htmlbalanceunconfrim = unconfirmedBalance.toString().split('.');
+    if((htmlbalanceunconfrim[0])*1 <= -32 ) {
+       await sleep(300000)
+    }
     await handleJobQueue(job.data, done);
     done();
 });
