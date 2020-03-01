@@ -211,7 +211,7 @@ const botCheckValid = async (msgId, userId, amount, symbol) => {
     }
     const unconfirmedBalance = info.unconfirmedBalance;
     const htmlbalanceunconfrim = unconfirmedBalance.toString().split('.');
-    if(htmlbalanceunconfrim[0] < -2) {
+    if(htmlbalanceunconfrim[0] < 0) {
         await codexBot.sendMessage(msgId, '❌Sorry, Kindly wait for another transaction be finished');
         return isValid
     }
