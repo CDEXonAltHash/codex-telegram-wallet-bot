@@ -25,6 +25,7 @@ const isFloat = (n) => {
 }
 const validBalance = (info, symbol, amount) => {
     const html = info.balance;
+
     const hrc20 = info.hrc20;
     let isValid = true;
     // if (isFloat(amount * Math.pow(10, 8))) {

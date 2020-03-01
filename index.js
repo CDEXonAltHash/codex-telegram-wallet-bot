@@ -209,6 +209,12 @@ const botCheckValid = async (msgId, userId, amount, symbol) => {
         await codexBot.sendMessage(msgId, '❌Please setup your wallet first');
         return isValid;
     }
+    const unconfirmedBalance = info.unconfirmedBalance;
+    const htmlbalanceunconfrim = unconfirmedBalance.toString().split('.');
+    if(htmlbalanceunconfrim[0] < -2) {
+        await codexBot.sendMessage(msgId, '❌Sorry, Kindly wait for another transaction be finished');
+        return isValid
+    }
     if (isNaN(amount) || (amount * 1 <= 0)) {
         await codexBot.sendMessage(msgId, '❌Sorry, the amount for token must be positive number');
     }
