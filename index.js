@@ -209,7 +209,7 @@ const botCheckValid = async (msgId, userId, amount, symbol) => {
         await codexBot.sendMessage(msgId, '❌Please setup your wallet first');
         return isValid;
     }
-    const unconfirmedBalance = info.unconfirmedBalance;
+    const unconfirmedBalance = balance.unconfirmedBalance;
     const htmlbalanceunconfrim = unconfirmedBalance.toString().split('.');
     if((htmlbalanceunconfrim[0] * 1) < 0) {
         await codexBot.sendMessage(msgId, '❌Sorry, Kindly wait for another transaction be finished');
