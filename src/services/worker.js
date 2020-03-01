@@ -8,9 +8,7 @@ const {
     getBalance
 } = require('./TokenService');
 
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
+
 
 const handleJobQueue =  async ( data, done ) => {
     try {
@@ -26,15 +24,12 @@ const handleJobQueue =  async ( data, done ) => {
     done();
 };
 
+let task = 0
 
 queue.process('rain', async (job, done) => {
-    let balance = await getBalance(`${job.data.from}`);
-    let unconfirmedBalance = balance.unconfirmedBalance;
-    let htmlbalanceunconfrim = unconfirmedBalance.toString().split('.');
-    if((htmlbalanceunconfrim[0])*1 <= -32 ) {
-       await sleep(300000)
-    }
+
     await handleJobQueue(job.data, done);
+    console.log(task++)
     done();
 });
 

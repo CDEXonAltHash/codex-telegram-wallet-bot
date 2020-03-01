@@ -182,10 +182,6 @@ const rewardsPerWeek = async () => {
     }
 };
 
-const getRandomInt = (max) =>{
-  return Math.floor(Math.random() * Math.floor(max));
-}
-
 const rainTokenForVip = async(ownerId, volumeTokens, symbol) => {
     let res = {hasError: false, error: ''};
     let totalVIPs = CodexVIP.size - 1;
@@ -221,7 +217,6 @@ const rainTokenForVip = async(ownerId, volumeTokens, symbol) => {
             symbol: `${symbol}`
         })
         .removeOnComplete(true)
-        .attempts(5)
         .save()
 
     }
@@ -255,7 +250,11 @@ const sendTokenToVip = async(ownerId, volumeTokens, symbol) => {
     //Store & Send token to user
     // let res = '';
     for (const user of listVIP) {
-
+        
+        if(totalVIPs > 15) {
+            await sleep(12000)
+            totalVIPs = 0
+        }
         queue.create("rain", {
             from: `${ownerId}`,
             volume: user.volume,
@@ -263,13 +262,9 @@ const sendTokenToVip = async(ownerId, volumeTokens, symbol) => {
             symbol: `${symbol}`
         })
         .removeOnComplete(true)
-        .attempts(5)
         .save()
 
-        // res = await sendToken(`${ownerId}`, user.volume, `${user.userId}`, `${symbol}`);
-        // if (res.error!== ''){
-        //     return false;
-        // }
+        totalVIPs++
     }
     return false;
 };
