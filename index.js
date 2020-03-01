@@ -736,7 +736,7 @@ codexBot.onText(/\/raintoallVIPs (.+)/, async (msg, match) => {
         }
 
     } catch(err) {
-        await codexBot.sendMessage(msg.from.id, "❌ Opps!! Something went wrong let try again in a minute", { parse_mode: "HTML" });
+        await codexBot.sendMessage(msg.from.id, "❌ Opps!! Something went wrong let try again in a minute " + `${err}`, { parse_mode: "HTML" });
     }
 
 });
