@@ -24,12 +24,8 @@ const handleJobQueue =  async ( data, done ) => {
     done();
 };
 
-let task = 0
-
 queue.process('rain', async (job, done) => {
-
     await handleJobQueue(job.data, done);
-    console.log(task++)
     done();
 });
 
