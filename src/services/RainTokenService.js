@@ -251,9 +251,10 @@ const sendTokenToVip = async(ownerId, volumeTokens, symbol) => {
     //Store & Send token to user
     // let res = '';
     for (const user of listVIP) {
-        if(listVIP >= 25) {
+        if(totalVIPs >= 25) {
+            console.log('How about VIP: ', totalVIPs)
             await sleep(60000);
-            listVIP = 0
+            totalVIPs = 0
         }
         queue.create("rain", {
             from: `${ownerId}`,
@@ -264,7 +265,7 @@ const sendTokenToVip = async(ownerId, volumeTokens, symbol) => {
         .removeOnComplete(true)
         .save()
 
-        listVIP ++
+        totalVIPs ++
         // res = await sendToken(`${ownerId}`, user.volume, `${user.userId}`, `${symbol}`);
         // if (res.error!== ''){
         //     return false;

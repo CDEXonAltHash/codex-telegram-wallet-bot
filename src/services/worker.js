@@ -10,7 +10,6 @@ const {
 const handleJobQueue =  async ( data, done ) => {
     if(!isEmpty(data)) {
         await sendToken(`${data.from}`, data.volume, `${data.to}`, `${data.symbol}`)
-
     }
     // .then((data) => {})
     // .catch(err => console.log(err))
