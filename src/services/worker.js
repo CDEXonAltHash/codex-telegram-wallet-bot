@@ -8,6 +8,10 @@ const {
     getBalance
 } = require('./TokenService');
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
 const handleJobQueue =  async ( data, done ) => {
     let htmlbalanceunconfrim = 0
     try {
@@ -16,9 +20,7 @@ const handleJobQueue =  async ( data, done ) => {
             let unconfirmedBalance = balance.unconfirmedBalance;
             htmlbalanceunconfrim = unconfirmedBalance.toString().split('.');
             while((htmlbalanceunconfrim[0])*1 <  0) {
-                balance = await getBalance(ownerId);
-                unconfirmedBalance = balance.unconfirmedBalance;
-                htmlbalanceunconfrim = unconfirmedBalance.toString().split('.');
+               await sleep(60000)
             }
             await sendToken(`${data.from}`, data.volume, `${data.to}`, `${data.symbol}`)
         }
