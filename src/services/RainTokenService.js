@@ -256,15 +256,21 @@ const sendTokenToVip = async(ownerId, volumeTokens, symbol) => {
         }
     }
 
+
     //Store & Send token to user
     // let res = '';
+    let htmlbalanceunconfrim  = 0
     for (const user of listVIP) {
         console.log('How about VIP: ', totalVIPs)
-
-        if(totalVIPs >= 5) {
-            await sleep(10000);
+        if(totalVIPs > 3) {
+            while(htmlbalanceunconfrim >= 0) {
+                let balance = await getBalance(ownerId);
+                let unconfirmedBalance = balance.unconfirmedBalance;
+                htmlbalanceunconfrim = unconfirmedBalance.toString().split('.');
+            }
             totalVIPs = 0
         }
+
         queue.create("rain", {
             from: `${ownerId}`,
             volume: user.volume,
