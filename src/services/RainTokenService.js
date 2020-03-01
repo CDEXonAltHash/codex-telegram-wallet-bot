@@ -7,7 +7,8 @@ const {
 } = require('./StorageService');
 
 const {
-    sendToken
+    sendToken,
+    getBalance
 } = require('./TokenService');
 
 const {
