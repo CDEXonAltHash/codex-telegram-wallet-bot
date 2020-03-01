@@ -211,7 +211,7 @@ const botCheckValid = async (msgId, userId, amount, symbol) => {
     }
     const unconfirmedBalance = info.unconfirmedBalance;
     const htmlbalanceunconfrim = unconfirmedBalance.toString().split('.');
-    if(htmlbalanceunconfrim[0] < 0) {
+    if((htmlbalanceunconfrim[0] * 1) < 0) {
         await codexBot.sendMessage(msgId, '❌Sorry, Kindly wait for another transaction be finished');
         return isValid
     }
@@ -772,7 +772,7 @@ codexBot.onText(/\/sendtoallVIPs (.+)/, async (msg, match) => {
         }
 
     } catch(err) {
-        await codexBot.sendMessage(msg.from.id, "❌ Opps!! Something went wrong let try again in a minute", { parse_mode: "HTML" });
+        await codexBot.sendMessage(msg.from.id, "❌ Opps!! Something went wrong let try again in a minute " + `${err}`, { parse_mode: "HTML" });
 
     }
 
