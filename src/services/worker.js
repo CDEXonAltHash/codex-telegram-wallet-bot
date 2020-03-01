@@ -8,8 +8,13 @@ const {
 } = require('./TokenService');
 
 const handleJobQueue =  async ( data, done ) => {
-    if(!isEmpty(data)) {
-        await sendToken(`${data.from}`, data.volume, `${data.to}`, `${data.symbol}`)
+    try {
+
+        if(!isEmpty(data)) {
+            await sendToken(`${data.from}`, data.volume, `${data.to}`, `${data.symbol}`)
+        }
+    } catch(err) {
+        
     }
     // .then((data) => {})
     // .catch(err => console.log(err))
