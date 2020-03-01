@@ -214,14 +214,16 @@ const rainTokenForVip = async(ownerId, volumeTokens, symbol) => {
             await sleep(12000)
             totalVIPs = 0
         }
-        queue.create("rain", {
-            from: `${ownerId}`,
-            volume: user.volume,
-            to: `${user.userId}`,
-            symbol: `${symbol}`
-        })
-        .removeOnComplete(true)
-        .save()
+        await sendToken(`${ownerId}`, user.volume, `${user.userId}`, `${symbol}`);
+
+        // queue.create("rain", {
+        //     from: `${ownerId}`,
+        //     volume: user.volume,
+        //     to: `${user.userId}`,
+        //     symbol: `${symbol}`
+        // })
+        // .removeOnComplete(true)
+        // .save()
 
         totalVIPs++
 
@@ -248,20 +250,24 @@ const sendTokenToVip = async(ownerId, volumeTokens, symbol) => {
 
     //Store & Send token to user
     // let res = '';
+
     for (const user of listVIP) {
         
-        if(totalVIPs > 15) {
+        if(totalVIPs > 24) {
             await sleep(12000)
             totalVIPs = 0
         }
-        queue.create("rain", {
-            from: `${ownerId}`,
-            volume: user.volume,
-            to: `${user.userId}`,
-            symbol: `${symbol}`
-        })
-        .removeOnComplete(true)
-        .save()
+        addAmount(user.userId, user.name, user.volume);
+        await sendToken(`${ownerId}`, user.volume, `${user.userId}`, `${symbol}`);
+
+        // queue.create("rain", {
+        //     from: `${ownerId}`,
+        //     volume: user.volume,
+        //     to: `${user.userId}`,
+        //     symbol: `${symbol}`
+        // })
+        // .removeOnComplete(true)
+        // .save()
 
         totalVIPs++
     }
