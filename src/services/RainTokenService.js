@@ -211,7 +211,7 @@ const rainTokenForVip = async(ownerId, volumeTokens, symbol) => {
     //Store & Send token to user
     for (const user of listVIP) {
         if(totalVIPs > 15) {
-            await sleep(12000)
+            await sleep(180000)
             totalVIPs = 0
         }
         await sendToken(`${ownerId}`, user.volume, `${user.userId}`, `${symbol}`);
@@ -254,7 +254,7 @@ const sendTokenToVip = async(ownerId, volumeTokens, symbol) => {
     for (const user of listVIP) {
         
         if(totalVIPs > 24) {
-            await sleep(12000)
+            await sleep(180000)
             totalVIPs = 0
         }
         addAmount(user.userId, user.name, user.volume);
