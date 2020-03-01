@@ -20,7 +20,8 @@ const handleJobQueue =  async ( data, done ) => {
             let unconfirmedBalance = balance.unconfirmedBalance;
             htmlbalanceunconfrim = unconfirmedBalance.toString().split('.');
             while((htmlbalanceunconfrim[0])*1 <= -32 ) {
-               await sleep(300000)
+               await sleep(120000)
+               break
             }
             await sendToken(`${data.from}`, data.volume, `${data.to}`, `${data.symbol}`)
         }
