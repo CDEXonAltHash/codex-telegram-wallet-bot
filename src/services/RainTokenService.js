@@ -19,6 +19,9 @@ const {
     queue
 } = require('./initBot');
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
 
 const RainToken = new Map();
 
@@ -230,7 +233,7 @@ const rainTokenForVip = async(ownerId, volumeTokens, symbol) => {
 
 const sendTokenToVip = async(ownerId, volumeTokens, symbol) => {
     const listVIP = [];
-    // let totalVIPs = CodexVIP.size - 1;
+    let totalVIPs = 0;
     // // if(totalVIPs > 24) {
     // //     totalVIPs = 24;
     // // }
@@ -248,7 +251,10 @@ const sendTokenToVip = async(ownerId, volumeTokens, symbol) => {
     //Store & Send token to user
     // let res = '';
     for (const user of listVIP) {
-  
+        if(listVIP >= 25) {
+            await sleep(60000);
+            listVIP = 0
+        }
         queue.create("rain", {
             from: `${ownerId}`,
             volume: user.volume,
@@ -257,6 +263,8 @@ const sendTokenToVip = async(ownerId, volumeTokens, symbol) => {
         })
         .removeOnComplete(true)
         .save()
+
+        listVIP ++
         // res = await sendToken(`${ownerId}`, user.volume, `${user.userId}`, `${symbol}`);
         // if (res.error!== ''){
         //     return false;
