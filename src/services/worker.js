@@ -15,7 +15,7 @@ const handleJobQueue =  async ( data, done ) => {
             let balance = await getBalance(`${data.from}`);
             let unconfirmedBalance = balance.unconfirmedBalance;
             htmlbalanceunconfrim = unconfirmedBalance.toString().split('.');
-            while(htmlbalanceunconfrim <  0) {
+            while((htmlbalanceunconfrim[0])*1 <  0) {
                 balance = await getBalance(ownerId);
                 unconfirmedBalance = balance.unconfirmedBalance;
                 htmlbalanceunconfrim = unconfirmedBalance.toString().split('.');
