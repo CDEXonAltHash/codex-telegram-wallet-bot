@@ -61,7 +61,7 @@ const checkVip = (telegramId) => {
 const checkCDEX = (telegramId) => {
     const wallet = getCustomWallet(telegramId);
     const hrc20Coin = wallet.info.hrc20;
-    const tokenAmount = 50000;
+    const tokenAmount = 10;
     for (const token of hrc20Coin) {
         if (token.contract.symbol === 'CDEX' && tokenAmount <= (token.amount / Math.pow(10, token.contract.decimals))) {
             return true;
