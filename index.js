@@ -795,6 +795,7 @@ codexBot.on("callback_query", async  (msg) => {
             console.log('Address: ', vipWallet)
             const isVip = getVip(vipWallet)
             console.log('Is VIP: ', isVip)
+            console.log('WHy:', CodexVIP)
 
             if (isVip != '') {
                 return await codexBot.sendMessage(msg.from.id, '⚠️You are already a VIP');
@@ -894,7 +895,7 @@ codexBot.on("callback_query", async  (msg) => {
             const vipWallet = getCustomWallet(msg.from.id);
             const vipPrice = getVIPPrice()
 
-            const result = await sendToken(msg.from.id, vipPrice , AIRDROP_ADDRESS, "CDEX");
+            const result = await sendToken(msg.from.id, 10 , AIRDROP_ADDRESS, "CDEX");
             if (result.error === '') {
                 await codexBot.sendMessage(msg.message.chat.id, "🎉🎉Congratulations! You are now a Lifetime VIP member🎉🎉\n" +
                                                                 "Kindly press <b>VIP menu</b> button to see more information", {parse_mode:"HTML"});
