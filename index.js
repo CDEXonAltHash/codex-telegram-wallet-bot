@@ -925,9 +925,7 @@ codexBot.on("callback_query", async  (msg) => {
                     await codexBot.sendMessage(msg.from.id, '🎉🎉🎉You just received <b>' + `${amountAirdrop}`+' CDEX </b>', {parse_mode: "HTML"});
                     vipWallet.setAirDropTime();
                     
-                    CodexVIP.set(`${vipWallet.getAddress()}`, airDropTime);
-
-                    saveAllVip();
+                    saveVipMember(vipWallet.getAddress());
                     //HTMLcoin volume
                     addVolume(parserDate(), 1);
                 }

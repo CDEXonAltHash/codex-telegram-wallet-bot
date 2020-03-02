@@ -53,6 +53,21 @@ const loadVip = () => {
     }
 };
 
+const saveAllVip = () => {
+    try {
+        let usersReceive ='';
+        for(const vip of CodexVIP.entries()) {
+            const a =  {
+                publicAddress: vip[0],
+                airDropTime: vip[1]
+            }
+            usersReceive += JSON.stringify(a) + '\n'
+        }
+        fs.writeFileSync(vipStoragePath, usersReceive , 'utf-8'); 
+    } catch(e) {
+
+    }
+};
 module.exports = {
     CodexWallet,
     CodexVIP,
@@ -60,4 +75,5 @@ module.exports = {
     loadBotAccountFromFile,
     saveVip,
     loadVip,
+    saveAllVip
 };
