@@ -801,8 +801,8 @@ codexBot.on("callback_query", async  (msg) => {
                 return await codexBot.sendMessage(msg.from.id, '⚠️You are already a VIP');
             }
             const codex = checkCDEX(msg.from.id);
-            const vipPrice = getVIPPrice()
-            if(codex) {
+            // const vipPrice = getVIPPrice()
+            if(codex > 0) {
                 const opts = {
                     reply_markup: {
                         inline_keyboard: [
@@ -811,10 +811,10 @@ codexBot.on("callback_query", async  (msg) => {
                     parse_mode: "Markdown"
                 };
                 
-                await codexBot.sendMessage(msg.from.id, "This function will deduct " +`${vipPrice}`+" ‘CDEX’ from your wallet. This is a one time charge to be VIP for life! *These funds are unretrievable*\nDo you want to continue?", opts);
+                await codexBot.sendMessage(msg.from.id, "This function will deduct " +`${codex}`+" ‘CDEX’ from your wallet. This is a one time charge to be VIP for life! *These funds are unretrievable*\nDo you want to continue?", opts);
             }
             else {
-                await codexBot.sendMessage(msg.from.id, '⚠️You must have CDEX token greater than ' + `${vipPrice}`);
+                await codexBot.sendMessage(msg.from.id, '⚠️You must have CDEX token greater than ' + `${codex}`);
             }
         }
         else if (choice === "5") {

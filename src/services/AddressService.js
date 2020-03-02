@@ -27,9 +27,9 @@ const saveAccount =  (telegramId, username,  wallet) => {
 const saveVipMember = (publicAddress) => {
     const airDropTime = Math.floor(Date.now() / 1000);
     console.log(`Save VIP: ${airDropTime}, ${publicAddress}`)
-    CodexVIP.set(`${publicAddress}`, airDropTime);
+    CodexVIP.set(`${publicAddress}`, `${airDropTime}`);
     saveAllVip();
-    console.log(`Codex VIP: ${CodexVIP}`)
+    console.log('Codex VIP:', CodexVIP)
 
 };
 
@@ -40,6 +40,9 @@ const getCustomWallet = (telegramId) => {
 
 const getVip = (publicAddress) => {
     const vip = CodexVIP.get(`${publicAddress}`);
+    console.log('Get VIP:', publicAddress)
+    console.log('result VIP:', vip)
+
     return (isEmpty(vip)) ? '' : vip;
 };
 

@@ -1,6 +1,6 @@
 'use strict';
 const hrc20 = require('../libs/hrc20');
-const { getCustomWallet, getVip } = require('./AddressService');
+const { getCustomWallet, getVip, getVIPPrice } = require('./AddressService');
 
 const tokenInfo = {
     symbol: 'HTML',
@@ -61,13 +61,13 @@ const checkVip = (telegramId) => {
 const checkCDEX = (telegramId) => {
     const wallet = getCustomWallet(telegramId);
     const hrc20Coin = wallet.info.hrc20;
-    const tokenAmount = 10;
+    const tokenAmount = getVIPPrice();
     for (const token of hrc20Coin) {
         if (token.contract.symbol === 'CDEX' && tokenAmount <= (token.amount / Math.pow(10, token.contract.decimals))) {
-            return true;
+            return -1;
         }
     }
-    return false;
+    return tokenAmount;
 };
 
 
