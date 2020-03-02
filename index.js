@@ -792,7 +792,11 @@ codexBot.on("callback_query", async  (msg) => {
             if(vipWallet === ''){
                 return await codexBot.sendMessage(msg.from.id, '⚠️Your address does not exist');
             }
-            if (getVip(vipWallet)) {
+            console.log('Address: ', vipWallet)
+            const isVip = getVip(vipWallet)
+            console.log('Is VIP: ', isVip)
+
+            if (isVip != '') {
                 return await codexBot.sendMessage(msg.from.id, '⚠️You are already a VIP');
             }
             const codex = checkCDEX(msg.from.id);
