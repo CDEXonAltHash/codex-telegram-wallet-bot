@@ -530,7 +530,8 @@ const LIST_GROUP = ['@photizocommunity', '@LacnaTokenHRC20', '@HRC20_Token_Room'
 codexBot.onText(/\/off/, async (msg) => {
     const admin = await codexBot.getChatMember(msg.chat.id, msg.from.id);
 
-    if (admin.status === 'administrator' || admin.status === 'creator') {
+    // if (admin.status === 'administrator' || admin.status === 'creator') {
+    if(admin.user.username === 'Brett_Hituhmull') {
         for (const user of LIST_GROUP) {
             await codexBot.sendMessage(user, "WE ARE GOING TO TURN OFF SERVER IN 10 MINS FOR UPDATE FUNCTION. <b>PLEASE SAVE YOUR PRIVATE KEY</b>", { parse_mode: "HTML" });
         }
@@ -543,7 +544,8 @@ codexBot.onText(/\/off/, async (msg) => {
 codexBot.onText(/\/on/, async (msg) => {
     const admin = await codexBot.getChatMember(msg.chat.id, msg.from.id);
 
-    if (admin.status === 'administrator' || admin.status === 'creator') {
+    // if (admin.status === 'administrator' || admin.status === 'creator') {
+    if(admin.user.username === 'Brett_Hituhmull') {
         for (const user of LIST_GROUP) {
             await codexBot.sendMessage(user, "THE SERVER HAS BEEN RUN. <b>PLEASE GO TO YOUR WALLET AND USE /restore &lt;private key&gt TO CONTINUE USING OUR SERVICE</b>", { parse_mode: "HTML" });
         }
