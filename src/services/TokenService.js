@@ -70,7 +70,7 @@ const checkCDEX = (telegramId) => {
             return error;
         }
     }
-    return tokenAmount;
+    return error;
 };
 
 
