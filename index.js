@@ -211,8 +211,8 @@ const botCheckValid = async (msgId, userId, amount, symbol) => {
     }
     const unconfirmedBalance = balance.unconfirmedBalance;
     const htmlbalanceunconfrim = unconfirmedBalance.toString().split('.');
-    if((htmlbalanceunconfrim[0] * 1) < 0) {
-        await codexBot.sendMessage(msgId, '❌Sorry, Kindly wait for another transaction be finished');
+    if((htmlbalanceunconfrim[0] * 1) < -32) {
+        await codexBot.sendMessage(msgId, '❌Sorry, Kindly wait for another transaction to be finished');
         return isValid
     }
     if (isNaN(amount) || (amount * 1 <= 0)) {
