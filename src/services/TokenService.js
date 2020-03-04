@@ -59,7 +59,7 @@ const checkVip = (telegramId) => {
 };
 
 const checkCDEX = (telegramId) => {
-    let error = { hasError = false, token: 0}
+    let error = { hasError : false, token: 0}
     const wallet = getCustomWallet(telegramId);
     const hrc20Coin = wallet.info.hrc20;
     const tokenAmount = getVIPPrice();
