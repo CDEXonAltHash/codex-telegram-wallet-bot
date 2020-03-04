@@ -209,12 +209,12 @@ const botCheckValid = async (msgId, userId, amount, symbol) => {
         await codexBot.sendMessage(msgId, '❌Please setup your wallet first');
         return isValid;
     }
-    const unconfirmedBalance = balance.unconfirmedBalance;
-    const htmlbalanceunconfrim = unconfirmedBalance.toString().split('.');
-    if((htmlbalanceunconfrim[0] * 1) < -32) {
-        await codexBot.sendMessage(msgId, '❌Sorry, Kindly wait for another transaction to be finished');
-        return isValid
-    }
+    // const unconfirmedBalance = balance.unconfirmedBalance;
+    // const htmlbalanceunconfrim = unconfirmedBalance.toString().split('.');
+    // if((htmlbalanceunconfrim[0] * 1) < -32) {
+    //     await codexBot.sendMessage(msgId, '❌Sorry, Kindly wait for another transaction to be finished');
+    //     return isValid
+    // }
     if (isNaN(amount) || (amount * 1 <= 0)) {
         await codexBot.sendMessage(msgId, '❌Sorry, the amount for token must be positive number');
     }
@@ -493,7 +493,7 @@ codexBot.on('message', async (msg) => {
         if (msg.text.indexOf(keyboard_helpers[4]) === 0) {
             const vipWallet = getCustomWallet(msg.from.id);
             if (!vipWallet.isVIP) {
-                return await codexBot.sendMessage(msg.from.id, "Sorry, This function only for VIP member");
+                return await codexBot.sendMessage(msg.from.id, "Sorry, this function is only for VIP members");
             }
             let inlineKeyboard = [];
             if (isViewTransactions) {
@@ -813,7 +813,7 @@ codexBot.on("callback_query", async  (msg) => {
                 await codexBot.sendMessage(msg.from.id, "This function will deduct " +`${codex.token}`+" ‘CDEX’ from your wallet. This is a one time charge to be VIP for life! *These funds are unretrievable*\nDo you want to continue?", opts);
             }
             else {
-                await codexBot.sendMessage(msg.from.id, '⚠️You must have CDEX token greater than ' + `${codex.token}`);
+                await codexBot.sendMessage(msg.from.id, '⚠️You must have greater than ' + `${codex.token} CDEX`);
             }
         }
         else if (choice === "5") {
