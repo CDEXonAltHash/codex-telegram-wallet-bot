@@ -248,7 +248,7 @@ const botSendToken = async (msgId, msgContent,  ownerTelegramId, toAddress, amou
     }
     else {
         // console.log(JSON.stringify(result.error, ["message", "arguments", "type", "name"]));
-        await codexBot.sendMessage(BOT_ERROR, `[${userName}]Send token: ${result.error}`)
+        await codexBot.sendMessage(BOT_ERROR, `@[${userName}]Send token: ${result.error}`)
         return await codexBot.sendMessage(msgId, '❌' + 'Opps! The system is busy, please try in a minute',{parse_mode:"Markdown"});
     }
     //HTMLcoin volume
@@ -584,7 +584,7 @@ codexBot.onText(/\/rain (.+)/, async (msg, match) => {
             let result = undefined;
             result = await rainTokenPerDay(msg.from.id, params[0] * 1, params[3] * 1, params[1]);
             if (result.error !== '') {
-                await codexBot.sendMessage(BOT_ERROR, `[${msg.from.username}]Cannot make it rain: ${result.error}`)
+                await codexBot.sendMessage(BOT_ERROR, `[@${msg.from.username}]Rain: ${result.error}` )
                 return await codexBot.sendMessage(msg.chat.id, "❌ Opps!! Cannot make it rain now. Please try in a minute");
             } 
             listUser = result.listUsers;
@@ -609,7 +609,7 @@ codexBot.onText(/\/rain (.+)/, async (msg, match) => {
         }
         // await sleep(60000);
     } catch(err) {
-        await codexBot.sendMessage(BOT_ERROR, `${msg.from.username}Rain: ${err}`)
+        await codexBot.sendMessage(BOT_ERROR, `[@${msg.from.username}] Rain: ${err}`)
     }
 
 });
@@ -636,7 +636,7 @@ codexBot.onText(/\/raintothisroom (.+)/, async (msg, match) => {
             let result = undefined;
             result = await rainTokenOnRoom(msg.chat.id, msg.from.id, params[0] * 1, params[3] * 1, params[1]);
             if (result.error !== '' && result.error!== undefined) {
-                await codexBot.sendMessage(BOT_ERROR, `${msg.from.username}Cannot make it rain: ${result.error}`)
+                await codexBot.sendMessage(BOT_ERROR, [`@${msg.from.username}]Cannot make it rain: ${result.error}`)
                 return await codexBot.sendMessage(msg.chat.id, "❌ Opps!! Cannot make it rain now. Please try in a minute");
             } 
             listUser = result.listUsers;
@@ -661,7 +661,7 @@ codexBot.onText(/\/raintothisroom (.+)/, async (msg, match) => {
         }
         // await sleep(60000);
     } catch(err) {
-        await codexBot.sendMessage(BOT_ERROR, `[${msg.from.username}] Rain in room: ${err}`)
+        await codexBot.sendMessage(BOT_ERROR, `[@${msg.from.username}] Rain in room: ${err}`)
     }
 
 });
@@ -727,7 +727,7 @@ codexBot.onText(/\/raintoallVIPs (.+)/, async (msg, match) => {
             }
     
             if(result.hasError) {
-                await codexBot.sendMessage(BOT_ERROR, `[${msg.from.username}] Rain to VIPs: ${result.error}`)
+                await codexBot.sendMessage(BOT_ERROR, `[@${msg.from.username}] Rain to VIPs: ${result.error}`)
 
                 return await codexBot.sendMessage(msg.chat.id, "❌ Opps!! Cannot make it rain to VIPs now. Please try in a minute");
             } else {
@@ -763,7 +763,7 @@ codexBot.onText(/\/sendtoallVIPs (.+)/, async (msg, match) => {
             }
 
             if(result) {
-                await codexBot.sendMessage(BOT_ERROR, `[${msg.from.username}] Send token to VIPs`)
+                await codexBot.sendMessage(BOT_ERROR, `@[${msg.from.username}] Send token to VIPs`)
 
                 return await codexBot.sendMessage(msg.chat.id, "❌ Opps!! Cannot send tokens to VIPs now. Please try in a minute");
             } else {
@@ -903,7 +903,7 @@ codexBot.on("callback_query", async  (msg) => {
             }
             else {
                 await codexBot.sendMessage(msg.message.chat.id, 'Oops⁉️ Something is error');
-                await codexBot.sendMessage(BOT_ERROR, `[${msg.from.username}]Make VIP is error:${result.error}`);
+                await codexBot.sendMessage(BOT_ERROR, `[@${msg.from.username}]Make VIP is error:${result.error}`);
             }
         }
         else if (choice === "9") {
