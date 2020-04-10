@@ -7,5 +7,6 @@ module.exports = {
     AIRDROP_ADDRESS: process.env.AIRDROP_ADDRESS,
     TELEGRAM_TOKEN: process.env.TELEGRAM_TOKEN,
     CODEX_CREDENTIAL: process.env.CODEX_CREDENTIAL,
-    BOT_ERROR: process.env.BOT_ERROR
+    BOT_ERROR: process.env.BOT_ERROR,
+    MONGO_URL: process.env.MONGO_URL
 }

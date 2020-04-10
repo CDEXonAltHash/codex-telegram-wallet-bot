@@ -44,8 +44,8 @@ const getLuckyAirdrop = (telegramId) => {
     addAirdropLog(telegramId, oneDie.result);
     return oneDie.result;
 }
+
 const airdropLog = async (telegramId) => {
-    // const airDropUser = [{ days: 'JUN 20', amounts: 10 }, { days: 'JUN 21', amounts: 35 }, { days: 'JUN 22', amounts: 12 }, { days: 'JUN 23', amounts: 10 }, { days: 'JUN 24', amounts: 60 }]
     const airDropUser = AirdopLog.get(`${telegramId}`);
     const width = 1500;
     const height = 1000;

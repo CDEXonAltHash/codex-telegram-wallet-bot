@@ -4,12 +4,9 @@ const webWallet = require('../libs/web-wallet');
 const fs = require('fs');
 const { CODEX_CREDENTIAL } = require('../config/Config');
 const userStoragePath = './codexWallet';
-const vipStoragePath = './codexVip';
 const CodexWallet = new Map();
-const CodexVIP = new Map();
 
 const accountArray = fs.readFileSync(`${userStoragePath}`).toString().split('\n');
-const vipArray = fs.readFileSync(`${vipStoragePath}`).toString().split('\n');
 
 const saveAccountToWallet = (account) => {
     const encryptedAccount = keyFile.encode(JSON.stringify(account), CODEX_CREDENTIAL);
@@ -35,45 +32,8 @@ const loadBotAccountFromFile =  () => {
     }
 
 };
-
-const saveVip = (vip) => {
-    fs.appendFileSync(vipStoragePath, JSON.stringify(vip) + '\n');
-};
-
-const loadVip = () => {
-    try {
-        for (const line of vipArray) {
-            if (line != '') {
-                const vip = JSON.parse(line);
-                CodexVIP.set(`${vip.publicAddress}`, vip.airDropTime);
-            }
-        }
-    }
-    catch (e) {
-    }
-};
-
-const saveAllVip = () => {
-    try {
-        let usersReceive ='';
-        for(const vip of CodexVIP.entries()) {
-            const a =  {
-                publicAddress: vip[0],
-                airDropTime: vip[1]
-            }
-            usersReceive += JSON.stringify(a) + '\n'
-        }
-        fs.writeFileSync(vipStoragePath, usersReceive , 'utf-8'); 
-    } catch(e) {
-
-    }
-};
 module.exports = {
     CodexWallet,
-    CodexVIP,
     saveAccountToWallet,
-    loadBotAccountFromFile,
-    saveVip,
-    loadVip,
-    saveAllVip
+    loadBotAccountFromFile
 };
