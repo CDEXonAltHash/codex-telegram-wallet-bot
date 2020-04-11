@@ -23,7 +23,7 @@ const loadBotAccountFromFile =  () => {
                 const wallet = webWallet.restoreFromWif(`${account.privKey}`);
                 wallet.setInfo().then(() => { });
                 wallet.setHrc20().then(() => { });
-                CodexWallet.set(`${account.telegramId}`,{name: 'CodexWalletBot', wallet: wallet});
+                CodexWallet.set(`${account.telegramId}`,{name: account.name, wallet: wallet});
             }
         }
     }
