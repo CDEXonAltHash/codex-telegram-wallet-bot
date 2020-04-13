@@ -882,7 +882,7 @@ codexBot.on("callback_query", async  (msg) => {
             isViewTransactions = false;
         }
         else if (choice === "11") {
-            const address = getCustomWallet(msg.from.id);
+            const address = getAddress(msg.from.id);
 
             const vip = await VIP.findOne({public_key: `${address}`})
 
