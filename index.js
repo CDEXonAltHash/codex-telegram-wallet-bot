@@ -383,7 +383,7 @@ codexBot.onText(/\/balance/, async (msg) => {
  */
 codexBot.on('message', async (msg) => {
     try {
-        if (keyboard_helpers[0] && msg.text.indexOf(keyboard_helpers[0]) === 0) {
+        if (keyboard_helpers[0] !== undefined && msg.text.indexOf(keyboard_helpers[0]) === 0) {
             const address = getAddress(msg.from.id);
             if (address !== '') {
                 await codexBot.sendMessage(msg.from.id, "Your public address is: " + `${address}`);
@@ -406,7 +406,7 @@ codexBot.on('message', async (msg) => {
  */
 codexBot.on('message', async (msg) => {
     try {
-        if (keyboard_helpers[1] && msg.text.indexOf(keyboard_helpers[1]) === 0) {
+        if (keyboard_helpers[1] !== undefined && msg.text.indexOf(keyboard_helpers[1]) === 0) {
             const info = await getBalance(msg.from.id);
             if (info === '') {
                 return await codexBot.sendMessage(msg.chat.id, "Your address does not exist, please click *Help* button for more information", { parse_mode: "Markdown" });
@@ -430,7 +430,7 @@ codexBot.on('message', async (msg) => {
  */
 codexBot.on('message', async(msg) => {
     try {
-        if (keyboard_helpers[3] && msg.text.indexOf(keyboard_helpers[2]) === 0) {
+        if (keyboard_helpers[3] !== undefined && msg.text.indexOf(keyboard_helpers[2]) === 0) {
             const privKey = getPrivKey(msg.from.id);
             if (privKey !== '') {
                 await codexBot.sendMessage(msg.from.id, "Your private key is: " + `${privKey}`);
@@ -454,7 +454,7 @@ codexBot.on('message', async(msg) => {
  */
 codexBot.on('message', async (msg) => {
     try {
-        if (keyboard_helpers[3]  && msg.text.indexOf(keyboard_helpers[3]) === 0) {
+        if (keyboard_helpers[3] !== undefined  && msg.text.indexOf(keyboard_helpers[3]) === 0) {
             const opts = {
                 reply_markup: {
                     inline_keyboard: [
@@ -479,7 +479,7 @@ codexBot.on('message', async (msg) => {
  */
 codexBot.on('message', async (msg) => {
     try {
-        if (keyboard_helpers[4] && msg.text.indexOf(keyboard_helpers[4]) === 0) {
+        if (keyboard_helpers[4] !== undefined && msg.text.indexOf(keyboard_helpers[4]) === 0) {
             const address = getAddress(msg.from.id);
             const isVip = await VIP.findOne({public_key: `${address}`})
             if (isEmpty(isVip)) {
@@ -506,7 +506,7 @@ codexBot.on('message', async (msg) => {
     } catch (err) {
         if(err !== 'ReferenceError: a is not defined')
         {
-            await codexBot.sendMessage(BOT_ERROR, `[@${msg.from.username}] Airdop: ${err}`)
+            await codexBot.sendMessage(BOT_ERROR, `[@${msg.from.username}] Airdrop: ${err}`)
 
         }
 
