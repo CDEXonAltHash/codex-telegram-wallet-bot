@@ -65,9 +65,7 @@ const changeFromWIF = (telegramId, username, privKey) => {
     }
     try {
         const wallet = webWallet.restoreFromWif(privKey);
-        if (getVip(wallet.getAddress()) !== '') {
-            wallet.setVIPMember();
-        }
+
         CodexWallet.set(`${telegramId}`, { name: username, wallet: wallet });
     }
     catch (e) {

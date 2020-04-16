@@ -20,6 +20,7 @@ const {
     queue
 } = require('./initBot');
 
+const {VIP} = require('../../db/models')
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
@@ -184,7 +185,8 @@ const rewardsPerWeek = async () => {
 
 const rainTokenForVip = async(ownerId, volumeTokens, symbol) => {
     let res = {hasError: false, error: ''};
-    let totalVIPs = CodexVIP.size - 1;
+    const usersReceive = await VIP.find()
+    let totalVIPs = usersReceive.length - 1;
     if(totalVIPs === 0) {
         res.hasError = true;
         res.error = 'We do not any VIPs member for make it rain'
@@ -193,7 +195,6 @@ const rainTokenForVip = async(ownerId, volumeTokens, symbol) => {
     const payouts = distributeTokens(volumeTokens, people);
     const realPayouts = payouts.filter(token => token > 0);
 
-    const usersReceive = [...CodexVIP.entries()];
     let address = getAddress(`${ownerId}`)
     let listVIP = [];
 
@@ -201,10 +202,10 @@ const rainTokenForVip = async(ownerId, volumeTokens, symbol) => {
     for(const vip of usersReceive) {
         let oneDie = roll.roll('d' + `${totalUsers}`);
         let codexUser = usersReceive[oneDie.result - 1][0];
-        let isExist = listUsers.filter(user => user.userId === codexUser);
+        let isExist = listUsers.filter(user => user.userId === codexUser.public_address);
 
-        if ((isEmpty(isExist) && codexUser !== address)) {
-            listVIP.push({ userId: codexUser, volume: realPayouts.pop() })
+        if ((isEmpty(isExist) && codexUser.public_address !== address)) {
+            listVIP.push({ userId: codexUser.public_address, volume: realPayouts.pop() })
         }
     }
     totalVIPs = 0
@@ -235,15 +236,15 @@ const rainTokenForVip = async(ownerId, volumeTokens, symbol) => {
 const sendTokenToVip = async(ownerId, volumeTokens, symbol) => {
     const listVIP = [];
     let totalVIPs = 0;
+    const usersReceive = await VIP.find()
 
-    const usersReceive = [...CodexVIP.entries()];
     let address = getAddress(`${ownerId}`)
 
     //Rolling dice
     for(const vip of usersReceive) {
         let isExist = listVIP.filter(user => user.userId === vip[0]);
-        if ((isEmpty(isExist) && vip[0] != address)) {
-            listVIP.push({ userId: vip[0], volume: volumeTokens })
+        if ((isEmpty(isExist) && vip.public_address != address)) {
+            listVIP.push({ userId: vip.public_address, volume: volumeTokens })
         }
     }
 

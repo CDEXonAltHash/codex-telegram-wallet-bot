@@ -8,9 +8,6 @@ const {
     getPrivKey,
     restoreFromWIF,
     changeFromWIF,
-    getCustomWallet,
-    saveVipMember,
-    getVip,
     getVIPPrice
 } = require('./src/services/AddressService'); 
 
@@ -37,7 +34,6 @@ const hrc20 = require('./src/libs/hrc20');
 
 const { 
     loadBotAccountFromFile,
-    loadVip,
     CodexWallet
 } = require('./src/services/StorageService');
 
@@ -479,6 +475,7 @@ codexBot.on('message', async (msg) => {
  */
 codexBot.on('message', async (msg) => {
     try {
+        console.log(keyboard_helpers[4])
         if (keyboard_helpers[4] !== undefined && msg.text.indexOf(keyboard_helpers[4]) === 0) {
             const address = getAddress(msg.from.id);
             const isVip = await VIP.findOne({public_key: `${address}`})
@@ -901,7 +898,7 @@ codexBot.on("callback_query", async  (msg) => {
                 }
             }
             else {
-                const miliseconds = TIME_AIRDROP - (new Date(msg.message.date).getTime() - new Date(vipWallet.getAirDropTime()).getTime());
+                const miliseconds = TIME_AIRDROP - (new Date(msg.message.date).getTime() - new Date(vip.last_time).getTime());
                 const timeLeft = convertTime(miliseconds*1000);
                 await codexBot.sendMessage(msg.from.id, "⚠️Please wait: <b>" + `${timeLeft}` + "</b> to get airdrop again! ", {parse_mode: "HTML"});
             }
