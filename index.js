@@ -477,7 +477,6 @@ codexBot.on('message', async (msg) => {
  */
 codexBot.on('message', async (msg) => {
     try {
-        console.log(keyboard_helpers[4])
         if (msg.text.indexOf(keyboard_helpers[4]) === 0) {
             const address = getAddress(msg.from.id);
             const isVip = await VIP.findOne({public_key: `${address}`})
@@ -505,6 +504,7 @@ codexBot.on('message', async (msg) => {
     } catch (err) {
         if(err !== 'ReferenceError: a is not defined')
         {
+            console.log(keyboard_helpers[4])
             await codexBot.sendMessage(BOT_ERROR, `[@${msg.from.username}] Airdrop: ${err}`)
 
         }
