@@ -576,18 +576,17 @@ codexBot.onText(/\/rain (.+)/, async (msg, match) => {
         const params = match[1].split(' ');
 
         //Check valid syntax
-        //Check valid syntax
         if(isNaN(params[0])) {
-            return await codexBot.sendMessage(msg.chat.id, '❌ Sorry, You need to include the symbol you are sending i.e: / rain 100 CDEX to 24');
+            return await codexBot.sendMessage(msg.chat.id, '❌ Sorry, need amount of token for rain i.e: / rain 100 CDEX to 24');
         }
         const validSymbol = checkTokenSymbol(params[1])
-        if ( params[1] !== validSymbol) {
+        if (!isNaN(params[1]) || params[1] !== validSymbol) {
             return await codexBot.sendMessage(msg.chat.id, '❌ Sorry, You need to include the symbol you are sending i.e: / rain 100 CDEX to 24');
         } else if(!isNaN(params[2])) {
-            return await codexBot.sendMessage(msg.chat.id, '❌ Here is the format of this command: / rain 100 CDEX to 24');
+            return await codexBot.sendMessage(msg.chat.id, '❌ Kindly check the format of command: / rain 100 CDEX to 24');
         }
         if (isNaN(params[3]) || (params[3] * 1) < 0 || (params[3]*1) > 25 ) {
-            return await codexBot.sendMessage(msg.chat.id, "❌ Sorry, The number of people must be a positive number and smaller than 25", { parse_mode: "HTML" });
+            return await codexBot.sendMessage(msg.chat.id, "❌ Sorry, The number of people must be a positive number or smaller than 25 (/ rain 100 CDEX to 24)", { parse_mode: "HTML" });
         }
         const isValid = await botCheckValid(msg.chat.id, msg.from.id, params[0], params[1]);
         if (isValid === 'OKAY') {
@@ -636,16 +635,16 @@ codexBot.onText(/\/raintothisroom (.+)/, async (msg, match) => {
 
         //Check valid syntax
         if(isNaN(params[0])) {
-            return await codexBot.sendMessage(msg.chat.id, '❌ Sorry, You need to include the symbol you are sending i.e: / raintothisroom 100 CDEX to 24');
+            return await codexBot.sendMessage(msg.chat.id, '❌ Sorry, need amount of token for rain i.e: / raintothisroom 100 CDEX to 24');
         }
         const validSymbol = checkTokenSymbol(params[1])
-        if ( params[1] !== validSymbol) {
+        if (!isNaN(params[1]) || params[1] !== validSymbol) {
             return await codexBot.sendMessage(msg.chat.id, '❌ Sorry, You need to include the symbol you are sending i.e: / raintothisroom 100 CDEX to 24');
         } else if(!isNaN(params[2])) {
-            return await codexBot.sendMessage(msg.chat.id, '❌ Here is the format of this command: / raintothisroom 100 CDEX to 24');
+            return await codexBot.sendMessage(msg.chat.id, '❌ Kindly check the format of this command: / raintothisroom 100 CDEX to 24');
         }
         if (isNaN(params[3]) || (params[3] * 1) < 0 || (params[3]*1) > 25 ) {
-            return await codexBot.sendMessage(msg.chat.id, "❌ Sorry, The number of people must be a positive number and smaller than 25", { parse_mode: "HTML" });
+            return await codexBot.sendMessage(msg.chat.id, "❌ Sorry, The number of people must be a positive number or smaller than 25 (/ raintothisroom 100 CDEX to 24)", { parse_mode: "HTML" });
         }
         const isValid = await botCheckValid(msg.chat.id, msg.from.id, params[0], params[1]);
         if (isValid === 'OKAY') {
