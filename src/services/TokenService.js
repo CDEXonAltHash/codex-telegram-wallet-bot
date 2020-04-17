@@ -10,9 +10,15 @@ const tokenInfo = {
     fee: '0.05',
 };
 const sendToken = async (telegramId, amount, toAddress, symbol) => {
-    const wallet = getCustomWallet(telegramId);
-    let rawTx;
+
     try {
+        const wallet = getCustomWallet(telegramId);
+        if(wallet = '') {
+            return {
+                error: 'Kindly setup your wallet first'
+            }
+        }
+        let rawTx;
         if (symbol === tokenInfo.symbol) {
             rawTx = await wallet.generateTx(toAddress, amount, tokenInfo.fee)
         } else if (hrc20.checkSymbol(symbol)) {

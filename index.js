@@ -576,8 +576,15 @@ codexBot.onText(/\/rain (.+)/, async (msg, match) => {
         const params = match[1].split(' ');
 
         //Check valid syntax
-        if (params[1] === 'to') {
-            return await codexBot.sendMessage(msg.chat.id, '❌ Sorry, You need to include the symbol you are sending');
+        //Check valid syntax
+        if(isNaN(params[0])) {
+            return await codexBot.sendMessage(msg.chat.id, '❌ Sorry, You need to include the symbol you are sending i.e: / rain 100 CDEX to 24');
+        }
+        const validSymbol = checkTokenSymbol(params[1])
+        if ( params[1] !== validSymbol) {
+            return await codexBot.sendMessage(msg.chat.id, '❌ Sorry, You need to include the symbol you are sending i.e: / rain 100 CDEX to 24');
+        } else if(!isNaN(params[2])) {
+            return await codexBot.sendMessage(msg.chat.id, '❌ Here is the format of this command: / rain 100 CDEX to 24');
         }
         if (isNaN(params[3]) || (params[3] * 1) < 0 || (params[3]*1) > 25 ) {
             return await codexBot.sendMessage(msg.chat.id, "❌ Sorry, The number of people must be a positive number and smaller than 25", { parse_mode: "HTML" });
@@ -628,8 +635,14 @@ codexBot.onText(/\/raintothisroom (.+)/, async (msg, match) => {
         const params = match[1].split(' ');
 
         //Check valid syntax
-        if (params[1] === 'to') {
-            return await codexBot.sendMessage(msg.chat.id, '❌ Sorry, You need to include the symbol you are sending');
+        if(isNaN(params[0])) {
+            return await codexBot.sendMessage(msg.chat.id, '❌ Sorry, You need to include the symbol you are sending i.e: / raintothisroom 100 CDEX to 24');
+        }
+        const validSymbol = checkTokenSymbol(params[1])
+        if ( params[1] !== validSymbol) {
+            return await codexBot.sendMessage(msg.chat.id, '❌ Sorry, You need to include the symbol you are sending i.e: / raintothisroom 100 CDEX to 24');
+        } else if(!isNaN(params[2])) {
+            return await codexBot.sendMessage(msg.chat.id, '❌ Here is the format of this command: / raintothisroom 100 CDEX to 24');
         }
         if (isNaN(params[3]) || (params[3] * 1) < 0 || (params[3]*1) > 25 ) {
             return await codexBot.sendMessage(msg.chat.id, "❌ Sorry, The number of people must be a positive number and smaller than 25", { parse_mode: "HTML" });
