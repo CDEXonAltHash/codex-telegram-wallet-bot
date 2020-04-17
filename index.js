@@ -504,8 +504,8 @@ codexBot.on('message', async (msg) => {
     } catch (err) {
         if(err !== 'ReferenceError: a is not defined')
         {
-            console.log(keyboard_helpers[4])
-            await codexBot.sendMessage(BOT_ERROR, `[@${msg.from.username}] Airdrop: ${err}`)
+            // console.log(keyboard_helpers[4])
+            // await codexBot.sendMessage(BOT_ERROR, `[@${msg.from.username}] Airdrop: ${err}`)
 
         }
 
