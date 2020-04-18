@@ -829,7 +829,7 @@ codexBot.on("callback_query", async  (msg) => {
             if (!isEmpty(isVip)) {
                 return await codexBot.sendMessage(msg.from.id, '⚠️You are already a VIP');
             }
-            const codex = checkCDEX(msg.from.id);
+            const codex = await checkCDEX(msg.from.id);
             // const vipPrice = getVIPPrice()
             if(!codex.hasError) {
                 const opts = {
