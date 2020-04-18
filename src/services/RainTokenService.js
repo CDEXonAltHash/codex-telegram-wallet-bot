@@ -108,21 +108,19 @@ const rainTokenPerDay = async (ownerId, volumeTokens, people, symbol) => {
 
 const rainTokenOnRoom = async (chatId, ownerId, volumeTokens, people, symbol) => {
     const listUsers = [];
-    const totalUsers = CodexWallet.size - 7;
-    if(totalUsers <= 0) {
-        return {
-            error: '',
-            listUsers: listUsers
-        };
-    }
+
+
+    const codexUser = [...CodexWallet.entries()];
+    const usersReceive = codexUser.filter(user => user[0] > 2025); 
+
+    const totalUsers = usersReceive.length;
+
     if(people > totalUsers - 2) {
         people = totalUsers - 2;
     }
     const payouts = distributeTokens(volumeTokens, people);
     const realPayouts = payouts.filter(token => token > 0);
-
-    const codexUser = [...CodexWallet.entries()];
-    const usersReceive = codexUser.filter(user => user[0] > 2025); 
+    
     //Rolling dice
     let ind = 0;
     while (!isEmpty(realPayouts)) {
