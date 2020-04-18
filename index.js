@@ -169,7 +169,7 @@ codexBot.onText(/\/mywallet/, async (msg) => {
     try {
         const result =  changeFromWIF(msg.from.id, msg.from.first_name, match[1]);
         if (result === true) {
-            await codexBot.sendMessage(msg.from.id, 'The change adddress is sucessful');
+            await codexBot.sendMessage(msg.from.id, 'Change of address successful.');
         }
         else {
             await codexBot.sendMessage(msg.from.id, '❌The private key is invalid or you do not have account on wallet');
@@ -600,7 +600,7 @@ codexBot.onText(/\/rain (.+)/, async (msg, match) => {
             listUser = result.listUsers;
             let rainMsg = '';
             if (!listUser.length) {
-                return await codexBot.sendMessage(msg.chat.id, "<b> WE DO NOT HAVE ANY LUCKY PEOPLE TODAY. SEE IN NEXT TIME</b>\n\n" +
+                return await codexBot.sendMessage(msg.chat.id, "<b> WE DO NOT HAVE ANY LUCKY PEOPLE TODAY. BETTER LUCK NEXT TIME</b>\n\n" +
                     rainMsg, { parse_mode: "HTML" });
             }
             for (const user of listUser) {
@@ -619,7 +619,7 @@ codexBot.onText(/\/rain (.+)/, async (msg, match) => {
         }
         // await sleep(60000);
     } catch(err) {
-        await codexBot.sendMessage(BOT_ERROR, `[@${msg.from.username}] Rain: ${err}`)
+        await codexBot.sendMessage(BOT_ERROR, `[@${msg.from.username}] Rain: ${err.stack}`)
     }
 
 });
@@ -658,7 +658,7 @@ codexBot.onText(/\/raintothisroom (.+)/, async (msg, match) => {
             listUser = result.listUsers;
             let rainMsg = '';
             if (!listUser.length) {
-                return await codexBot.sendMessage(msg.chat.id, "<b> WE DO NOT HAVE ANY LUCKY PEOPLE TODAY. SEE IN NEXT TIME</b>\n\n" +
+                return await codexBot.sendMessage(msg.chat.id, "<b> WE DO NOT HAVE ANY LUCKY PEOPLE TODAY. BETTER LUCK NEXT TIME</b>\n\n" +
                     rainMsg, { parse_mode: "HTML" });
             }
             for (const user of listUser) {
@@ -677,7 +677,7 @@ codexBot.onText(/\/raintothisroom (.+)/, async (msg, match) => {
         }
         // await sleep(60000);
     } catch(err) {
-        await codexBot.sendMessage(BOT_ERROR, `[@${msg.from.username}] Rain in room ${msg.chat.username}: ${err}`)
+        await codexBot.sendMessage(BOT_ERROR, `[@${msg.from.username}] Rain in room ${msg.chat.username}: ${err.stack}`)
     }
 
 });
