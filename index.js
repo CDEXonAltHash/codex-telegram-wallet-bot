@@ -286,8 +286,6 @@ const botSendToken = async (msgId, msgContent,  ownerTelegramId, toAddress, amou
  */
 codexBot.onText(/\/send (.+)/, async (msg, match) => {
     try {
-
-    } catch(err) {
         const params = match[1].split(' ');
         const isValid = await botCheckValid(msg.from.id, msg.from.id, params[1], params[2]);
         if (isValid === 'OKAY') {
@@ -296,6 +294,8 @@ codexBot.onText(/\/send (.+)/, async (msg, match) => {
         else if (isValid === 'NOT ENOUGH'){
             await codexBot.sendMessage(msg.from.id, "<b>Sorry, You do not have enough balance </b>", { parse_mode: "HTML" });
         }
+    
+    } catch(err) {
     }
 
 });
