@@ -91,7 +91,8 @@ const rainTokenPerDay = async (ownerId, volumeTokens, people, symbol) => {
         }
     }
     //Store & Send token to user
-    let res = '';
+    let res = {error: '', listUsers: []};
+
     for (const user of listUsers) {
         addAmount(user.userId, user.name, user.volume);
         res = await sendToken(`${ownerId}`, user.volume, getAddress(`${user.userId}`), `${symbol}`);
@@ -99,11 +100,8 @@ const rainTokenPerDay = async (ownerId, volumeTokens, people, symbol) => {
             break;
         }
     }
-    
-    return {
-        error: `${res.error}`,
-        listUsers: listUsers
-    };
+    res.listUsers = listUsers
+    return res
 };
 
 const rainTokenOnRoom = async (chatId, ownerId, volumeTokens, people, symbol) => {
@@ -120,7 +118,7 @@ const rainTokenOnRoom = async (chatId, ownerId, volumeTokens, people, symbol) =>
     }
     const payouts = distributeTokens(volumeTokens, people);
     const realPayouts = payouts.filter(token => token > 0);
-    
+
     //Rolling dice
     let ind = 0;
     while (!isEmpty(realPayouts)) {
@@ -140,7 +138,8 @@ const rainTokenOnRoom = async (chatId, ownerId, volumeTokens, people, symbol) =>
         }
     }
     //Store & Send token to user
-    let res = '';
+    let res = {error: '', listUsers: []};
+
     for (const user of listUsers) {
         addAmount(user.userId, user.name, user.volume);
         res = await sendToken(`${ownerId}`, user.volume, getAddress(`${user.userId}`), `${symbol}`);
@@ -148,11 +147,8 @@ const rainTokenOnRoom = async (chatId, ownerId, volumeTokens, people, symbol) =>
             break;
         }
     }
-    
-    return {
-        error: `${res.error}`,
-        listUsers: listUsers
-    };
+    res.listUsers = listUsers
+    return res
 };
 const rewardsPerWeek = async () => {
     const totalUsers = RainToken.size;
