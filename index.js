@@ -242,7 +242,7 @@ const botCheckValid = async (msgId, userId, amount, symbol) => {
     else if (!validDecimals(amount*1)) {
         await codexBot.sendMessage(msgId, '❌Sorry, the amount of decimals is <= 8');
     }
-    else if (symbol === undefined) {
+    else if (!symbol) {
         await codexBot.sendMessage(msgId, '❌Please type token symbol');
     }
     else {
@@ -578,6 +578,8 @@ codexBot.onText(/\/rain (.+)/, async (msg, match) => {
         //Check valid syntax
         if(isNaN(params[0])) {
             return await codexBot.sendMessage(msg.chat.id, '❌ Sorry, need amount of token for rain i.e: / rain 100 CDEX to 24');
+        } else if(!params[1]) {
+            return await codexBot.sendMessage(msg.chat.id, '❌ Sorry, You need to include the symbol you are sending i.e: / rain 100 CDEX to 24');
         }
         const validSymbol = checkTokenSymbol(params[1])
         if (!isNaN(params[1]) || params[1] !== validSymbol) {
@@ -636,6 +638,8 @@ codexBot.onText(/\/raintothisroom (.+)/, async (msg, match) => {
         //Check valid syntax
         if(isNaN(params[0])) {
             return await codexBot.sendMessage(msg.chat.id, '❌ Sorry, need amount of token for rain i.e: / raintothisroom 100 CDEX to 24');
+        } else if(!params[1]) {
+            return await codexBot.sendMessage(msg.chat.id, '❌ Sorry, You need to include the symbol you are sending i.e: / rain 100 CDEX to 24');
         }
         const validSymbol = checkTokenSymbol(params[1])
         if (!isNaN(params[1]) || params[1] !== validSymbol) {
