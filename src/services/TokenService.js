@@ -21,6 +21,7 @@ const sendToken = async (telegramId, amount, toAddress, symbol) => {
         let rawTx;
         if (symbol === tokenInfo.symbol) {
             rawTx = await wallet.generateTx(toAddress, amount, tokenInfo.fee)
+            console.log('generatte')
         } else if (hrc20.checkSymbol(symbol)) {
             const token = hrc20.getTokenBySymbol(symbol)
             const encodedData = hrc20.encodeSendData(token, toAddress, amount)
@@ -34,7 +35,7 @@ const sendToken = async (telegramId, amount, toAddress, symbol) => {
         }
     } catch (err) {
         return {
-            error: `${JSON.stringify(err)}`,
+            error: `${JSON.stringify(err.response.body)}`,
         }
     }
 };
