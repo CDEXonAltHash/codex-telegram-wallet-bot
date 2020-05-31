@@ -53,11 +53,11 @@ module.exports = {
   },
 
   async sendRawTx(rawTx) {
-    return (await (_post('/tx/send', { rawtx: rawTx }))).txid
+    return (await (_post('/tx/send', { rawtx: rawTx })))
   },
 
   async fetchRawTx(txid) {
-    return (await _get(`/raw-tx/${txid}`)).rawtx
+    return (await _get(`/raw-tx/${txid}`))
   },
 
   getTxExplorerUrl(tx) {
