@@ -34,8 +34,9 @@ const sendToken = async (telegramId, amount, toAddress, symbol) => {
             trxId: trxId,
         }
     } catch (err) {
+        console.log(err)
         return {
-            error: `${JSON.stringify(err.response.data)}`,
+            error: `${JSON.stringify(err)}`,
         }
     }
 };

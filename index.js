@@ -225,7 +225,6 @@ codexBot.onText(/\/stats/,  async (msg) => {
  */
 const botCheckValid = async (msgId, userId, amount, symbol) => {
     let isValid = 'ERROR';
-    console.log('Check balance')
     const balance = await getBalance(userId);
     if (balance === '') {
         await codexBot.sendMessage(msgId, '❌Please setup your wallet first');
@@ -258,7 +257,6 @@ const botCheckValid = async (msgId, userId, amount, symbol) => {
             await codexBot.sendMessage(msgId, '❌Sorry, We do not support this token');
         }
     }
-    console.log('Finish Check balance')
 
     return isValid;
 }
@@ -291,7 +289,6 @@ codexBot.onText(/\/send (.+)/, async (msg, match) => {
     try {
         const params = match[1].split(' ');
         const isValid = await botCheckValid(msg.from.id, msg.from.id, params[1], params[2]);
-        console.log('send token')
         if (isValid === 'OKAY') {
             await botSendToken(msg.from.id, 'Send tokens is ', msg.from.id, params[0], params[1], params[2], msg.from.username);
         }
