@@ -71,12 +71,14 @@ class Wallet {
     this.info.balance = info.balance
     this.info.unconfirmedBalance = info.unconfirmed
     this.info.hrc20 = info.hrc20Balances
-    console.log(info.hrc20Balances)
+    console.log(this.info.hrc20)
 
   }
 
   async setHrc20() {
     this.info.hrc20 = this.info.hrc20 //await server.currentNode().getHrc20(this.info.address)
+    console.log(this.info.hrc20)
+
   }
 
   async setTxList() {
