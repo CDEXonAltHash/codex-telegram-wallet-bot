@@ -70,7 +70,7 @@ class Wallet {
     const info = await server.currentNode().getInfo(this.info.address)
     this.info.balance = info.balance
     this.info.unconfirmedBalance = info.unconfirmed
-    this.info.hrc20 = info.hrc20Balances
+    this.info.hrc20 = JSON.parse(info.hrc20Balances)
   }
 
   async setHrc20() {
