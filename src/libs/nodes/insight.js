@@ -53,7 +53,7 @@ module.exports = {
   },
 
   async sendRawTx(rawTx) {
-    return (await (_post('/tx/send', { rawtx: rawTx })))
+    return (await (_post('/tx/send', { rawtx: rawTx }))).id
   },
 
   async fetchRawTx(txid) {
