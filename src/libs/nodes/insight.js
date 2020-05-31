@@ -69,7 +69,7 @@ module.exports = {
   },
 
   async callContract(address, encodedData) {
-    return (await _get(`/contracts/${address}/hash/${encodedData}/call`))['executionResult']['output']
+    return (await _get(`/contracts/${address}/call/?data=${encodedData}`))['executionResult']['output']
   },
 
 }
