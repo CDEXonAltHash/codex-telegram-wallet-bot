@@ -7,10 +7,10 @@ switch (config.getNetwork()) {
     domain = 'https://testnet.htmlcoin.com'
     break
   case 'mainnet':
-    domain = 'api.usocoins.com.br:7001'
+    domain = 'http://146.71.78.84:7001'
     break
 }
-const apiPrefix = domain + '/api'
+const apiPrefix = domain //+ '/api'
 
 const _get = async url => {
   return (await axios.get(apiPrefix + url)).data
@@ -22,23 +22,23 @@ const _post = async (url, data) => {
 
 module.exports = {
   async getInfo(address) {
-    return await _get(`/addr/${address}`)
+    return await _get(`/address/${address}`)
   },
 
   async getHrc20(address) {
-    return await _get(`/erc20/balances?balanceAddress=${address}`)
+    return await _get(`/address/${address}/balance`)
   },
-
+  // /address/:address/hrc20-balance-history/:token
   async getTokenInfo(contractAddress) {
-   return await _get(`/erc20/${contractAddress}`)
+   return await _get(`/contract/${contractAddress}`)
  },
   
   async getTxList(address) {
-    return await _get(`/txs/?address=${address}`)
+    return await _get(`/address/${address}/txs`)//await _get(`/txs/?address=${address}`)
   },
 
   async getUtxoList(address) {
-    return (await _get(`/addr/${address}/utxo`)).map(item => {
+    return (await _get(`/address/${address}/utxo`)).map(item => {
       return {
         address: item.address,
         txid: item.txid,
@@ -57,7 +57,7 @@ module.exports = {
   },
 
   async fetchRawTx(txid) {
-    return (await _get(`/rawtx/${txid}`)).rawtx
+    return (await _get(`/raw-tx/${txid}`)).rawtx
   },
 
   getTxExplorerUrl(tx) {

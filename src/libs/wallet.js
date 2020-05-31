@@ -69,11 +69,12 @@ class Wallet {
   async setInfo() {
     const info = await server.currentNode().getInfo(this.info.address)
     this.info.balance = info.balance
-    this.info.unconfirmedBalance = info.unconfirmedBalance
+    this.info.unconfirmedBalance = info.unconfirmed
+    this.info.hrc20 = info.hrc20Balances
   }
 
   async setHrc20() {
-    this.info.hrc20 = await server.currentNode().getHrc20(this.info.address)
+    this.info.hrc20 = this.info.hrc20 //await server.currentNode().getHrc20(this.info.address)
   }
 
   async setTxList() {
