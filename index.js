@@ -334,6 +334,7 @@ const botGetBlance =  (info) =>{
     const unconfirmedBalance = info.unconfirmedBalance;
     let yCoordinate = 506;
     const hrc20 = info.hrc20;
+    console.log(`BOT GET BALANCE:${hrc20}`)
     let svgFile = svgTemplate(800, 120 + hrc20.length*40);
 
     for(const token of hrc20) {
