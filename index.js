@@ -290,6 +290,8 @@ codexBot.onText(/\/send (.+)/, async (msg, match) => {
         const params = match[1].split(' ');
         const isValid = await botCheckValid(msg.from.id, msg.from.id, params[1], params[2]);
         if (isValid === 'OKAY') {
+            console.log('send send send')
+            console.log(msg.from.id)
             await botSendToken(msg.from.id, 'Send tokens is ', msg.from.id, params[0], params[1], params[2], msg.from.username);
         }
         else if (isValid === 'NOT ENOUGH'){
