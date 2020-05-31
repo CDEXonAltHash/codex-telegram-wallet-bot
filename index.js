@@ -334,14 +334,13 @@ const botGetBlance =  (info) =>{
     const unconfirmedBalance = info.unconfirmedBalance;
     let yCoordinate = 506;
     const hrc20 = info.hrc20;
-    console.log(`BOT GET BALANCE:${hrc20}`)
     let svgFile = svgTemplate(800, 120 + hrc20.length*40);
 
     for(const token of hrc20) {
-        const tokenValue = (token.amount / Math.pow(10, token.contract.decimals)).toString().split('.');
+        const tokenValue = (token.balance / Math.pow(10, token.decimals)).toString().split('.');
         if(tokenValue[1] === undefined) tokenValue[1] = 0;
         if (tokenValue[0] === undefined) tokenValue[0] = 0;
-        svgFile += buildSvgFile(yCoordinate, token.contract.name, tokenValue[0], '.' + tokenValue[1] , token.contract.symbol );
+        svgFile += buildSvgFile(yCoordinate, token.name, tokenValue[0], '.' + tokenValue[1] , token.symbol );
         yCoordinate += 40;
     }
     const htmlbalance = balance.toString().split('.');
