@@ -26,7 +26,6 @@ const sendToken = async (telegramId, amount, toAddress, symbol) => {
             const encodedData = hrc20.encodeSendData(token, toAddress, amount)
             rawTx = await wallet.generateSendToContractTx(token.address, encodedData, tokenInfo.gasLimit, tokenInfo.gasPrice, tokenInfo.fee)
         }
-        console.log('Send a token')
         const trxId = await wallet.sendRawTx(rawTx);
         console.log(`TX: ${trxId}`)
         return {
@@ -34,7 +33,6 @@ const sendToken = async (telegramId, amount, toAddress, symbol) => {
             trxId: trxId,
         }
     } catch (err) {
-        console.log(err)
         return {
             error: `${JSON.stringify(err)}`,
         }
