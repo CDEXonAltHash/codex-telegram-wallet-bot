@@ -96,7 +96,7 @@ const rainTokenPerDay = async (ownerId, volumeTokens, people, symbol) => {
         }
     }
     // remain token
-    if(totalTokens > 0 !isEmpty(listUsers)) {
+    if(totalTokens > 0 && !isEmpty(listUsers)) {
         oneDie = roll.roll('d' + `${totalUsers}`);
         listUsers[oneDie.result - 1].volume += totalTokens
     }
