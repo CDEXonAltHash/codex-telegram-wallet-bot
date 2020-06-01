@@ -344,13 +344,10 @@ const botGetBlance =  (info) =>{
     let hrc20 = info.hrc20;
     let svgFile = svgTemplate(800, 120 + hrc20.length*40);
     let codex 
+    let hrc20Token = []
     hrc20.sort(compare)
-    console.log(hrc20)
 
-    let hrc20Token = hrc20.map(token => {
-        console.log(`Token1: ${(token)}`)
-
-        console.log(`Token2: ${(token.name)}`)
+    hrc20Token = hrc20.map(token => {
 
         if(token.name !== 'Codex') {
             return {
@@ -368,11 +365,11 @@ const botGetBlance =  (info) =>{
             }
         }
     })
-
+    console.log(hrc20Token)
     hrc20Token.unshift(codex)
 
     for(const token of hrc20Token) {
-
+        
         if(token.symbol !== 'IVO') {
             const tokenValue = (token.balance / Math.pow(10, token.decimals)).toString().split('.');
             if(tokenValue[1] === undefined) tokenValue[1] = 0;
