@@ -344,11 +344,13 @@ const botGetBlance =  (info) =>{
     let hrc20 = info.hrc20;
     let svgFile = svgTemplate(800, 120 + hrc20.length*40);
     let codex 
+    console.log(hrc20)
     hrc20.sort(compare)
+
     let hrc20Token = hrc20.map(token => {
         console.log(`Token1: ${(token)}`)
 
-        console.log(`Token2: ${JSON.parse(token)}`)
+        console.log(`Token2: ${(token.name)}`)
 
         if(token.name !== 'Codex') {
             return {
