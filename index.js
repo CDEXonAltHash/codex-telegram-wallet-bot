@@ -219,6 +219,12 @@ codexBot.onText(/\/stats/,  async (msg) => {
     }
 
 });
+const compare = (a, b) => {
+    const upperA = a.name.toUpperCase();
+    const upperB = b.name.toUpperCase();
+
+    return upperA > upperB;
+  }
 
 /**
  * Bot send token
@@ -337,13 +343,27 @@ const botGetBlance =  (info) =>{
     let yCoordinate = 506;
     const hrc20 = info.hrc20;
     let svgFile = svgTemplate(800, 120 + hrc20.length*40);
+    let codex 
+    let sortedHrc20 = hrc20.sort(compare)
+    let hrc20Token = sortedHrc20.map(token => {
+        if(token.name !== 'Codex') {
+            return token
+        } else {
+            codex = token
+        }
+    })
 
-    for(const token of hrc20) {
-        const tokenValue = (token.balance / Math.pow(10, token.decimals)).toString().split('.');
-        if(tokenValue[1] === undefined) tokenValue[1] = 0;
-        if (tokenValue[0] === undefined) tokenValue[0] = 0;
-        svgFile += buildSvgFile(yCoordinate, token.name, tokenValue[0], '.' + tokenValue[1] , token.symbol );
-        yCoordinate += 40;
+    hrc20Token.unshift(codex)
+
+    for(const token of hrc20Token) {
+        if(token.symbol !== 'IVO') {
+            const tokenValue = (token.balance / Math.pow(10, token.decimals)).toString().split('.');
+            if(tokenValue[1] === undefined) tokenValue[1] = 0;
+            if (tokenValue[0] === undefined) tokenValue[0] = 0;
+            svgFile += buildSvgFile(yCoordinate, token.name, tokenValue[0], '.' + tokenValue[1] , token.symbol );
+            yCoordinate += 40;
+        }
+
     }
     const htmlbalance = balance.toString().split('.');
     if (htmlbalance[1] === undefined) htmlbalance[1] = 0;
