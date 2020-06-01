@@ -901,7 +901,7 @@ codexBot.on("callback_query", async  (msg) => {
             console.log(`VIP Address: ${address}`)
 
             const vip = await VIP.findOne({public_key: `${address}`})
-            console.log(JSON.parse(vip))
+            console.log(`VIP find: ${JSON.parse(vip)}`)
 
             if (isValidAirDrop(msg.message.date, vip.last_time)) {  
                 const amountAirdrop = getLuckyAirdrop(msg.from.id);
