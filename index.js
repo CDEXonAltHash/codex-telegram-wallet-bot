@@ -365,9 +365,10 @@ const botGetBlance =  (info) =>{
             }
         }
     })
-    console.log(hrc20Token)
     hrc20Token.unshift(codex)
-
+    hrc20Token = hrc20Token.filter(item => {
+        return item != null
+    })
     for(const token of hrc20Token) {
         
         if(token.symbol !== 'IVO') {
