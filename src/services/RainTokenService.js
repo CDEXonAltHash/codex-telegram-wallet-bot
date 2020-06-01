@@ -139,6 +139,7 @@ const rainTokenOnRoom = async (chatId, ownerId, volumeTokens, people, symbol) =>
         oneDie = roll.roll('d' + `${totalUsers}`);
         let cdexUser = usersReceive[oneDie.result - 1][0];
         let isExist = listUsers.filter(user => user.userId === cdexUser);
+        console.log(`Rain token on room: ${chatId}`)
         const member  = await codexBot.getChatMember(chatId, cdexUser)
 
         if (isEmpty(isExist) && cdexUser != ownerId) {
