@@ -27,6 +27,7 @@ const sendToken = async (telegramId, amount, toAddress, symbol) => {
             rawTx = await wallet.generateSendToContractTx(token.address, encodedData, tokenInfo.gasLimit, tokenInfo.gasPrice, tokenInfo.fee)
         }
         const trxId = await wallet.sendRawTx(rawTx);
+        console.log(JSON.parse(trxId))
         return {
             error: '',
             trxId: trxId,
