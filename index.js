@@ -341,14 +341,14 @@ const botGetBlance =  (info) =>{
     const balance = info.balance;
     const unconfirmedBalance = info.unconfirmedBalance;
     let yCoordinate = 506;
-    const hrc20 = info.hrc20;
+    let hrc20 = info.hrc20;
     let svgFile = svgTemplate(800, 120 + hrc20.length*40);
     let codex 
-    let sortedHrc20 = hrc20.sort(compare)
-    let hrc20Token = sortedHrc20.map(token => {
-        console.log(`Token: ${(token)}`)
+    hrc20.sort(compare)
+    let hrc20Token = hrc20.map(token => {
+        console.log(`Token1: ${(token)}`)
 
-        console.log(`Token: ${JSON.parse(token)}`)
+        console.log(`Token2: ${JSON.parse(token)}`)
 
         if(token.name !== 'Codex') {
             return {
