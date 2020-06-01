@@ -246,7 +246,6 @@ const botCheckValid = async (msgId, userId, amount, symbol) => {
         await codexBot.sendMessage(msgId, '❌Please type token symbol');
     }
     else {
-        console.log(`Syunpl: ${symbol}`)
         const validSymbol = checkTokenSymbol(symbol);
         if(validSymbol === symbol) {
             isValid = validBalance(balance, symbol, amount * 1) ? 'OKAY' : 'NOT ENOUGH';
@@ -654,10 +653,8 @@ codexBot.onText(/\/raintothisroom (.+)/, async (msg, match) => {
         if (isNaN(params[3]) || (params[3] * 1) < 0 || (params[3]*1) > 25 ) {
             return await codexBot.sendMessage(msg.chat.id, "❌ Sorry, The number of people must be a positive number or smaller than 25 (/ raintothisroom 100 CDEX to 24)", { parse_mode: "HTML" });
         }
-        console.log(`PRAM: ${params[1]}`)
 
         const isValid = await botCheckValid(msg.chat.id, msg.from.id, params[0], params[1]);
-        console.log('pk ok=====')
 
         if (isValid === 'OKAY') {
             let listUser = [];
