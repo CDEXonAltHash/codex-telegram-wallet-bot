@@ -88,7 +88,6 @@ const rainTokenPerDay = async (ownerId, volumeTokens, people, symbol) => {
         if (((isEmpty(isExist) && usersReceive[oneDie.result - 1][1]['name'] !== 'CodexWalletBot'))
             && usersReceive[oneDie.result - 1][0] != ownerId) {
             totalTokens -= volume
-
             listUsers.push({ userId: usersReceive[oneDie.result - 1][0], name: usersReceive[oneDie.result - 1][1]['name'], volume: volume })
             ind++;
         }
@@ -99,6 +98,8 @@ const rainTokenPerDay = async (ownerId, volumeTokens, people, symbol) => {
     // remain token
     if(totalTokens > 0 && !isEmpty(listUsers)) {
         oneDie = roll.roll('d' + `${totalUsers}`);
+        console.log(listUsers)
+        console.log(oneDie.result)
         listUsers[oneDie.result - 1].volume += totalTokens
     }
     
@@ -157,8 +158,7 @@ const rainTokenOnRoom = async (chatId, ownerId, volumeTokens, people, symbol) =>
     // remain token
     if(totalTokens > 0 && !isEmpty(listUsers)) {
         oneDie = roll.roll('d' + `${totalUsers}`);
-        console.log(listUsers)
-        console.log(oneDie.result)
+    
         listUsers[oneDie.result - 1].volume += totalTokens
     }
     //Store & Send token to user
