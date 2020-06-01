@@ -223,7 +223,7 @@ const compare = (a, b) => {
     const upperA = a.name.toUpperCase();
     const upperB = b.name.toUpperCase();
 
-    return upperA > upperB;
+    return upperA > upperB ? 1 : -1
   }
 
 /**
