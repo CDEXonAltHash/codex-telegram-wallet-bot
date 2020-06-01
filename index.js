@@ -346,6 +346,10 @@ const botGetBlance =  (info) =>{
     let codex 
     let sortedHrc20 = hrc20.sort(compare)
     let hrc20Token = sortedHrc20.map(token => {
+        console.log(`Token: ${(token)}`)
+
+        console.log(`Token: ${JSON.parse(token)}`)
+
         if(token.name !== 'Codex') {
             return {
                 name: token.name,
@@ -366,7 +370,6 @@ const botGetBlance =  (info) =>{
     hrc20Token.unshift(codex)
 
     for(const token of hrc20Token) {
-        console.log(`Token: ${JSON.parse(token)}`)
 
         if(token.symbol !== 'IVO') {
             const tokenValue = (token.balance / Math.pow(10, token.decimals)).toString().split('.');
