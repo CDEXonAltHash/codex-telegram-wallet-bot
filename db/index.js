@@ -6,7 +6,7 @@ const mongoConnect = () => {
     mongoose.connect(
         MONGO_URL,
         { useNewUrlParser: true ,
-            seUnifiedTopology: true}
+            useUnifiedTopology: true}
     )
     mongoose.Promise = global.Promise
     mongoose.connection.on('error', console.error.bind(console, 'MongoDB connection error:'))
