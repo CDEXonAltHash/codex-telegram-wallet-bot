@@ -11,5 +11,6 @@ const mongoConnect = () => {
     mongoose.connection.on('error', console.error.bind(console, 'MongoDB connection error:'))
     mongoose.set('useCreateIndex', true)
     mongoose.set('useFindAndModify', false)
+    mongoose.set('useUnifiedTopology', true)
 }
 mongoConnect()

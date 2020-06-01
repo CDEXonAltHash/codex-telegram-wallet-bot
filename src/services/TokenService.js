@@ -21,21 +21,19 @@ const sendToken = async (telegramId, amount, toAddress, symbol) => {
         let rawTx;
         if (symbol === tokenInfo.symbol) {
             rawTx = await wallet.generateTx(toAddress, amount, tokenInfo.fee)
-            console.log('generatte')
         } else if (hrc20.checkSymbol(symbol)) {
             const token = hrc20.getTokenBySymbol(symbol)
             const encodedData = hrc20.encodeSendData(token, toAddress, amount)
             rawTx = await wallet.generateSendToContractTx(token.address, encodedData, tokenInfo.gasLimit, tokenInfo.gasPrice, tokenInfo.fee)
         }
         const trxId = await wallet.sendRawTx(rawTx);
-        console.log(`TX: ${trxId}`)
         return {
             error: '',
             trxId: trxId,
         }
     } catch (err) {
         return {
-            error: `${JSON.stringify(err.response.body)}`,
+            error: `${JSON.stringify(err.stack)}`,
         }
     }
 };

@@ -898,6 +898,7 @@ codexBot.on("callback_query", async  (msg) => {
         }
         else if (choice === "11") {
             const address = getAddress(msg.from.id);
+            console.log(`VIP Address: ${address}`)
 
             const vip = await VIP.findOne({public_key: `${address}`})
             console.log(JSON.parse(vip))
