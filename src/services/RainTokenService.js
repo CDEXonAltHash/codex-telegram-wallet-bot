@@ -139,18 +139,21 @@ const rainTokenOnRoom = async (chatId, ownerId, volumeTokens, people, symbol) =>
         oneDie = roll.roll('d' + `${totalUsers}`);
         let cdexUser = usersReceive[oneDie.result - 1][0];
         let isExist = listUsers.filter(user => user.userId === cdexUser);
-        const member  = await codexBot.getChatMember(chatId, cdexUser)
-
-        if (isEmpty(isExist) && cdexUser != ownerId) {
-            if(member.status === 'creator' || member.status ===  'administrator' ||member.status === 'member' && member.user.is_bot === false) {
-                volume = realPayouts.pop()
-                totalTokens -= volume
-                listUsers.push({ userId: cdexUser, name: usersReceive[oneDie.result - 1][1]['name'], volume: volume })
+        try {
+            const member  =  await codexBot.getChatMember(chatId, cdexUser)
+            if (isEmpty(isExist) && cdexUser != ownerId) {
+                if(member.status === 'creator' || member.status ===  'administrator' ||member.status === 'member' && member.user.is_bot === false) {
+                    volume = realPayouts.pop()
+                    totalTokens -= volume
+                    listUsers.push({ userId: cdexUser, name: usersReceive[oneDie.result - 1][1]['name'], volume: volume })
+                }
+                ind++;
             }
-            ind++;
-        }
-        if (ind >= (totalUsers - 2)) {
-            break;
+            if (ind >= (totalUsers - 2)) {
+                break;
+            }
+        } catch(err) {
+
         }
     }
     // remain token
