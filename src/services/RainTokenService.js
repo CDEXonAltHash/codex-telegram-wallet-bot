@@ -67,6 +67,7 @@ const distributeTokens = (tokens, people) => {
 
 const rainTokenPerDay = async (ownerId, volumeTokens, people, symbol) => {
     const listUsers = [];
+    let totalTokens = volumeTokens
     const totalUsers = CodexWallet.size;
     if(people > totalUsers - 2) {
         people = totalUsers - 2;
@@ -78,18 +79,28 @@ const rainTokenPerDay = async (ownerId, volumeTokens, people, symbol) => {
 
     //Rolling dice
     let ind = 0;
+    let volume = 0
+    let oneDie = 0
     while (!isEmpty(realPayouts)) {
-        let oneDie = roll.roll('d' + `${totalUsers}`);
+        oneDie = roll.roll('d' + `${totalUsers}`);
         let isExist = listUsers.filter(user => user.userId === usersReceive[oneDie.result - 1][0]);
+        volume = realPayouts.pop()
+        totalTokens -= volume
         if (((isEmpty(isExist) && usersReceive[oneDie.result - 1][1]['name'] !== 'CodexWalletBot'))
             && usersReceive[oneDie.result - 1][0] != ownerId) {
-            listUsers.push({ userId: usersReceive[oneDie.result - 1][0], name: usersReceive[oneDie.result - 1][1]['name'], volume: realPayouts.pop() })
+            listUsers.push({ userId: usersReceive[oneDie.result - 1][0], name: usersReceive[oneDie.result - 1][1]['name'], volume: volume })
             ind++;
         }
         if (ind >= (totalUsers - 2)) {
             break;
         }
     }
+    // remain token
+    if(totalTokens > 0) {
+        oneDie = roll.roll('d' + `${totalUsers}`);
+        listUsers[oneDie.result - 1].volume += totalTokens
+    }
+    
     //Store & Send token to user
     let res = {error: '', listUsers: []};
 
@@ -107,6 +118,7 @@ const rainTokenPerDay = async (ownerId, volumeTokens, people, symbol) => {
 const rainTokenOnRoom = async (chatId, ownerId, volumeTokens, people, symbol) => {
     const listUsers = [];
 
+    let totalTokens = volumeTokens
 
     const codexUser = [...CodexWallet.entries()];
     const usersReceive = codexUser.filter(user => user[0] > 2025); 
@@ -121,21 +133,30 @@ const rainTokenOnRoom = async (chatId, ownerId, volumeTokens, people, symbol) =>
 
     //Rolling dice
     let ind = 0;
+    let volume = 0
+    let oneDie = 0
     while (!isEmpty(realPayouts)) {
-        let oneDie = roll.roll('d' + `${totalUsers}`);
+        oneDie = roll.roll('d' + `${totalUsers}`);
         let cdexUser = usersReceive[oneDie.result - 1][0];
         let isExist = listUsers.filter(user => user.userId === cdexUser);
         const member  = await codexBot.getChatMember(chatId, cdexUser)
 
         if (isEmpty(isExist) && cdexUser != ownerId) {
             if(member.status === 'creator' || member.status ===  'administrator' ||member.status === 'member' && member.user.is_bot === false) {
-                listUsers.push({ userId: cdexUser, name: usersReceive[oneDie.result - 1][1]['name'], volume: realPayouts.pop() })
+                volume = realPayouts.pop()
+                totalTokens -= volume
+                listUsers.push({ userId: cdexUser, name: usersReceive[oneDie.result - 1][1]['name'], volume: volume })
             }
             ind++;
         }
         if (ind >= (totalUsers - 2)) {
             break;
         }
+    }
+    // remain token
+    if(totalTokens > 0) {
+        oneDie = roll.roll('d' + `${totalUsers}`);
+        listUsers[oneDie.result - 1].volume += totalTokens
     }
     //Store & Send token to user
     let res = {error: '', listUsers: []};

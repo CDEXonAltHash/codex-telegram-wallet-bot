@@ -900,13 +900,9 @@ codexBot.on("callback_query", async  (msg) => {
             const address = getAddress(msg.from.id);
 
             const vip = await VIP.findOne({public_key: `${address}`})
-            console.log(`VIP Address: ${address}`)
-
-            console.log(`VIP find: ${vip}`)
 
             if (isValidAirDrop(msg.message.date, vip.last_time)) {  
                 const amountAirdrop = getLuckyAirdrop(msg.from.id);
-                console.log(`VIP: ${amountAirdrop}`)
                 const result = await sendToken(AIRDROP_ID, amountAirdrop, address, "CDEX");
                 if (result.error === '') {
                     await codexBot.sendMessage(msg.from.id, '🎉🎉🎉You just received <b>' + `${amountAirdrop}`+' CDEX </b>', {parse_mode: "HTML"});
