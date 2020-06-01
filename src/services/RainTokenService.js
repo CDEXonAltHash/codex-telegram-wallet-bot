@@ -157,6 +157,8 @@ const rainTokenOnRoom = async (chatId, ownerId, volumeTokens, people, symbol) =>
     // remain token
     if(totalTokens > 0 && !isEmpty(listUsers)) {
         oneDie = roll.roll('d' + `${totalUsers}`);
+        console.log(listUsers)
+        console.log(oneDie.result)
         listUsers[oneDie.result - 1].volume += totalTokens
     }
     //Store & Send token to user
