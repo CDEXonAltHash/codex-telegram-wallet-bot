@@ -85,9 +85,10 @@ const rainTokenPerDay = async (ownerId, volumeTokens, people, symbol) => {
         oneDie = roll.roll('d' + `${totalUsers}`);
         let isExist = listUsers.filter(user => user.userId === usersReceive[oneDie.result - 1][0]);
         volume = realPayouts.pop()
-        totalTokens -= volume
         if (((isEmpty(isExist) && usersReceive[oneDie.result - 1][1]['name'] !== 'CodexWalletBot'))
             && usersReceive[oneDie.result - 1][0] != ownerId) {
+            totalTokens -= volume
+
             listUsers.push({ userId: usersReceive[oneDie.result - 1][0], name: usersReceive[oneDie.result - 1][1]['name'], volume: volume })
             ind++;
         }
