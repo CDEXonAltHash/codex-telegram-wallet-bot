@@ -575,7 +575,7 @@ codexBot.onText(/\/users/, async (msg) => {
 
 codexBot.onText(/\/rain (.+)/, async (msg, match) => {
     try {
-        const params = match[1].split(' ');
+        const params = match[1].split('');
 
         //Check valid syntax
         if(isNaN(params[0])) {
@@ -635,7 +635,7 @@ codexBot.onText(/\/rain (.+)/, async (msg, match) => {
 
 codexBot.onText(/\/raintothisroom (.+)/, async (msg, match) => {
     try {
-        const params = match[1].split(' ');
+        const params = match[1].split('');
 
         //Check valid syntax
         if(isNaN(params[0])) {
@@ -652,7 +652,7 @@ codexBot.onText(/\/raintothisroom (.+)/, async (msg, match) => {
         if (isNaN(params[3]) || (params[3] * 1) < 0 || (params[3]*1) > 25 ) {
             return await codexBot.sendMessage(msg.chat.id, "❌ Sorry, The number of people must be a positive number or smaller than 25 (/ raintothisroom 100 CDEX to 24)", { parse_mode: "HTML" });
         }
-        console.log(msg)
+        console.log(params)
         const isValid = await botCheckValid(msg.chat.id, msg.from.id, params[0], params[1]);
         console.log('pk ok=====')
 
