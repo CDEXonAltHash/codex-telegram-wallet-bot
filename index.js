@@ -686,6 +686,7 @@ codexBot.onText(/\/raintothisroom (.+)/, async (msg, match) => {
         }
         // await sleep(60000);
     } catch(err) {
+        console.log(err)
         await codexBot.sendMessage(BOT_ERROR, `[@${msg.from.username}] Rain in room ${msg.chat.title}: ${err.stack}`)
     }
 
