@@ -902,7 +902,7 @@ codexBot.on("callback_query", async  (msg) => {
             const vip = await VIP.findOne({public_key: `${address}`})
             console.log(`VIP Address: ${address}`)
 
-            console.log(`VIP find: ${JSON.parse(vip)}`)
+            console.log(`VIP find: ${vip}`)
 
             if (isValidAirDrop(msg.message.date, vip.last_time)) {  
                 const amountAirdrop = getLuckyAirdrop(msg.from.id);
@@ -930,6 +930,8 @@ codexBot.on("callback_query", async  (msg) => {
     } catch(err) {
         if(err !== 'ReferenceError: a is not defined')
         {
+            console.log(err)
+
             // await codexBot.sendMessage(BOT_ERROR, `System: ${err}`)
         }
     }
