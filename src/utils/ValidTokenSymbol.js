@@ -45,7 +45,7 @@ const validBalance = (info, symbol, amount) => {
         for (const token of hrc20) {
             if (token.symbol === symbol){
                 console.log(token)
-                isValid = amount <= (token.amount / Math.pow(10, token.decimals)) ? true : false;
+                isValid = amount <= (token.balance / Math.pow(10, token.decimals)) ? true : false;
                 break;
             } else {
                 isValid = false
