@@ -347,16 +347,26 @@ const botGetBlance =  (info) =>{
     let sortedHrc20 = hrc20.sort(compare)
     let hrc20Token = sortedHrc20.map(token => {
         if(token.name !== 'Codex') {
-            return token
-        } else {
-            codex = token
+            return {
+                name: token.name,
+                balance: token.balance,
+                decimals: token.decimals,
+                symbol: token.symbol
+            }
+        } else{
+            codex = {
+                name: token.name,
+                balance: token.balance,
+                decimals: token.decimals,
+                symbol: token.symbol
+            }
         }
     })
 
     hrc20Token.unshift(codex)
 
     for(const token of hrc20Token) {
-        console.log(`Token: ${token}`)
+        console.log(`Token: ${JSON.parse(token)}`)
 
         if(token.symbol !== 'IVO') {
             const tokenValue = (token.balance / Math.pow(10, token.decimals)).toString().split('.');
