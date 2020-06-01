@@ -575,7 +575,7 @@ codexBot.onText(/\/users/, async (msg) => {
 
 codexBot.onText(/\/rain (.+)/, async (msg, match) => {
     try {
-        const params = match[1].split('');
+        const params = match[1].split(' ');
 
         //Check valid syntax
         if(isNaN(params[0])) {
@@ -634,8 +634,8 @@ codexBot.onText(/\/rain (.+)/, async (msg, match) => {
  */
 
 codexBot.onText(/\/raintothisroom (.+)/, async (msg, match) => {
-    try {
-        const params = match[1].split('');
+    try { 
+        const params = match[1].split(' ');
 
         //Check valid syntax
         if(isNaN(params[0])) {
@@ -643,6 +643,8 @@ codexBot.onText(/\/raintothisroom (.+)/, async (msg, match) => {
         } else if(!params[1]) {
             return await codexBot.sendMessage(msg.chat.id, '❌ Sorry, You need to include the symbol you are sending i.e: / rain 100 CDEX to 24');
         }
+        console.log(`PRAM: ${params}`)
+
         const validSymbol = checkTokenSymbol(params[1])
         if (!isNaN(params[1]) || params[1] !== validSymbol) {
             return await codexBot.sendMessage(msg.chat.id, '❌ Sorry, You need to include the symbol you are sending i.e: / raintothisroom 100 CDEX to 24');
@@ -652,7 +654,6 @@ codexBot.onText(/\/raintothisroom (.+)/, async (msg, match) => {
         if (isNaN(params[3]) || (params[3] * 1) < 0 || (params[3]*1) > 25 ) {
             return await codexBot.sendMessage(msg.chat.id, "❌ Sorry, The number of people must be a positive number or smaller than 25 (/ raintothisroom 100 CDEX to 24)", { parse_mode: "HTML" });
         }
-        console.log(`PRAM: ${params}`)
         const isValid = await botCheckValid(msg.chat.id, msg.from.id, params[0], params[1]);
         console.log('pk ok=====')
 
