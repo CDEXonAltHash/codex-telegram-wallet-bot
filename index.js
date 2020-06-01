@@ -354,9 +354,10 @@ const botGetBlance =  (info) =>{
     })
 
     hrc20Token.unshift(codex)
-    console.log(`Token: ${hrc20Token}`)
 
     for(const token of hrc20Token) {
+        console.log(`Token: ${token}`)
+
         if(token.symbol !== 'IVO') {
             const tokenValue = (token.balance / Math.pow(10, token.decimals)).toString().split('.');
             if(tokenValue[1] === undefined) tokenValue[1] = 0;
