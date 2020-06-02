@@ -37,35 +37,35 @@ module.exports = {
     return await _get(`/txs/?address=${address}`)
   },
 
-  // async getUtxoList(address) {
-  //   return (await _get(`/addr/${address}/utxo`)).map(item => {
-  //     return {
-  //       address: item.address,
-  //       txid: item.txid,
-  //       confirmations: item.confirmations,
-  //       isStake: item.isStake,
-  //       amount: item.amount,
-  //       value: item.satoshis,
-  //       hash: item.txid,
-  //       pos: item.vout
-  //     }
-  //   })
-  // },
-
   async getUtxoList(address) {
-    return (await _get(`/address/${address}/utxo`)).map(item => {
+    return (await _get(`/addr/${address}/utxo`)).map(item => {
       return {
         address: item.address,
-        txid: item.transactionId,
+        txid: item.txid,
         confirmations: item.confirmations,
         isStake: item.isStake,
-        amount: item.value,
-        value: item.value,
-        hash: item.transactionId,
-        pos: item.outputIndex
+        amount: item.amount,
+        value: item.satoshis,
+        hash: item.txid,
+        pos: item.vout
       }
     })
   },
+
+  // async getUtxoList(address) {
+  //   return (await _get(`/address/${address}/utxo`)).map(item => {
+  //     return {
+  //       address: item.address,
+  //       txid: item.transactionId,
+  //       confirmations: item.confirmations,
+  //       isStake: item.isStake,
+  //       amount: item.value,
+  //       value: item.value,
+  //       hash: item.transactionId,
+  //       pos: item.outputIndex
+  //     }
+  //   })
+  // },
 
   async sendRawTx(rawTx) {
     return (await (_post('/tx/send', { rawtx: rawTx }))).txid
