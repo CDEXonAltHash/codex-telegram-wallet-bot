@@ -351,16 +351,16 @@ const botGetBlance =  (info) =>{
         if(token.name !== 'Codex') {
             return {
                 name: token.name,
-                balance: token.balance,
-                decimals: token.decimals,
-                symbol: token.symbol
+                balance: token.amount,
+                decimals: token.contract.decimals,
+                symbol: token.contract.symbol
             }
         } else{
             codex = {
                 name: token.name,
-                balance: token.balance,
-                decimals: token.decimals,
-                symbol: token.symbol
+                balance: token.amount,
+                decimals: token.contract.decimals,
+                symbol: token.contract.symbol
             }
         }
     })
@@ -371,10 +371,10 @@ const botGetBlance =  (info) =>{
     for(const token of hrc20Token) {
         
         if(token.symbol !== 'IVO') {
-            const tokenValue = (token.amount / Math.pow(10, token.contract.decimals)).toString().split('.');
+            const tokenValue = (token.balance / Math.pow(10, token.decimals)).toString().split('.');
             if(tokenValue[1] === undefined) tokenValue[1] = 0;
             if (tokenValue[0] === undefined) tokenValue[0] = 0;
-            svgFile += buildSvgFile(yCoordinate, token.contract.name, tokenValue[0], '.' + tokenValue[1] , token.symbol );
+            svgFile += buildSvgFile(yCoordinate, token.name, tokenValue[0], '.' + tokenValue[1] , token.symbol );
             yCoordinate += 40;
         }
 
