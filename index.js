@@ -341,6 +341,7 @@ const botGetBlance =  (info) =>{
     const unconfirmedBalance = info.unconfirmedBalance;
     let yCoordinate = 506;
     let hrc20 = info.hrc20;
+    console.log(hrc20)
     let svgFile = svgTemplate(800, 120 + hrc20.length*40);
     let codex 
     let hrc20Token = []
