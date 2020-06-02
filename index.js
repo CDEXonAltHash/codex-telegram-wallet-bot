@@ -348,7 +348,7 @@ const botGetBlance =  (info) =>{
 
     hrc20Token = hrc20.map(token => {
 
-        if(token.name !== 'Codex') {
+        if(token.contract.name !== 'Codex') {
             return {
                 name: token.contract.name,
                 balance: token.amount,
