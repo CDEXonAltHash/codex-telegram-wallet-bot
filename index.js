@@ -341,7 +341,6 @@ const botGetBlance =  (info) =>{
     const unconfirmedBalance = info.unconfirmedBalance;
     let yCoordinate = 506;
     let hrc20 = info.hrc20;
-    console.log(hrc20)
     let svgFile = svgTemplate(800, 120 + hrc20.length*40);
     let codex 
     let hrc20Token = []
@@ -351,14 +350,14 @@ const botGetBlance =  (info) =>{
 
         if(token.name !== 'Codex') {
             return {
-                name: token.name,
+                name: token.contract.name,
                 balance: token.amount,
                 decimals: token.contract.decimals,
                 symbol: token.contract.symbol
             }
         } else{
             codex = {
-                name: token.name,
+                name: token.contract.name,
                 balance: token.amount,
                 decimals: token.contract.decimals,
                 symbol: token.contract.symbol
