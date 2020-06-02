@@ -1,4 +1,4 @@
-const tokenSymbols = ['HTML', 'BUNK', 'CDEX', 'XOLA', 'MAG', 'ASW', 'BIFD', 'BIFF', 'YMA', 'LAC', 'IVO',
+const tokenSymbols = ['HTML', 'BUNK', 'CDEX', 'MAG', 'ASW', 'BIFD', 'BIFF', 'YMA', 'LAC','SFUN','COOP','BURQ',
 
                        'BIFP', 'VCTR', 'BIFG', , 'TRS', 'BFCC', 'PHO', 'JUL', 'HOLY', 'BCDX', 'Roy', 'KKC', 'RAIN', 'LOVE', 'BBCT', 'SMILE',
                     'ABLE', 'EDUC', 'BBCT', 'WLK' ]

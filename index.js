@@ -219,6 +219,12 @@ codexBot.onText(/\/stats/,  async (msg) => {
     }
 
 });
+const compare = (a, b) => {
+    const upperA = a.name.toUpperCase();
+    const upperB = b.name.toUpperCase();
+
+    return upperA > upperB ? 1 : -1
+  }
 
 /**
  * Bot send token
@@ -296,6 +302,7 @@ codexBot.onText(/\/send (.+)/, async (msg, match) => {
         }
     
     } catch(err) {
+       // console.log(err)
     }
 
 });
@@ -333,15 +340,44 @@ const botGetBlance =  (info) =>{
     const balance = info.balance;
     const unconfirmedBalance = info.unconfirmedBalance;
     let yCoordinate = 506;
-    const hrc20 = info.hrc20;
+    let hrc20 = info.hrc20;
     let svgFile = svgTemplate(800, 120 + hrc20.length*40);
+    let codex 
+    let hrc20Token = []
+    hrc20.sort(compare)
 
-    for(const token of hrc20) {
-        const tokenValue = (token.amount / Math.pow(10, token.contract.decimals)).toString().split('.');
-        if(tokenValue[1] === undefined) tokenValue[1] = 0;
-        if (tokenValue[0] === undefined) tokenValue[0] = 0;
-        svgFile += buildSvgFile(yCoordinate, token.contract.name, tokenValue[0], '.' + tokenValue[1] , token.contract.symbol );
-        yCoordinate += 40;
+    hrc20Token = hrc20.map(token => {
+
+        if(token.name !== 'Codex') {
+            return {
+                name: token.name,
+                balance: token.balance,
+                decimals: token.decimals,
+                symbol: token.symbol
+            }
+        } else{
+            codex = {
+                name: token.name,
+                balance: token.balance,
+                decimals: token.decimals,
+                symbol: token.symbol
+            }
+        }
+    })
+    hrc20Token.unshift(codex)
+    hrc20Token = hrc20Token.filter(item => {
+        return item != null
+    })
+    for(const token of hrc20Token) {
+        
+        if(token.symbol !== 'IVO') {
+            const tokenValue = (token.amount / Math.pow(10, token.contract.decimals)).toString().split('.');
+            if(tokenValue[1] === undefined) tokenValue[1] = 0;
+            if (tokenValue[0] === undefined) tokenValue[0] = 0;
+            svgFile += buildSvgFile(yCoordinate, token.contract.name, tokenValue[0], '.' + tokenValue[1] , token.symbol );
+            yCoordinate += 40;
+        }
+
     }
     const htmlbalance = balance.toString().split('.');
     if (htmlbalance[1] === undefined) htmlbalance[1] = 0;
