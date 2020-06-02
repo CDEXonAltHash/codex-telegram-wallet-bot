@@ -220,8 +220,8 @@ codexBot.onText(/\/stats/,  async (msg) => {
 
 });
 const compare = (a, b) => {
-    const upperA = a.name.toUpperCase();
-    const upperB = b.name.toUpperCase();
+    const upperA = a.contract.name.toUpperCase();
+    const upperB = b.contract.name.toUpperCase();
 
     return upperA > upperB ? 1 : -1
   }
@@ -345,11 +345,8 @@ const botGetBlance =  (info) =>{
     let codex 
     let hrc20Token = []
     hrc20.sort(compare)
-    console.log(hrc20)
 
     hrc20Token = hrc20.map(token => {
-        console.log(token)
-        console.log('-------------')
 
         if(token.contract.name !== 'Codex') {
             return {
