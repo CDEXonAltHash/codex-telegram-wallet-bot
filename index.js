@@ -345,6 +345,7 @@ const botGetBlance =  (info) =>{
     let codex 
     let hrc20Token = []
     hrc20.sort(compare)
+    console.log(hrc20)
 
     hrc20Token = hrc20.map(token => {
         console.log(token)
