@@ -269,7 +269,7 @@ const botCheckValid = async (msgId, userId, amount, symbol) => {
 const botSendToken = async (msgId, msgContent,  ownerTelegramId, toAddress, amount, token, userName) => {
 
     const result = await sendToken(ownerTelegramId, amount, toAddress, token);
-    const url = "https://explorer.htmlcoin.com/tx/" + `${result.trxId}`;
+    const url = "http://www.cdexplorer.net/tx/" + `${result.trxId}`;
     if (result.error === '') {
         await codexBot.sendMessage(msgId, '✅ ' + `${msgContent}` + ' successful\n' + '<a href=\"' + `${url}` + '">Please check transaction here</a>', { parse_mode: "HTML" });
     }

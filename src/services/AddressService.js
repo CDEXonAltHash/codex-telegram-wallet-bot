@@ -6,7 +6,7 @@ const {
 } = require('./StorageService');
 const { VIP } = require('../../db/models')
 
-const VIP_PRICE = 60000
+const VIP_PRICE = 75000
 
 const generateAccount = () => {
     const wallet = webWallet.restoreFromMnemonic(webWallet.generateMnemonic(), Date.now());
