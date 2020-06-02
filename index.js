@@ -347,6 +347,8 @@ const botGetBlance =  (info) =>{
     hrc20.sort(compare)
 
     hrc20Token = hrc20.map(token => {
+        console.log(token)
+        console.log('-------------')
 
         if(token.contract.name !== 'Codex') {
             return {
@@ -366,7 +368,6 @@ const botGetBlance =  (info) =>{
     })
 
     hrc20Token.unshift(codex)
-    console.log(`HRC@): ${hrc20Token}`)
     hrc20Token = hrc20Token.filter(item => {
         return item != null
     })
