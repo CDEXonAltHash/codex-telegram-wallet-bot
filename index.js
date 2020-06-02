@@ -364,7 +364,9 @@ const botGetBlance =  (info) =>{
             }
         }
     })
+
     hrc20Token.unshift(codex)
+    console.log(`HRC@): ${hrc20Token}`)
     hrc20Token = hrc20Token.filter(item => {
         return item != null
     })
