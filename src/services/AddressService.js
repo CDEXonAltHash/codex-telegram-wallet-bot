@@ -2,9 +2,11 @@
 const webWallet = require('../libs/web-wallet');
 const {isEmpty} = require('lodash');
 const {
-    CodexWallet
+    CodexWallet,
+    CodexVIP,
+    saveVip
 } = require('./StorageService');
-const { VIP } = require('../../db/models')
+// const { VIP } = require('../../db/models')
 
 const VIP_PRICE = 75000
 
@@ -28,6 +30,19 @@ const getCustomWallet = (telegramId) => {
     return (isEmpty(customWallet))? '' : customWallet['wallet'];
 };
 
+const saveVipMember = (publicAddress) => {
+        const airDropTime = Math.floor(Date.now() / 1000);
+        CodexVIP.set(`${publicAddress}`, airDropTime);
+        saveVip({
+            publicAddress: `${publicAddress}`,
+            airDropTime: `${airDropTime}`,
+        });
+}
+
+const getVip = (publicAddress) => {
+        const vip = CodexVIP.get(`${publicAddress}`);
+        return (isEmpty(vip)) ? '' : vip;
+}
 
 const getAddress = (telegramId) => {
     const wallet = getCustomWallet(telegramId);
@@ -74,9 +89,8 @@ const changeFromWIF = (telegramId, username, privKey) => {
     return true;
 };
 
-const getVIPPrice = async () => {
-    const vips = await VIP.find({})
-    const totalVips = vips.length
+const getVIPPrice = () => {
+    const totalVips = CodexVIP.size
     let price = VIP_PRICE
     if(totalVips < 100) {
         return price
@@ -99,5 +113,7 @@ module.exports = {
     getCustomWallet,
     restoreFromWIF,
     changeFromWIF,
-    getVIPPrice
+    getVIPPrice,
+    saveVipMember,
+    getVip
 };

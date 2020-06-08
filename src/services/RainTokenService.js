@@ -20,7 +20,7 @@ const {
     queue
 } = require('./initBot');
 
-const {VIP} = require('../../db/models')
+// const {VIP} = require('../../db/models')
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
@@ -210,8 +210,9 @@ const rewardsPerWeek = async () => {
 
 const rainTokenForVip = async(ownerId, volumeTokens, symbol) => {
     let res = {hasError: false, error: ''};
-    const usersReceive = await VIP.find()
-    let totalVIPs = usersReceive.length - 1;
+    const usersReceive = [...CodexVIP.entries()];
+    let totalVIPs = usersReceive.size;
+
     if(totalVIPs === 0) {
         res.hasError = true;
         res.error = 'We do not any VIPs member for make it rain'
@@ -261,7 +262,7 @@ const rainTokenForVip = async(ownerId, volumeTokens, symbol) => {
 const sendTokenToVip = async(ownerId, volumeTokens, symbol) => {
     const listVIP = [];
     let totalVIPs = 0;
-    const usersReceive = await VIP.find()
+    const usersReceive = [...CodexVIP.entries()];
 
     let address = getAddress(`${ownerId}`)
 
