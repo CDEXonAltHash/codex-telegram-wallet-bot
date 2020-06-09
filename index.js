@@ -922,7 +922,7 @@ codexBot.on("callback_query", async  (msg) => {
                 return await codexBot.sendMessage(msg.from.id, '⚠️You are already a VIP');
             }
             const codex =  checkCDEX(msg.from.id);
-            console.log(`Code: ${codex}`)
+            console.log(`Code: ${JSON.parse(codex)}`)
             // const vipPrice = getVIPPrice()
             if(!codex.hasError) {
                 const opts = {
