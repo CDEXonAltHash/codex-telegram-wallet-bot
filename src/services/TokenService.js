@@ -72,6 +72,7 @@ const checkCDEX =  (telegramId) => {
     error.token = tokenAmount
     for (const token of hrc20Coin) {
         if (token.contract.symbol === 'CDEX' && tokenAmount < (token.amount / Math.pow(10, token.contract.decimals))) {
+            console.log(`Codex: ${token.amount} --- ${token}`)
             error.hasError = true
             return error;
         }
