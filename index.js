@@ -631,10 +631,10 @@ codexBot.onText(/\/checkvip (.+)/, async (msg, match) => {
             
                const vip = getVip(`${params[0]}`) 
                if(vip) {
-                await codexBot.sendMessage(msg.from.id, "<b>This user is a vip member. Kindly check in file/b>", { parse_mode: "HTML" });
+                await codexBot.sendMessage(msg.from.id, "<b>Found! Kindly check in file/b>", { parse_mode: "HTML" });
 
                }else {
-                await codexBot.sendMessage(msg.from.id, "<b>This user is not a vip member. Kindly check in file/b>", { parse_mode: "HTML" });
+                await codexBot.sendMessage(msg.from.id, "<b>Not Found!/b>", { parse_mode: "HTML" });
 
                }
             }
@@ -651,9 +651,7 @@ codexBot.onText(/\/checkvip (.+)/, async (msg, match) => {
 });
 
 codexBot.onText(/\/addtoken (.+)/, async (msg, match) => {
-    // const supply =  hrc20.getTokenBySymbol('CDEX');
-    // addCustomToken(address, name, symbol, decimals) 
-    // addTokens
+
     try {
         const params = match[1].split(' ');
         const admin = await codexBot.getChatMember(msg.chat.id, msg.from.id);
