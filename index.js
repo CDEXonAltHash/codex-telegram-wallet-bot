@@ -631,10 +631,10 @@ codexBot.onText(/\/checkvip (.+)/, async (msg, match) => {
             
                const vip = getVip(`${params[0]}`) 
                if(vip) {
-                await codexBot.sendMessage(msg.from.id, "<b>Found! Kindly check in file/b>", { parse_mode: "HTML" });
+                await codexBot.sendMessage(msg.from.id, "<b>Found! Kindly check in file</b>", { parse_mode: "HTML" });
 
                }else {
-                await codexBot.sendMessage(msg.from.id, "<b>Not Found!/b>", { parse_mode: "HTML" });
+                await codexBot.sendMessage(msg.from.id, "<b>Not Found!</b>", { parse_mode: "HTML" });
 
                }
             }
@@ -659,7 +659,7 @@ codexBot.onText(/\/addtoken (.+)/, async (msg, match) => {
         if(admin.user.username === 'Brett_Hituhmull'  || admin.user.username === 'nobitasun') {
             addTokens(params[2])
             hrc20.addCustomToken(params[0], params[1], params[2], params[3])
-            await codexBot.sendMessage(msg.from.id, "<b>Add token is done!/b>", { parse_mode: "HTML" });
+            await codexBot.sendMessage(msg.from.id, "<b>Add token is done!</b>", { parse_mode: "HTML" });
             
         } else {
             await codexBot.sendMessage(msg.from.id, "<b>Sorry the function is only for admin</b>", { parse_mode: "HTML" });
