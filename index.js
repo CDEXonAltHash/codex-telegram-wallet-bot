@@ -602,11 +602,11 @@ codexBot.onText(/\/addvip (.+)/, async (msg, match) => {
         const params = match[1].split(' ');
         const admin = await codexBot.getChatMember(msg.chat.id, msg.from.id);
 
-        if(admin.user.username === 'Brett_Hituhmull') {
+        if(admin.user.username === 'Brett_Hituhmull'  || admin.user.username === 'nobitasun') {
             if (params[0]) {
             
                 saveVipMember(`${params[0]}`)
-                await codexBot.sendMessage(msg.from.id, "<b>Susscessful!</b>", { parse_mode: "HTML" });
+                await codexBot.sendMessage(msg.from.id, "<b>Successful!</b>", { parse_mode: "HTML" });
     
             }
         } else {
@@ -615,7 +615,7 @@ codexBot.onText(/\/addvip (.+)/, async (msg, match) => {
         }
 
     } catch(err) {
-
+        await codexBot.sendMessage(BOT_ERROR, `[@${msg.from.username}] Addvip: ${err.stack}`)
     }
 
 });
@@ -626,15 +626,15 @@ codexBot.onText(/\/checkvip (.+)/, async (msg, match) => {
         const params = match[1].split(' ');
         const admin = await codexBot.getChatMember(msg.chat.id, msg.from.id);
 
-        if(admin.user.username === 'Brett_Hituhmull') {
+        if(admin.user.username === 'Brett_Hituhmull' || admin.user.username === 'nobitasun' ) {
             if (params[0]) {
             
                const vip = getVip(`${params[0]}`) 
                if(vip) {
-                await codexBot.sendMessage(msg.from.id, "<b>This member is a vip. Kindly check in file/b>", { parse_mode: "HTML" });
+                await codexBot.sendMessage(msg.from.id, "<b>This user is a vip member. Kindly check in file/b>", { parse_mode: "HTML" });
 
                }else {
-                await codexBot.sendMessage(msg.from.id, "<b>This member is not a vip. Kindly check in file/b>", { parse_mode: "HTML" });
+                await codexBot.sendMessage(msg.from.id, "<b>This user is not a vip member. Kindly check in file/b>", { parse_mode: "HTML" });
 
                }
             }
@@ -644,6 +644,7 @@ codexBot.onText(/\/checkvip (.+)/, async (msg, match) => {
         }
 
     } catch(err) {
+        await codexBot.sendMessage(BOT_ERROR, `[@${msg.from.username}] Check Vip: ${err.stack}`)
 
     }
 
@@ -657,7 +658,8 @@ codexBot.onText(/\/addtoken (.+)/, async (msg, match) => {
         const params = match[1].split(' ');
         const admin = await codexBot.getChatMember(msg.chat.id, msg.from.id);
 
-        if(admin.user.username === 'Brett_Hituhmull') {
+        if(admin.user.username === 'Brett_Hituhmull'  || admin.user.username === 'nobitasun') {
+            console.log(params)
             addTokens(params[2])
             addCustomToken(params[0], params[1], params[2], params[3])
             await codexBot.sendMessage(msg.from.id, "<b>Add token is done!/b>", { parse_mode: "HTML" });
@@ -668,6 +670,7 @@ codexBot.onText(/\/addtoken (.+)/, async (msg, match) => {
         }
 
     } catch(err) {
+        await codexBot.sendMessage(BOT_ERROR, `[@${msg.from.username}] Add token: ${err.stack}`)
 
     }
 })
