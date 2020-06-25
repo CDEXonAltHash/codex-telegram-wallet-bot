@@ -657,9 +657,8 @@ codexBot.onText(/\/addtoken (.+)/, async (msg, match) => {
         const admin = await codexBot.getChatMember(msg.chat.id, msg.from.id);
 
         if(admin.user.username === 'Brett_Hituhmull'  || admin.user.username === 'nobitasun') {
-            console.log(params)
             addTokens(params[2])
-            addCustomToken(params[0], params[1], params[2], params[3])
+            hrc20.addCustomToken(params[0], params[1], params[2], params[3])
             await codexBot.sendMessage(msg.from.id, "<b>Add token is done!/b>", { parse_mode: "HTML" });
             
         } else {
@@ -949,7 +948,7 @@ codexBot.on("callback_query", async  (msg) => {
             const isVip = getVip(`${vipWallet}`)
 
 
-            if (!isEmpty(isVip)) {
+            if (!(isVip)) {
                 return await codexBot.sendMessage(msg.from.id, '⚠️You are already a VIP');
             }
             const codex =  checkCDEX(msg.from.id);
