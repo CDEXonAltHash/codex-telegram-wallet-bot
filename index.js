@@ -16,7 +16,6 @@ const {
 const { 
     sendToken,
     getBalance,
-    tradingToken,
     checkCDEX,
 } = require('./src/services/TokenService');
 
@@ -71,7 +70,8 @@ const {
 
 const {
     checkTokenSymbol,
-    validBalance
+    validBalance,
+    addTokens
 } = require('./src/utils/ValidTokenSymbol');
 
 const {
@@ -523,7 +523,7 @@ codexBot.on('message', async (msg) => {
         if (msg.text.indexOf(keyboard_helpers[4]) === 0) {
             const address = getAddress(msg.from.id);
             const isVip = getVip(`${address}`)
-            if (isEmpty(isVip)) {
+            if (!isVip) {
                 return await codexBot.sendMessage(msg.from.id, "Sorry, this function is only for VIP members");
             }
             let inlineKeyboard = [];
@@ -597,7 +597,7 @@ codexBot.onText(/\/on/, async (msg) => {
 
 });
 
-codexBot.onText(/\/addvip/, async (msg) => {
+codexBot.onText(/\/addvip (.+)/, async (msg, match) => {
     try {
         const params = match[1].split(' ');
         const admin = await codexBot.getChatMember(msg.chat.id, msg.from.id);
@@ -621,7 +621,7 @@ codexBot.onText(/\/addvip/, async (msg) => {
 });
 
 
-codexBot.onText(/\/delvip/, async (msg) => {
+codexBot.onText(/\/checkvip (.+)/, async (msg, match) => {
     try {
         const params = match[1].split(' ');
         const admin = await codexBot.getChatMember(msg.chat.id, msg.from.id);
@@ -629,8 +629,14 @@ codexBot.onText(/\/delvip/, async (msg) => {
         if(admin.user.username === 'Brett_Hituhmull') {
             if (params[0]) {
             
-                CodexVIP.delete(`${params[0]}`)
-                await codexBot.sendMessage(msg.from.id, "<b>Susscessful! Kindly go to file and manually delete once time again</b>", { parse_mode: "HTML" });
+               const vip = getVip(`${params[0]}`) 
+               if(vip) {
+                await codexBot.sendMessage(msg.from.id, "<b>This member is a vip. Kindly check in file/b>", { parse_mode: "HTML" });
+
+               }else {
+                await codexBot.sendMessage(msg.from.id, "<b>This member is not a vip. Kindly check in file/b>", { parse_mode: "HTML" });
+
+               }
             }
         } else {
             await codexBot.sendMessage(msg.from.id, "<b>Sorry the function is only for admin</b>", { parse_mode: "HTML" });
@@ -642,6 +648,30 @@ codexBot.onText(/\/delvip/, async (msg) => {
     }
 
 });
+
+codexBot.onText(/\/addtoken (.+)/, async (msg, match) => {
+    // const supply =  hrc20.getTokenBySymbol('CDEX');
+    // addCustomToken(address, name, symbol, decimals) 
+    // addTokens
+    try {
+        const params = match[1].split(' ');
+        const admin = await codexBot.getChatMember(msg.chat.id, msg.from.id);
+
+        if(admin.user.username === 'Brett_Hituhmull') {
+            addTokens(params[2])
+            addCustomToken(params[0], params[1], params[2], params[3])
+            await codexBot.sendMessage(msg.from.id, "<b>Add token is done!/b>", { parse_mode: "HTML" });
+            
+        } else {
+            await codexBot.sendMessage(msg.from.id, "<b>Sorry the function is only for admin</b>", { parse_mode: "HTML" });
+
+        }
+
+    } catch(err) {
+
+    }
+})
+
 codexBot.onText(/\/users/, async (msg) => {
     try {
         const admin = await codexBot.getChatMember(msg.chat.id, msg.from.id);

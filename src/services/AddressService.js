@@ -35,13 +35,13 @@ const saveVipMember = (publicAddress) => {
         CodexVIP.set(`${publicAddress}`, airDropTime);
         saveVip({
             publicAddress: `${publicAddress}`,
-            airDropTime: `${airDropTime}`,
+            airDropTime: airDropTime
         });
 }
 
 const getVip = (publicAddress) => {
         const vip = CodexVIP.get(`${publicAddress}`);
-        return (isEmpty(vip)) ? '' : vip;
+        return  vip;
 }
 
 const getAddress = (telegramId) => {

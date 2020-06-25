@@ -1,4 +1,4 @@
-const tokenSymbols = ['HTML', 'BUNK', 'CDEX', 'MAG', 'ASW', 'BIFD', 'BIFF', 'YMA', 'LAC','SFUN','COOP','BURQ','BIFP', 'VCTR', 'BIFG', , 'TRS', 'BFCC', 'PHO', 'JUL', 'HOLY', 'BCDX', 'Roy', 'KKC', 'RAIN', 'LOVE', 'BBCT', 'SMILE','ABLE', 'EDUC', 'BBCT', 'WLK' ]
+const tokenSymbols = ['HTML', 'BUNK', 'CDEX', 'MAG', 'ASW', 'BIFD', 'BIFF', 'YMA', 'LAC','SFUN','COOP','BURQ','BIFP', 'VCTR', 'BIFG', 'TRS', 'BFCC', 'PHO', 'JUL', 'HOLY', 'BCDX', 'Roy', 'KKC', 'RAIN', 'LOVE', 'BBCT', 'SMILE','ABLE', 'EDUC', 'BBCT', 'WLK']
 
 
 const checkTokenSymbol = (symbol) => {
@@ -10,13 +10,17 @@ const checkTokenSymbol = (symbol) => {
     const lowerSymbol = symbol.toLowerCase();
     let result = '';
     for (const item of tokenSymbols) {
-        console.log(`Check Token symbol: ${item}`)
         let lowerItem = item.toLowerCase();
         if(0 <= lowerItem.indexOf(lowerSymbol)) {
             result += item + ', ';
         }
+        
     }
     return result;
+}
+
+const addTokens = (symbol) => {
+    tokenSymbols.push(`${symbol}`)
 }
 
 const isFloat = (n) => {
@@ -55,5 +59,6 @@ const validBalance = (info, symbol, amount) => {
 
 module.exports = {
     checkTokenSymbol,
-    validBalance
+    validBalance,
+    addTokens
 };
