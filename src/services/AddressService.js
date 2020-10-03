@@ -8,7 +8,7 @@ const {
 } = require('./StorageService');
 // const { VIP } = require('../../db/models')
 
-const VIP_PRICE = 10000
+const VIP_PRICE = 100000
 
 const generateAccount = () => {
     const wallet = webWallet.restoreFromMnemonic(webWallet.generateMnemonic(), Date.now());
@@ -90,10 +90,11 @@ const changeFromWIF = (telegramId, username, privKey) => {
 };
 
 const getVIPPrice = (totalAmount) => {
+    console.log(`VIP Price: ${totalAmount}`)
     const totalVips = CodexVIP.size
     let price = VIP_PRICE
-    if(totalVips < 100) {
-        return price
+    if(totalVips < 100 ) {
+        return (totalAmount >= VIP_PRICE) ? price * 0.5: price
     }
     let mul = totalVips/100
     if(!mul.isInteger) {
