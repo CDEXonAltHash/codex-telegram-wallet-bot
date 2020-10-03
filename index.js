@@ -71,7 +71,8 @@ const {
 const {
     checkTokenSymbol,
     validBalance,
-    addTokens
+    addTokens,
+    getCDEXBalance
 } = require('./src/utils/ValidTokenSymbol');
 
 const {
@@ -981,7 +982,10 @@ codexBot.on("callback_query", async  (msg) => {
                 { parse_mode: "HTML" });    
         } else if(choice === "8") {
             const address = getAddress(msg.from.id);
-            const vipPrice =  getVIPPrice()
+            const balance = await getBalance(userId);
+
+            // getCDEXBalance
+            const vipPrice =  getVIPPrice(getCDEXBalance(balance))
 
             const result = await sendToken(msg.from.id, vipPrice , AIRDROP_ADDRESS, "CDEX");
             if (result.error === '') {

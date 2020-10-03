@@ -23,9 +23,7 @@ const addTokens = (symbol) => {
     tokenSymbols.push(`${symbol}`)
 }
 
-const isFloat = (n) => {
-    return !(n % 1 === 0);
-}
+
 const validBalance = (info, symbol, amount) => {
     const html = info.balance;
 
@@ -56,9 +54,29 @@ const validBalance = (info, symbol, amount) => {
     }
     return isValid;
 }
+const getCDEXBalance = (info) => {
+    const html = info.balance;
+
+    const hrc20 = info.hrc20;
+
+    let amount = 0
+    //TODO remove hard code
+    if (html < 1.001) {
+       return amount;
+    }
+    for (const token of hrc20) {
+        if (token.contract.symbol === "CDEX"){
+            amount =  token.amount / Math.pow(10, token.contract.decimals);
+            break;
+        }
+           
+    }
+    return amount;
+}
 
 module.exports = {
     checkTokenSymbol,
     validBalance,
-    addTokens
+    addTokens,
+    getCDEXBalance
 };
