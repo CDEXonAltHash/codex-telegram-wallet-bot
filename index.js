@@ -952,9 +952,16 @@ codexBot.on("callback_query", async  (msg) => {
             if ((isVip)) {
                 return await codexBot.sendMessage(msg.from.id, '⚠️You are already a VIP');
             }
-            const codex =  checkCDEX(msg.from.id);
-            // const vipPrice = getVIPPrice()
+            let codex =  checkCDEX(msg.from.id);
+
+            // getCDEXBalance
+            
+
             if(!codex.hasError) {
+                const vipPrice =  getVIPPrice(codex.token)
+
+                codex.token = vipPrice
+
                 const opts = {
                     reply_markup: {
                         inline_keyboard: [
