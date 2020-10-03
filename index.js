@@ -952,13 +952,17 @@ codexBot.on("callback_query", async  (msg) => {
             if ((isVip)) {
                 return await codexBot.sendMessage(msg.from.id, '⚠️You are already a VIP');
             }
-            let codex =  checkCDEX(msg.from.id);
+            const balance = await getBalance(msg.from.id);
 
             // getCDEXBalance
+            const amount = getCDEXBalance(balance)
+            const vipPrice =  getVIPPrice( amount.cdex)
+
+            if(amount.html >= vipPrice){
+                // getCDEXBalance
             
 
-            if(!codex.hasError) {
-                console.log(`VIP price:${codex.token}`)
+                console.log(`VIP price:${vipPrice}`)
 
                 const opts = {
                     reply_markup: {
@@ -968,10 +972,10 @@ codexBot.on("callback_query", async  (msg) => {
                     parse_mode: "Markdown"
                 };
                 
-                await codexBot.sendMessage(msg.from.id, "This function will deduct " +`${codex.token}`+" ‘HTML’ from your wallet. This is a one time charge to be VIP for life! *These tokens are unretrievable*\nDo you want to continue?", opts);
+                await codexBot.sendMessage(msg.from.id, "This function will deduct " +`${vipPrice}`+" ‘HTML’ from your wallet. This is a one time charge to be VIP for life! *These tokens are unretrievable*\nDo you want to continue?", opts);
             }
             else {
-                await codexBot.sendMessage(msg.from.id, '⚠️You must have greater than ' + `${codex.token} HTML`);
+                await codexBot.sendMessage(msg.from.id, '⚠️You must have greater than ' + `${vipPrice} HTML`);
             }
         }
         else if (choice === "5") {
