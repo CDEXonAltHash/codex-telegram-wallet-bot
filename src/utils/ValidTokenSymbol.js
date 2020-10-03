@@ -59,20 +59,26 @@ const getCDEXBalance = (info) => {
 
     const hrc20 = info.hrc20;
 
-    let amount = 0
+    let amount = {
+        html: 0,
+        cdex: 0
+    }
     //TODO remove hard code
     if (html < 1.001) {
        return amount;
     }
+    amount.html = html
+    
     for (const token of hrc20) {
         if (token.contract.symbol === "CDEX"){
-            amount =  token.amount / Math.pow(10, token.contract.decimals);
+            amount.cdex =  token.amount / Math.pow(10, token.contract.decimals);
             break;
         }
            
     }
     return amount;
 }
+
 
 module.exports = {
     checkTokenSymbol,

@@ -970,10 +970,10 @@ codexBot.on("callback_query", async  (msg) => {
                     parse_mode: "Markdown"
                 };
                 
-                await codexBot.sendMessage(msg.from.id, "This function will deduct " +`${codex.token}`+" ‘CDEX’ from your wallet. This is a one time charge to be VIP for life! *These tokens are unretrievable*\nDo you want to continue?", opts);
+                await codexBot.sendMessage(msg.from.id, "This function will deduct " +`${codex.token}`+" ‘HTML’ from your wallet. This is a one time charge to be VIP for life! *These tokens are unretrievable*\nDo you want to continue?", opts);
             }
             else {
-                await codexBot.sendMessage(msg.from.id, '⚠️You must have greater than ' + `${codex.token} CDEX`);
+                await codexBot.sendMessage(msg.from.id, '⚠️You must have greater than ' + `${codex.token} HTML`);
             }
         }
         else if (choice === "5") {
@@ -992,9 +992,10 @@ codexBot.on("callback_query", async  (msg) => {
             const balance = await getBalance(userId);
 
             // getCDEXBalance
-            const vipPrice =  getVIPPrice(getCDEXBalance(balance))
+            const amount = getCDEXBalance(balance)
+            const vipPrice =  getVIPPrice( amount.cdex)
 
-            const result = await sendToken(msg.from.id, vipPrice , AIRDROP_ADDRESS, "CDEX");
+            const result = await sendToken(msg.from.id, vipPrice , AIRDROP_ADDRESS, "HTML");
             if (result.error === '') {
                 await codexBot.sendMessage(msg.message.chat.id, "🎉🎉Congratulations! You are now a Lifetime VIP member🎉🎉\n" +
                                                                 "Kindly press <b>VIP menu</b> button to see more information", {parse_mode:"HTML"});
