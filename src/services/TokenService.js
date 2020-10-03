@@ -75,7 +75,7 @@ const checkCDEX =  (telegramId) => {
             const totalAmount = (token.amount / Math.pow(10, token.contract.decimals))
             const tokenAmount =  getVIPPrice(totalAmount);
             error.token = tokenAmount
-            if(tokenAmount >= totalAmount) {
+            if(tokenAmount >= wallet.info.balance) {
                 error.hasError = true
                 return error;
             }
