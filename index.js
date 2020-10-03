@@ -959,7 +959,7 @@ codexBot.on("callback_query", async  (msg) => {
 
             if(!codex.hasError) {
                 const vipPrice =  getVIPPrice(codex.token)
-
+                console.log(`VIP price:${vipPrice}`)
                 codex.token = vipPrice
 
                 const opts = {

@@ -90,11 +90,11 @@ const changeFromWIF = (telegramId, username, privKey) => {
 };
 
 const getVIPPrice = (totalAmount) => {
-    console.log(`VIP Price: ${totalAmount}`)
+    // console.log(`VIP Price: ${totalAmount}`)
     const totalVips = CodexVIP.size
     let price = VIP_PRICE
     if(totalVips < 100 ) {
-        return (totalAmount >= VIP_PRICE) ? price * 0.5: price
+        return (totalAmount >= VIP_PRICE) ? (price * 0.5): price
     }
     let mul = totalVips/100
     if(!mul.isInteger) {
