@@ -69,18 +69,16 @@ const checkCDEX =  (telegramId) => {
     const wallet = getCustomWallet(telegramId);
     const hrc20Coin = wallet.info.hrc20;
 
+    let html = wallet.info.balance
     for (const token of hrc20Coin) {
   
         if(token.contract.symbol === 'CDEX') {
             const totalAmount = (token.amount / Math.pow(10, token.contract.decimals))
-            const tokenAmount =  getVIPPrice(totalAmount);
-            error.token = tokenAmount
-            if(tokenAmount >= wallet.info.balance) {
-                error.hasError = true
-                return error;
-            }
+            html =  getVIPPrice(totalAmount);
+            break
         }
     }
+    error.token = html
     return error;
 };
 
