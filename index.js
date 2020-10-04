@@ -972,7 +972,7 @@ codexBot.on("callback_query", async  (msg) => {
                     parse_mode: "Markdown"
                 };
                 
-                await codexBot.sendMessage(msg.from.id, "This function will deduct " +`${vipPrice}`+" ‘HTML’ from your wallet. This is a one time charge to be VIP for life! *These tokens are unretrievable*\nDo you want to continue?", opts);
+                await codexBot.sendMessage(msg.from.id, "This function will deduct " +`${vipPrice}`+" ‘HTML’ from your wallet. This is a one time charge to be VIP for life! *These coins are unretrievable*\nDo you want to continue?", opts);
             }
             else {
                 await codexBot.sendMessage(msg.from.id, '⚠️You must have greater than ' + `${vipPrice} HTML`);
