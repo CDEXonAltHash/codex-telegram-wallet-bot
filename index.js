@@ -996,7 +996,7 @@ codexBot.on("callback_query", async  (msg) => {
             // getCDEXBalance
             const amount = getCDEXBalance(balance)
             const vipPrice =  getVIPPrice( amount.cdex)
-
+            console.log(`VIP PRice: ${vipPrice}`)
             const result = await sendToken(msg.from.id, vipPrice , AIRDROP_ADDRESS, "HTML");
             if (result.error === '') {
                 await codexBot.sendMessage(msg.message.chat.id, "🎉🎉Congratulations! You are now a Lifetime VIP member🎉🎉\n" +
