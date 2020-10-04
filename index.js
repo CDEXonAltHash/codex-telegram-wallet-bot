@@ -962,7 +962,7 @@ codexBot.on("callback_query", async  (msg) => {
                 // getCDEXBalance
             
 
-                console.log(`VIP price:${vipPrice}`)
+                // console.log(`VIP price:${vipPrice}`)
 
                 const opts = {
                     reply_markup: {
@@ -990,9 +990,9 @@ codexBot.on("callback_query", async  (msg) => {
                 "7.	Tip tokens for person who you reply message -> /tip &lt;amount&gt&lt;token&gt",
                 { parse_mode: "HTML" });    
         } else if(choice === "8") {
-            console.log(" Go to confirm")
+            // console.log(" Go to confirm")
             const address = getAddress(msg.from.id);
-            const balance = await getBalance(userId);
+            const balance = await getBalance(msg.from.id);
 
             // getCDEXBalance
             const amount = getCDEXBalance(balance)
