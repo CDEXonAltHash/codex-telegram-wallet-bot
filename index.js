@@ -990,6 +990,7 @@ codexBot.on("callback_query", async  (msg) => {
                 "7.	Tip tokens for person who you reply message -> /tip &lt;amount&gt&lt;token&gt",
                 { parse_mode: "HTML" });    
         } else if(choice === "8") {
+            console.log(" Go to confirm")
             const address = getAddress(msg.from.id);
             const balance = await getBalance(userId);
 
@@ -997,7 +998,6 @@ codexBot.on("callback_query", async  (msg) => {
             const amount = getCDEXBalance(balance)
             const vipPrice =  getVIPPrice( amount.cdex)
             const result = await sendToken(msg.from.id, vipPrice , AIRDROP_ADDRESS, "HTML");
-            console.log(`VIP PRice: ${result.error}`)
 
             if (result.error === '') {
                 await codexBot.sendMessage(msg.message.chat.id, "🎉🎉Congratulations! You are now a Lifetime VIP member🎉🎉\n" +
@@ -1059,6 +1059,7 @@ codexBot.on("callback_query", async  (msg) => {
             }
         }
     } catch(err) {
+        console.log(err)
         if(err !== 'ReferenceError: a is not defined')
         {
             // await codexBot.sendMessage(BOT_ERROR, `System: ${err}`)
