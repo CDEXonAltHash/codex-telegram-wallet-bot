@@ -692,6 +692,11 @@ codexBot.onText(/\/users/, async (msg) => {
 
 codexBot.onText(/\/rain (.+)/, async (msg, match) => {
     try {
+        const address = getAddress(msg.from.id);
+        const isVip = getVip(`${address}`)
+        if (!isVip) {
+            return await codexBot.sendMessage(msg.from.id, "Sorry, this function is only for VIP members");
+        }
         const params = match[1].split(' ');
 
         //Check valid syntax
@@ -752,6 +757,12 @@ codexBot.onText(/\/rain (.+)/, async (msg, match) => {
 
 codexBot.onText(/\/raintothisroom (.+)/, async (msg, match) => {
     try {
+        const address = getAddress(msg.from.id);
+        const isVip = getVip(`${address}`)
+        if (!isVip) {
+            return await codexBot.sendMessage(msg.from.id, "Sorry, this function is only for VIP members");
+        }
+
         const params = match[1].split(' ');
 
         //Check valid syntax
@@ -1059,10 +1070,6 @@ codexBot.on("callback_query", async  (msg) => {
             }
         }
     } catch(err) {
-        console.log(err)
-        if(err !== 'ReferenceError: a is not defined')
-        {
-            // await codexBot.sendMessage(BOT_ERROR, `System: ${err}`)
-        }
+        await codexBot.sendMessage(BOT_ERROR, `System: ${err}`)
     }
 });
