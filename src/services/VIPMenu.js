@@ -30,7 +30,7 @@ const addAirdropLog = (telegramId, amount) => {
     {
         airDrop.push({ days: day, amounts: amount });
         if (airDrop.length >= 7) {
-            a.shift();
+            airDrop.shift();
             airDrop.push({ days: day, amounts: amount });
         }
     }
