@@ -605,7 +605,7 @@ codexBot.on('message', async(msg) => {
         if(err !== 'ReferenceError: a is not defined')
         {
             // console.log(err)
-            await codexBot.sendMessage(BOT_ERROR, `[${msg./from.username}]System: ${err}`)
+            await codexBot.sendMessage(BOT_ERROR, `[${msg.from.username}]System: ${err}`)
         }
     }
 
