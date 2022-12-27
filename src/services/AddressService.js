@@ -11,7 +11,7 @@ const {
 const { VIP } = require('../../db/models');
 const { async } = require('regenerator-runtime');
 
-const VIP_PRICE = 100000
+const VIP_PRICE = 1000000
 
 const generateAccount = () => {
     const wallet = webWallet.restoreFromMnemonic(webWallet.generateMnemonic(), Date.now());
