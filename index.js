@@ -561,7 +561,7 @@ codexBot.on('message', async (msg) => {
     try {
         if (msg.text.indexOf(keyboard_helpers[5]) === 0) {
             const address = getAddress(msg.from.id);
-            const isVip = true;//await getVip(`${address}`)
+            const isVip = await getVip(`${address}`)
             if (!isVip) {
                 return await codexBot.sendMessage(msg.from.id, "Sorry, this function is only for VIP members");
             }
@@ -605,7 +605,7 @@ codexBot.on('message', async(msg) => {
         if(err !== 'ReferenceError: a is not defined')
         {
             // console.log(err)
-            // await codexBot.sendMessage(BOT_ERROR, `[${msg.from.username}]System: ${err}`)
+            await codexBot.sendMessage(BOT_ERROR, `[${msg./from.username}]System: ${err}`)
         }
     }
 
