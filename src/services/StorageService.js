@@ -2,7 +2,7 @@
 const keyFile = require('../libs/keyfile');
 const webWallet = require('../libs/web-wallet');
 const fs = require('fs');
-const { CODEX_CREDENTIAL } = require('../config/Config');
+const { CODEX_CREDENTIAL } = require('../config/config');
 const userStoragePath = './codexWallet';
 const vipStoragePath = './codexVip';
 

@@ -1,4 +1,6 @@
 'use strict';
+const otpGenerator = require('otp-generator');
+
 const webWallet = require('../libs/web-wallet');
 const {isEmpty} = require('lodash');
 const {
@@ -6,7 +8,8 @@ const {
     CodexVIP,
     saveVip
 } = require('./StorageService');
-// const { VIP } = require('../../db/models')
+const { VIP } = require('../../db/models');
+const { async } = require('regenerator-runtime');
 
 const VIP_PRICE = 100000
 
@@ -30,18 +33,24 @@ const getCustomWallet = (telegramId) => {
     return (isEmpty(customWallet))? '' : customWallet['wallet'];
 };
 
-const saveVipMember = (publicAddress) => {
-        const airDropTime = Math.floor(Date.now() / 1000);
-        CodexVIP.set(`${publicAddress}`, airDropTime);
-        saveVip({
-            publicAddress: `${publicAddress}`,
-            airDropTime: airDropTime
-        });
+const saveVipMember = async (publicAddress) => {
+    const airDropTime = Math.floor(Date.now() / 1000);
+    const otp = otpGenerator.generate(6, {
+        specialChars: false,
+        lowerCaseAlphabets: false,
+        upperCaseAlphabets: false,
+      });
+    await VIP.create({address: publicAddress , airDropTime: airDropTime, otp: otp, isVerify: false});
 }
 
-const getVip = (publicAddress) => {
-        const vip = CodexVIP.get(`${publicAddress}`);
-        return  vip;
+const updateVipMember = async (publicAddress) => {
+    const airDropTime = Math.floor(Date.now() / 1000);
+    await VIP.findOneAndUpdate({address: publicAddress}, {$set: {airDropTime: airDropTime}});
+}
+
+const getVip = async (publicAddress) => {
+    const vip = VIP.findOne({address: publicAddress});
+    return  vip;
 }
 
 const getAddress = (telegramId) => {
@@ -89,9 +98,9 @@ const changeFromWIF = (telegramId, username, privKey) => {
     return true;
 };
 
-const getVIPPrice = (totalAmount) => {
+const getVIPPrice = async (totalAmount) => {
     // console.log(`TOKEN CDEX: ${totalAmount}`)
-    const totalVips = CodexVIP.size
+    const totalVips = await VIP.countDocuments({})
     let price = VIP_PRICE
     if(totalVips < 100 ) {
         return (totalAmount >= VIP_PRICE) ? (price * 0.5): price
@@ -119,5 +128,6 @@ module.exports = {
     changeFromWIF,
     getVIPPrice,
     saveVipMember,
-    getVip
+    getVip,
+    updateVipMember
 };

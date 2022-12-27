@@ -4,3 +4,4 @@ TELEGRAM_TOKEN=telegram-token
 CODEX_CREDENTIAL=your password
 BOT_ERROR=@channel-name
 MONGO_URL=mongodb://localhost:27017/test
+VIP_CHAT_LINK=https://t.me/CodexWalletBot

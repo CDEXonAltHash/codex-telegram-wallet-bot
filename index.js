@@ -1,6 +1,6 @@
 'use strict';
 require('babel-polyfill');
-const { isEmpty } = require('lodash')
+const { isEmpty, isNumber } = require('lodash')
 const {
     generateAccount,
     saveAccount,
@@ -10,7 +10,8 @@ const {
     changeFromWIF,
     getVIPPrice,
     getVip,
-    saveVipMember
+    saveVipMember,
+    updateVipMember
 } = require('./src/services/AddressService'); 
 
 const { 
@@ -29,7 +30,8 @@ const {
     AIRDROP_ID,
     AIRDROP_ADDRESS,
     BOT_ERROR,
-} = require('./src/config/Config');
+    VIP_CHAT_LINK,
+} = require('./src/config/config');
 
 const hrc20 = require('./src/libs/hrc20');
 
@@ -69,9 +71,7 @@ const {
 } = require('./src/utils/DateParser');
 
 const {
-    checkTokenSymbol,
     validBalance,
-    addTokens,
     getCDEXBalance
 } = require('./src/utils/ValidTokenSymbol');
 
@@ -84,14 +84,14 @@ const {
 } = require('./src/services/initBot')
 
 // require('./src/services/worker')
-// const {
-//     VIP
-// } = require('./db/models')
+const {
+    VIP
+} = require('./db/models')
 
-// require('./db')
+require('./db')
 
 
-const keyboard_helpers = ["📬Public address", "💰Get balance", "🔑Get private key", "🔍Help", "🎁VIP menu"];
+const keyboard_helpers = ["📬Public address", "💰Get balance", "🔑Get private key", "🔍Help", "🎁VIP menu", "💬 VIP chat"];
 
 
 
@@ -100,7 +100,7 @@ const keyboard_helpers = ["📬Public address", "💰Get balance", "🔑Get priv
  */
 loadBotAccountFromFile();
 
-loadVip();
+// loadVip();
 
 
 /**
@@ -125,7 +125,7 @@ codexBot.onText(/\/start/, async(msg) => {
                     "keyboard": [
                         [keyboard_helpers[0], keyboard_helpers[1]],
                         [keyboard_helpers[2], keyboard_helpers[3]],
-                        [keyboard_helpers[4]],
+                        [keyboard_helpers[4], keyboard_helpers[5]],
                     ]
                 }
             });
@@ -158,7 +158,7 @@ codexBot.onText(/\/mywallet/, async (msg) => {
                     "keyboard": [
                         [keyboard_helpers[0], keyboard_helpers[1]],
                         [keyboard_helpers[2], keyboard_helpers[3]],
-                        [keyboard_helpers[4]],
+                        [keyboard_helpers[4], keyboard_helpers[5]],
                     ]
                 },
                 parse_mode:"HTML"
@@ -199,7 +199,7 @@ codexBot.onText(/\/mywallet/, async (msg) => {
                     "keyboard": [
                         [keyboard_helpers[0], keyboard_helpers[1]],
                         [keyboard_helpers[2], keyboard_helpers[3]],
-                        [keyboard_helpers[4]],
+                        [keyboard_helpers[4], keyboard_helpers[5]],
                     ]
                 }
             });
@@ -219,7 +219,7 @@ codexBot.onText(/\/mywallet/, async (msg) => {
 
 codexBot.onText(/\/stats/,  async (msg) => {
     try {
-        const supply =  hrc20.getTokenBySymbol('CDEX');
+        const supply = await hrc20.getTokenBySymbol('CDEX');
         await codexBot.sendMessage(msg.chat.id, 'Total Supply of CDEX:', supply.total_supply);
     }catch(err) {
 
@@ -259,12 +259,10 @@ const botCheckValid = async (msgId, userId, amount, symbol) => {
         await codexBot.sendMessage(msgId, '❌Please type token symbol');
     }
     else {
-        const validSymbol = checkTokenSymbol(symbol);
-        if(validSymbol === symbol) {
+        const validSymbol = symbol.toUpperCase();
+        const isValidSymbol = await hrc20.checkSymbol(validSymbol);
+        if(isValidSymbol) {
             isValid = validBalance(balance, symbol, amount * 1) ? 'OKAY' : 'NOT ENOUGH';
-        }
-        else if (validSymbol) {
-            await codexBot.sendMessage(msgId,'❌Sorry, Did you mean: ' + validSymbol);
         }
         else {
             await codexBot.sendMessage(msgId, '❌Sorry, We do not support this token');
@@ -523,7 +521,7 @@ codexBot.on('message', async (msg) => {
     try {
         if (msg.text.indexOf(keyboard_helpers[4]) === 0) {
             const address = getAddress(msg.from.id);
-            const isVip = getVip(`${address}`)
+            const isVip = await getVip(`${address}`)
             if (!isVip) {
                 return await codexBot.sendMessage(msg.from.id, "Sorry, this function is only for VIP members");
             }
@@ -555,6 +553,65 @@ codexBot.on('message', async (msg) => {
 
     }
 });
+
+/**
+ * VIP chat
+ */
+codexBot.on('message', async (msg) => {
+    try {
+        if (msg.text.indexOf(keyboard_helpers[5]) === 0) {
+            const address = getAddress(msg.from.id);
+            const isVip = true;//await getVip(`${address}`)
+            if (!isVip) {
+                return await codexBot.sendMessage(msg.from.id, "Sorry, this function is only for VIP members");
+            }
+            let inlineKeyboard = [[{ text: "🔍Get your invitation code", callback_data: "12" }, { text: "📎Join chat", callback_data: "13" }]];
+            const opts = {
+                reply_markup: {
+                    inline_keyboard: inlineKeyboard
+                },
+                parse_mode: "HTML"
+            };
+
+            await codexBot.sendMessage(msg.from.id, "<b>Please choose action</b>", opts);
+        }
+    } catch (err) {
+        if(err !== 'ReferenceError: a is not defined')
+        {
+            // console.log(keyboard_helpers[4])
+            // await codexBot.sendMessage(BOT_ERROR, `[@${msg.from.username}] Airdrop: ${err}`)
+
+        }
+
+    }
+});
+
+codexBot.on('message', async(msg) => {
+    try {
+        let msgText = msg.text*1.0;
+ 
+        if(CodexVIP.get(msg.from.id)) {
+            const isOTP = await VIP.findOne({ otp: msgText})
+            if(isOTP) {
+                await codexBot.sendMessage(msg.chat.id, `Here is the link to VIP chat room: ${VIP_CHAT_LINK}`);
+                CodexVIP.set(msg.from.id, false);
+
+            } else {
+                await codexBot.sendMessage(msg.chat.id, `Wrong invitation code.`);
+            }
+        }   
+
+    } catch(err) {
+        if(err !== 'ReferenceError: a is not defined')
+        {
+            // console.log(err)
+            // await codexBot.sendMessage(BOT_ERROR, `[${msg.from.username}]System: ${err}`)
+        }
+    }
+
+});
+
+
 
 /**
  * Command for administrator
@@ -603,10 +660,10 @@ codexBot.onText(/\/addvip (.+)/, async (msg, match) => {
         const params = match[1].split(' ');
         const admin = await codexBot.getChatMember(msg.chat.id, msg.from.id);
 
-        if(admin.user.username === 'Brett_Hituhmull'  || admin.user.username === 'nobitasun') {
+        if(admin.user.username === 'Brett_Hituhmull'  || admin.user.username === 'windvn7') {
             if (params[0]) {
             
-                saveVipMember(`${params[0]}`)
+                await saveVipMember(`${params[0]}`)
                 await codexBot.sendMessage(msg.from.id, "<b>Successful!</b>", { parse_mode: "HTML" });
     
             }
@@ -627,10 +684,10 @@ codexBot.onText(/\/checkvip (.+)/, async (msg, match) => {
         const params = match[1].split(' ');
         const admin = await codexBot.getChatMember(msg.chat.id, msg.from.id);
 
-        if(admin.user.username === 'Brett_Hituhmull' || admin.user.username === 'nobitasun' ) {
+        if(admin.user.username === 'Brett_Hituhmull' || admin.user.username === 'windvn7' ) {
             if (params[0]) {
             
-               const vip = getVip(`${params[0]}`) 
+               const vip = await getVip(`${params[0]}`) 
                if(vip) {
                 await codexBot.sendMessage(msg.from.id, "<b>Found! Kindly check in file</b>", { parse_mode: "HTML" });
 
@@ -657,10 +714,9 @@ codexBot.onText(/\/addtoken (.+)/, async (msg, match) => {
         const params = match[1].split(' ');
         const admin = await codexBot.getChatMember(msg.chat.id, msg.from.id);
 
-        if(admin.user.username === 'Brett_Hituhmull'  || admin.user.username === 'nobitasun') {
-            addTokens(params[2])
-            hrc20.addCustomToken(params[0], params[1], params[2], params[3])
-            await codexBot.sendMessage(msg.from.id, "<b>Add token is done!</b>", { parse_mode: "HTML" });
+        if(admin.user.username === 'Brett_Hituhmull'  || admin.user.username === 'windvn7') {
+            const result = await hrc20.addCustomToken(params[0], params[1], params[2], params[3], params[4])
+            await codexBot.sendMessage(msg.from.id, `<b>${result}</b>`, { parse_mode: "HTML" });
             
         } else {
             await codexBot.sendMessage(msg.from.id, "<b>Sorry the function is only for admin</b>", { parse_mode: "HTML" });
@@ -693,7 +749,7 @@ codexBot.onText(/\/users/, async (msg) => {
 codexBot.onText(/\/rain (.+)/, async (msg, match) => {
     try {
         const address = getAddress(msg.from.id);
-        const isVip = getVip(`${address}`)
+        const isVip =  await getVip(`${address}`)
         if (!isVip) {
             return await codexBot.sendMessage(msg.from.id, "Sorry, this function is only for VIP members");
         }
@@ -705,8 +761,10 @@ codexBot.onText(/\/rain (.+)/, async (msg, match) => {
         } else if(!params[1]) {
             return await codexBot.sendMessage(msg.chat.id, '❌ Sorry, You need to include the symbol you are sending i.e: / rain 100 CDEX to 24');
         }
-        const validSymbol = checkTokenSymbol(params[1])
-        if (!isNaN(params[1]) || params[1] !== validSymbol) {
+        const validSymbol = params[1].toUpperCase();
+
+        const isValidSymbol = await hrc20.checkSymbol(validSymbol)
+        if (!isNaN(params[1]) || !isValidSymbol) {
             return await codexBot.sendMessage(msg.chat.id, '❌ Sorry, You need to include the symbol you are sending i.e: / rain 100 CDEX to 24');
         } else if(!isNaN(params[2])) {
             return await codexBot.sendMessage(msg.chat.id, '❌ Kindly check the format of command: / rain 100 CDEX to 24');
@@ -758,7 +816,7 @@ codexBot.onText(/\/rain (.+)/, async (msg, match) => {
 codexBot.onText(/\/raintothisroom (.+)/, async (msg, match) => {
     try {
         const address = getAddress(msg.from.id);
-        const isVip = getVip(`${address}`)
+        const isVip = await getVip(`${address}`)
         if (!isVip) {
             return await codexBot.sendMessage(msg.from.id, "Sorry, this function is only for VIP members");
         }
@@ -771,8 +829,9 @@ codexBot.onText(/\/raintothisroom (.+)/, async (msg, match) => {
         } else if(!params[1]) {
             return await codexBot.sendMessage(msg.chat.id, '❌ Sorry, You need to include the symbol you are sending i.e: / rain 100 CDEX to 24');
         }
-        const validSymbol = checkTokenSymbol(params[1])
-        if (!isNaN(params[1]) || params[1] !== validSymbol) {
+        const validSymbol = params[1].toUpperCase();
+        const isValidSymbol = await hrc20.checkSymbol(validSymbol);
+        if (!isNaN(params[1]) || !isValidSymbol) {
             return await codexBot.sendMessage(msg.chat.id, '❌ Sorry, You need to include the symbol you are sending i.e: / raintothisroom 100 CDEX to 24');
         } else if(!isNaN(params[2])) {
             return await codexBot.sendMessage(msg.chat.id, '❌ Kindly check the format of this command: / raintothisroom 100 CDEX to 24');
@@ -957,8 +1016,7 @@ codexBot.on("callback_query", async  (msg) => {
             if(vipWallet === ''){
                 return await codexBot.sendMessage(msg.from.id, '⚠️Your address does not exist');
             }
-            const isVip = getVip(`${vipWallet}`)
-
+            const isVip = await getVip(`${vipWallet}`)
 
             if ((isVip)) {
                 return await codexBot.sendMessage(msg.from.id, '⚠️You are already a VIP');
@@ -967,7 +1025,7 @@ codexBot.on("callback_query", async  (msg) => {
 
             // getCDEXBalance
             const amount = getCDEXBalance(balance)
-            const vipPrice =  getVIPPrice( amount.cdex)
+            const vipPrice =  await getVIPPrice( amount.cdex)
 
             if(amount.html >= vipPrice){
                 // getCDEXBalance
@@ -1007,14 +1065,14 @@ codexBot.on("callback_query", async  (msg) => {
 
             // getCDEXBalance
             const amount = getCDEXBalance(balance)
-            const vipPrice =  getVIPPrice( amount.cdex)
+            const vipPrice =  await getVIPPrice( amount.cdex)
             const result = await sendToken(msg.from.id, vipPrice , AIRDROP_ADDRESS, "HTML");
 
             if (result.error === '') {
                 await codexBot.sendMessage(msg.message.chat.id, "🎉🎉Congratulations! You are now a Lifetime VIP member🎉🎉\n" +
                                                                 "Kindly press <b>VIP menu</b> button to see more information", {parse_mode:"HTML"});
                 
-                saveVipMember(`${address}`)
+                await saveVipMember(`${address}`)
 
                 // const newVip = {
                 //     public_key: `${address}`,
@@ -1044,18 +1102,19 @@ codexBot.on("callback_query", async  (msg) => {
         else if (choice === "11") {
             const address = getAddress(msg.from.id);
 
-            const vip =  getVip(`${address}`)
+            const vip =  await getVip(`${address}`)
+            if(!vip) {
+                await codexBot.sendMessage(msg.from.id, 'You are not a VIP member.');
 
-            if (isValidAirDrop(msg.message.date, vip)) {
+            }
+            else if (isValidAirDrop(msg.message.date, vip.airDropTime)) {
                 const amountAirdrop = getLuckyAirdrop(msg.from.id);
                 const result = await sendToken(AIRDROP_ID, amountAirdrop, address, "CDEX");
         
                 if (result.error === '') {
                     await codexBot.sendMessage(msg.from.id, '🎉🎉🎉You just received <b>' + `${amountAirdrop}`+' CDEX </b>', {parse_mode: "HTML"});
-                                   
-                    const airDropTime = Math.floor(Date.now() / 1000);
-
-                    CodexVIP.set(`${address}`, airDropTime);     
+                     
+                    await updateVipMember(address);
                     //HTMLcoin volume
                     addVolume(parserDate(), 1);
                 }
@@ -1064,9 +1123,31 @@ codexBot.on("callback_query", async  (msg) => {
                 }
             }
             else {
-                const miliseconds = TIME_AIRDROP - (new Date(msg.message.date).getTime() - new Date(vip).getTime());
+                const miliseconds = TIME_AIRDROP - (new Date(msg.message.date).getTime() - new Date(vip.airDropTime).getTime());
                 const timeLeft = convertTime(miliseconds*1000);
                 await codexBot.sendMessage(msg.from.id, "⚠️Please wait: <b>" + `${timeLeft}` + "</b> to get airdrop again! ", {parse_mode: "HTML"});
+            }
+        } else if (choice === "12") {
+            const address = getAddress(msg.from.id);
+
+            const vip =  await getVip(`${address}`)
+            if(!vip) {
+                await codexBot.sendMessage(msg.from.id, 'You are not a VIP member.');
+
+            } else {
+                await codexBot.sendMessage(msg.from.id, `Here is your once time invitation code: ${vip.otp}`);
+
+            }
+        } else if (choice === "13") {
+            const address = getAddress(msg.from.id);
+
+            const vip =  await getVip(`${address}`)
+            if(!vip) {
+                await codexBot.sendMessage(msg.from.id, 'You are not a VIP member.');
+
+            } else {
+                CodexVIP.set(msg.from.id, true);
+                await codexBot.sendMessage(msg.from.id, 'What is your invitation code? ');
             }
         }
     } catch(err) {

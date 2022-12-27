@@ -8,5 +8,6 @@ module.exports = {
     TELEGRAM_TOKEN: process.env.TELEGRAM_TOKEN,
     CODEX_CREDENTIAL: process.env.CODEX_CREDENTIAL,
     BOT_ERROR: process.env.BOT_ERROR,
-    MONGO_URL: process.env.MONGO_URL
+    MONGO_URL: process.env.MONGO_URL,
+    VIP_CHAT_LINK: process.env.VIP_CHAT_LINK,
 }

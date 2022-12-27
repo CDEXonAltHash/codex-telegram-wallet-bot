@@ -21,8 +21,8 @@ const sendToken = async (telegramId, amount, toAddress, symbol) => {
         let rawTx;
         if (symbol === tokenInfo.symbol) {
             rawTx = await wallet.generateTx(toAddress, amount, tokenInfo.fee)
-        } else if (hrc20.checkSymbol(symbol)) {
-            const token = hrc20.getTokenBySymbol(symbol)
+        } else if (await hrc20.checkSymbol(symbol)) {
+            const token = await hrc20.getTokenBySymbol(symbol)
             const encodedData = hrc20.encodeSendData(token, toAddress, amount)
             rawTx = await wallet.generateSendToContractTx(token.address, encodedData, tokenInfo.gasLimit, tokenInfo.gasPrice, tokenInfo.fee)
         }
@@ -56,15 +56,15 @@ const getTransaction = async(telegramId) => {
     return (wallet !== '') ? wallet.txList.txs : '';
 }
 
-const checkVip = (telegramId) => {
-    const vip = getVip(telegramId);
+const checkVip = async (telegramId) => {
+    const vip = await getVip(telegramId);
     if(vip !==''){
         return true;
     }
     return false;
 };
 
-const checkCDEX =  (telegramId) => {
+const checkCDEX =  async (telegramId) => {
     let error = { hasError : false, token: 0}
     const wallet = getCustomWallet(telegramId);
     const hrc20Coin = wallet.info.hrc20;
@@ -74,7 +74,7 @@ const checkCDEX =  (telegramId) => {
   
         if(token.contract.symbol === 'CDEX') {
             const totalAmount = (token.amount / Math.pow(10, token.contract.decimals))
-            html =  getVIPPrice(totalAmount);
+            html = await getVIPPrice(totalAmount);
             break
         }
     }

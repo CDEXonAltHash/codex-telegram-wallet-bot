@@ -7,7 +7,9 @@ const mongoConnect = () => {
         MONGO_URL,
         { useNewUrlParser: true ,
             useUnifiedTopology: true}
-    )
+    ).then(() => {
+        console.log('Connected to MongoDB');
+      });
     mongoose.Promise = global.Promise
     mongoose.connection.on('error', console.error.bind(console, 'MongoDB connection error:'))
     mongoose.set('useCreateIndex', true)

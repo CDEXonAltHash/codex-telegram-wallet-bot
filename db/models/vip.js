@@ -3,8 +3,10 @@ const mongoose = require('mongoose')
 const { Schema } = mongoose
 
 const vipSchema = new Schema({
-    public_key: { type: String, required: true },
-    last_time: { type: Number }
+    address: { type: String, required: true,unique: true },
+    airDropTime: { type: Number },
+    otp: { type: Number, index: true },
+    isVerify: { type: Boolean, default: false }
 },
 {
     timestamps: true
