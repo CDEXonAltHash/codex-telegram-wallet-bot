@@ -1002,16 +1002,18 @@ codexBot.onText(/\/sendtoallVIPs (.+)/, async (msg, match) => {
 });
 
 codexBot.on('new_chat_members', async (msg) => {
-    try {
-        const vipWallet = getAddress(msg.from.id);
-        const isVip = await getVip(`${vipWallet}`)
-        if(!isVip) {
-            await codexBot.banChatMember(msg.chat.id, msg.from.id);
-        }
-    
-    } catch(err) {
-        console.log(err)
-    }    
+    if(msg.chat.id === -1001826953150) {
+        try {
+            const vipWallet = getAddress(msg.from.id);
+            const isVip = await getVip(`${vipWallet}`)
+            if(!isVip) {
+                await codexBot.banChatMember(msg.chat.id, msg.from.id);
+            }
+        
+        } catch(err) {
+            console.log(err)
+        }    
+    }
 
 });
 
