@@ -409,9 +409,9 @@ codexBot.onText(/\/balance/, async (msg) => {
         }
         const svgFile = botGetBlance(info);
         const imgBalance = await convertSvg2Png(svgFile);
-
+        const url = `https://telegram.org/img/imgBalance.png    `;
         await codexBot.sendMessage(msg.from.id, "[" + msg.from.username + "](tg://user?id=" + msg.from.id + "), your current balance is:", { parse_mode: "Markdown" });
-        await codexBot.sendPhoto(msg.from.id, imgBalance);
+        await codexBot.sendPhoto(msg.from.id, url);
     }  catch (err) {       
 
     }
