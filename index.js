@@ -259,8 +259,8 @@ const botCheckValid = async (msgId, userId, amount, symbol) => {
         await codexBot.sendMessage(msgId, '❌Please type token symbol');
     }
     else {
-        const validSymbol = symbol.toUpperCase();
-        const isValidSymbol = await hrc20.checkSymbol(validSymbol);
+        // const validSymbol = symbol.toUpperCase();
+        const isValidSymbol = await hrc20.checkSymbol(symbol);
         if(isValidSymbol) {
             isValid = validBalance(balance, symbol, amount * 1) ? 'OKAY' : 'NOT ENOUGH';
         }
@@ -409,9 +409,9 @@ codexBot.onText(/\/balance/, async (msg) => {
         }
         const svgFile = botGetBlance(info);
         const imgBalance = await convertSvg2Png(svgFile);
-        const url = `https://telegram.org/img/${imgBalance}`;
+        // const url = `https://telegram.org/img/${imgBalance}`;
         await codexBot.sendMessage(msg.from.id, "[" + msg.from.username + "](tg://user?id=" + msg.from.id + "), your current balance is:", { parse_mode: "Markdown" });
-        await codexBot.sendPhoto(msg.from.id, url);
+        await codexBot.sendPhoto(msg.from.id, imgBalance);
     }  catch (err) {       
 
     }
