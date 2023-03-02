@@ -589,7 +589,9 @@ codexBot.on('message', async (msg) => {
 codexBot.on('message', async(msg) => {
     try {
         let msgText = msg.text*1.0;
- 
+        if(!msgText) {
+            await codexBot.sendMessage(msg.chat.id, `Please enter your OTP code.`);
+        }
         if(CodexVIP.get(msg.from.id)) {
             const isOTP = await VIP.findOne({ otp: msgText})
             if(isOTP) {
@@ -761,9 +763,9 @@ codexBot.onText(/\/rain (.+)/, async (msg, match) => {
         } else if(!params[1]) {
             return await codexBot.sendMessage(msg.chat.id, '❌ Sorry, You need to include the symbol you are sending i.e: / rain 100 CDEX to 24');
         }
-        const validSymbol = params[1].toUpperCase();
+        // const validSymbol = params[1].toUpperCase();
 
-        const isValidSymbol = await hrc20.checkSymbol(validSymbol)
+        const isValidSymbol = await hrc20.checkSymbol(params[1])
         if (!isNaN(params[1]) || !isValidSymbol) {
             return await codexBot.sendMessage(msg.chat.id, '❌ Sorry, You need to include the symbol you are sending i.e: / rain 100 CDEX to 24');
         } else if(!isNaN(params[2])) {
@@ -829,8 +831,8 @@ codexBot.onText(/\/raintothisroom (.+)/, async (msg, match) => {
         } else if(!params[1]) {
             return await codexBot.sendMessage(msg.chat.id, '❌ Sorry, You need to include the symbol you are sending i.e: / rain 100 CDEX to 24');
         }
-        const validSymbol = params[1].toUpperCase();
-        const isValidSymbol = await hrc20.checkSymbol(validSymbol);
+        // const validSymbol = params[1].toUpperCase();
+        const isValidSymbol = await hrc20.checkSymbol(params[1]);
         if (!isNaN(params[1]) || !isValidSymbol) {
             return await codexBot.sendMessage(msg.chat.id, '❌ Sorry, You need to include the symbol you are sending i.e: / raintothisroom 100 CDEX to 24');
         } else if(!isNaN(params[2])) {
