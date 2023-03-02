@@ -589,10 +589,7 @@ codexBot.on('message', async (msg) => {
 codexBot.on('message', async(msg) => {
     try {
         let msgText = msg.text*1.0;
-        if(!msgText) {
-            await codexBot.sendMessage(msg.chat.id, `Please enter your OTP code.`);
-        }
-        if(CodexVIP.get(msg.from.id)) {
+        if(msgText && CodexVIP.get(msg.from.id)) {
             const isOTP = await VIP.findOne({ otp: msgText})
             if(isOTP) {
                 await codexBot.sendMessage(msg.chat.id, `Here is the link to VIP chat room: ${VIP_CHAT_LINK}`);
